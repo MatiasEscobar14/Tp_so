@@ -1,6 +1,15 @@
-#include <utils/hello.h>
+#include <utils/utils.h>
 
 int main(int argc, char* argv[]) {
-    saludar("io");
+    char* ip;
+	
+    t_log* logger = iniciar_logger("loggerIo.log");
+    log_info(logger, "Hola mundo");
+
+    t_config* config = iniciar_config("io.config"); 
+    
+    ip = config_get_string_value(config, "IP_KERNEL");
+    log_info(logger, "IP: %s", ip);
+    //saludar("io");
     return 0;
 }
