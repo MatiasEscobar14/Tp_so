@@ -1,6 +1,8 @@
 #include <utils/utils.h>
 
 int main(int argc, char* argv[]) {
+
+    //===========================================CONEXION IO (CLIENTE) CON KERNEL (SERVER)========================================================//
     char* ip_kernel;
 	char* puerto_kernel;
 	

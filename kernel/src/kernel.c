@@ -4,11 +4,13 @@
 
 int main(int argc, char* argv[]) {
 
+	//===========================================CONEXION KERNEL (CLIENTE) CON MEMORIA (SERVER)========================================================//
+
     char* ip_memoria;
 	char* puerto_memoria;
 
     t_log* logger = iniciar_logger("kernel.log", "Kernel");
-    log_info(logger, "Hola mundo");						//prueba
+   
 
     t_config* config = iniciar_config("kernel.config"); 
 
@@ -17,19 +19,39 @@ int main(int argc, char* argv[]) {
     
 	int conexionMemoria = crear_conexion(logger, "memoriaSV", ip_memoria, puerto_memoria);
 	if (conexionMemoria == -1) {
-		log_error(logger, "No se pudo establecer conexión con el servidor");
+		log_error(logger, "No se pudo establecer conexión con el servidor");						//TODO BIDIRECCIONAL VALEN
 		terminar_programa(conexionMemoria, logger, config);
 		return EXIT_FAILURE;
 	}
 
 	enviar_mensaje("Hola memoria desde KERNEL", conexionMemoria,logger);   //prueba
 
-   paquete(conexionMemoria);
+	log_info(logger, "Mensaje enviado, esperando respuesta del memoria...");
+    while (1) {
+        int cod_op = recibir_operacion(conexionMemoria);  
+        switch (cod_op) {
+            case MENSAJE:
+                recibir_mensaje(logger, conexionMemoria);
+                break;
+            case PAQUETE:
+                t_list* paquete = recibir_paquete(conexionMemoria);
+
+                break;
+            case -1:
+                log_error(logger, "Se cerró la conexión con el Kernel");
+                return EXIT_FAILURE;
+            default:
+                log_warning(logger, "Operación desconocida recibida");
+                break;
+        }
+    }
+
+   paquete(conexionMemoria);				//preguntar para que sirve y para que esta al final 
 
    
 
    
-//===================================================================================================//
+//===========================================CONEXION KERNEL (SERVER) CON IO (CLIENTE)========================================================//
 	char* puerto_io;
 	
 	puerto_io = config_get_string_value (config,"PUERTO_ESCUCHA_IO");
