@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]) {
     char* ip;
 	
-    t_log* logger = iniciar_logger("loggerCPU.log");
+    t_log* logger = iniciar_logger("loggerCPU.log", "Cpu");
     log_info(logger, "Hola mundo");
 
     t_config* config = iniciar_config("cpu.config"); 

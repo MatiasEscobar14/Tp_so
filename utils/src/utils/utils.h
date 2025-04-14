@@ -37,7 +37,7 @@ int crear_conexion(t_log* logger, const char* server_name, char* ip, char* puert
 void liberar_conexion(int* socket_cliente);
 
 t_config* iniciar_config(char* nombreArchivoConfig);
-t_log* iniciar_logger(char* nombreArchivoLog);
+t_log* iniciar_logger(char* nombreArchivoLog, char* nombreModulo);
 void terminar_programa(int conexion, t_log* logger, t_config* config);
 void enviar_mensaje(char* mensaje, int socket_cliente,t_log* logger);
 void* serializar_paquete(t_paquete* paquete, int bytes);

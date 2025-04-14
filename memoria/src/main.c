@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]){
     char* puerto_escucha;
 	
-    t_log* logger = iniciar_logger("loggerMemoria.log");
+    t_log* logger = iniciar_logger("loggerMemoria.log", "Memoria");
     log_info(logger, "Hola mundo");
 
     t_config* config = iniciar_config("memoria.config"); 
@@ -40,6 +40,6 @@ int main(int argc, char* argv[]){
 
 }
 void iterator(char* value) {
-	t_log* logger = iniciar_logger("loggerMemoria.log");
+	t_log* logger = iniciar_logger("loggerMemoria.log", "Memoria");
     log_info(logger, "%s", value);  // Usamos el logger que se pasa como argumento
 }

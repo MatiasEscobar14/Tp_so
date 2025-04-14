@@ -7,7 +7,7 @@ int main(int argc, char* argv[]) {
     char* ip_memoria;
 	char* puerto_memoria;
 
-    t_log* logger = iniciar_logger("kernel.log");
+    t_log* logger = iniciar_logger("kernel.log", "Kernel");
     log_info(logger, "Hola mundo");						//prueba
 
     t_config* config = iniciar_config("kernel.config"); 
@@ -25,6 +25,8 @@ int main(int argc, char* argv[]) {
 	enviar_mensaje("Hola memoria desde KERNEL", conexionMemoria,logger);   //prueba
 
    paquete(conexionMemoria);
+
+   
 
    
 //===================================================================================================//
@@ -57,15 +59,13 @@ int main(int argc, char* argv[]) {
 			break;
 		}
 	}return EXIT_SUCCESS;
-	
 
-
-	
 	terminar_programa(conexionMemoria, logger, config);
+	
 	
 return 0;
 }
 void iterator(char* value) {
-	t_log* logger = iniciar_logger("kernel.log");
+	t_log* logger = iniciar_logger("kernel.log", "Kernel");
     log_info(logger, "%s", value);  // Usamos el logger que se pasa como argumento
 }

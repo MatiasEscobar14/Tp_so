@@ -107,8 +107,8 @@ void liberar_conexion(int* socket_cliente) {
     *socket_cliente = -1;
 }
 
-t_log* iniciar_logger(char* nombreArchivo){
-	t_log* nuevo_logger = log_create(nombreArchivo, "Memoria", 1, LOG_LEVEL_INFO);
+t_log* iniciar_logger(char* nombreArchivo, char* modulo){
+	t_log* nuevo_logger = log_create(nombreArchivo, modulo, 1, LOG_LEVEL_INFO);
 
 
 	return nuevo_logger;
@@ -248,7 +248,7 @@ void* recibir_buffer(int* size, int socket_cliente){
 void recibir_mensaje(t_log* logger,int socket_cliente) {
     int size;
     char* buffer = recibir_buffer(&size, socket_cliente);
-    log_info(logger, "Me llego el mensaje %s", buffer);
+    log_info(logger, "Me llego el mensaje: %s", buffer);
     free(buffer);
 }
 

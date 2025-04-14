@@ -4,7 +4,7 @@ int main(int argc, char* argv[]) {
     char* ip_kernel;
 	char* puerto_kernel;
 	
-    t_log* logger = iniciar_logger("loggerIo.log");
+    t_log* logger = iniciar_logger("loggerIo.log", "Io");
     log_info(logger, "Hola mundo");
 
     t_config* config = iniciar_config("io.config"); 
@@ -21,8 +21,28 @@ int main(int argc, char* argv[]) {
 	}
 
 	enviar_mensaje("Hola kernel desde IO", conexionKernel,logger);   //prueba
+    log_info(logger, "Mensaje enviado, esperando respuesta del kernel...");
+    while (1) {
+        int cod_op = recibir_operacion(conexionKernel);  
+        switch (cod_op) {
+            case MENSAJE:
+                recibir_mensaje(logger, conexionKernel);
+                break;
+            case PAQUETE:
+                t_list* paquete = recibir_paquete(conexionKernel);
+
+                break;
+            case -1:
+                log_error(logger, "Se cerró la conexión con el Kernel");
+                return EXIT_FAILURE;
+            default:
+                log_warning(logger, "Operación desconocida recibida");
+                break;
+        }
+    }
     
-    recibir_mensaje(logger, conexionKernel);
+   
+
     
 
    paquete(conexionKernel);
