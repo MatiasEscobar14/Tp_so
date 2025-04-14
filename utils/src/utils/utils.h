@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include<readline/readline.h>
+
 typedef enum
 {
 	MENSAJE,
@@ -26,6 +27,7 @@ typedef struct
 	op_code codigo_operacion;
 	t_buffer* buffer;
 } t_paquete;
+
 extern t_log* logger;
 
 
@@ -51,6 +53,5 @@ void recibir_mensaje(t_log* logger,int socket_cliente);
 int recibir_operacion(int socket_cliente);
 void* recibir_buffer(int* size, int socket_cliente);
 t_list* recibir_paquete(int socket_cliente);
-
 
 #endif

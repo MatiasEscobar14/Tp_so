@@ -8,11 +8,10 @@ int main(int argc, char* argv[]){
 
     t_config* config = iniciar_config("memoria.config"); 
     puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");     //es una prueba
-    log_info(logger, "IP: %s", puerto_escucha);
+    log_info(logger, "IP: %s", puerto_escucha);									//prueba
     int server_fd =  iniciar_servidor(logger, "memoriaSV","127.0.0.1", puerto_escucha);
     log_info(logger, "Esperando cliente en el puerto %s", puerto_escucha);
     int cliente_fd = esperar_cliente(logger, "memoriaSV", server_fd);
-	
 	
 
    t_list* lista;
