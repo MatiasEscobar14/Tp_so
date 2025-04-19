@@ -1,58 +1,62 @@
 #include <utils/utils.h>
 
-int iniciar_servidor(t_log* logger, const char* name, char* ip, char* puerto) {
-    log_info(logger, "Iniciando servidor %s en IP %s en el puerto %s", name, ip, puerto);
-	int socket_servidor;
-    struct addrinfo hints, *servinfo;
+extern t_log* logger;
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;    //AF_UNPEC
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    if (getaddrinfo(ip, puerto, &hints, &servinfo) != 0) {  // ¡Verifica errores!
-        log_error(logger, "Error en getaddrinfo");
-        return 0;
-    }
-
-    bool conecto = false;
-
-    for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next) {
-        socket_servidor = socket(p->ai_family, 
-                                p->ai_socktype, 
-                                p->ai_protocol);
-        if (socket_servidor == -1) {
-            log_info(logger, "No se pudo crear socket");
-            continue;
-        }
-
-        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
-            log_info(logger, "No se pudo bindear");
-            close(socket_servidor);
-            continue;
-        }
-
-        conecto = true; 
-        break;
-    }
-
-    if (!conecto) {
-        freeaddrinfo(servinfo); 
-        return 0;
-    }
-
-    if (listen(socket_servidor, SOMAXCONN) == -1) { // Escuchando (hasta SOMAXCONN conexiones simultaneas)
-        log_error(logger, "Error en listen");
-        close(socket_servidor);
-        freeaddrinfo(servinfo);
-        return 0;
-    }
-
-    log_info(logger, "Escuchando en %s:%s (%s)", ip, puerto, name);
-    freeaddrinfo(servinfo);
-    return socket_servidor;
+void iterator(char* value) {
+	t_log* logger = iniciar_logger("loggerMemoria.log", "Memoria");
+    log_info(logger, "%s", value);  // Usamos el logger que se pasa como argumento
 }
 
+t_log *logger_recibido;
+
+int iniciar_servidor(t_log *logger, const char *name, char *puerto)
+{
+	logger_recibido = logger;
+	int socket_servidor;
+	struct addrinfo hints, *servinfo;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	getaddrinfo(NULL, puerto, &hints, &servinfo);
+
+	bool conecto = false;
+
+	for (struct addrinfo *p = servinfo; p != NULL; p = p->ai_next)
+	{
+		socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+		if (socket_servidor == -1)
+			continue;
+
+		int enable = 1;
+		if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+		{
+			close(socket_servidor);
+			log_error(logger, "setsockopt(SO_REUSEADDR) failed");
+			continue;
+		}
+
+		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1)
+		{
+			close(socket_servidor);
+			continue;
+		}
+		conecto = true;
+		break;
+	}
+	if (!conecto)
+	{
+		free(servinfo);
+		return 0;
+	}
+	listen(socket_servidor, SOMAXCONN);
+	log_info(logger, "Servidor escuchando en %s:%s", name, puerto);
+
+	freeaddrinfo(servinfo);
+	return socket_servidor;
+}
 
 // ESPERAR CONEXION DE CLIENTE EN UN SERVER ABIERTO
 int esperar_cliente(t_log* logger, const char* name, int socket_servidor) {
@@ -134,142 +138,83 @@ void terminar_programa(int conexion, t_log* logger, t_config* config){
 
 }
 
-void enviar_mensaje(char* mensaje, int socket_cliente, t_log* logger){
-	t_paquete* paquete = malloc(sizeof(t_paquete));
 
-	paquete->codigo_operacion = MENSAJE;
-	paquete->buffer = malloc(sizeof(t_buffer));
-	paquete->buffer->size = strlen(mensaje) + 1;
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	memcpy(paquete->buffer->stream, mensaje, paquete->buffer->size);
+int server_escuchar(t_log* logger, char* server_name, int server_socket) {
+    int cliente_socket = esperar_cliente(logger, server_name, server_socket);
 
-	int bytes = paquete->buffer->size + 2*sizeof(int);
+    if (cliente_socket != -1) {
+        pthread_t hilo;
+        t_procesar_conexion_args* args = malloc(sizeof(t_procesar_conexion_args));
+        args->log = logger;
+        args->fd = cliente_socket;
+        args->server_name = server_name;
 
-	void* a_enviar = serializar_paquete(paquete, bytes);
+       pthread_create(&hilo, NULL, (void*)procesar_conexion, (void*) args);
+		
 
-	send(socket_cliente, a_enviar, bytes, 0);
-	log_info(logger, "Mensaje enviado: %s", mensaje);
-	free(a_enviar);
-	eliminar_paquete(paquete);
-}
-
-void* serializar_paquete(t_paquete* paquete, int bytes){
-	void * magic = malloc(bytes);
-	int desplazamiento = 0;
-
-	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(int));
-	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, paquete->buffer->stream, paquete->buffer->size);
-	desplazamiento+= paquete->buffer->size;
-
-	return magic;
-}
-void eliminar_paquete(t_paquete* paquete){
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
-	free(paquete);
-}
-void crear_buffer(t_paquete* paquete){
-	paquete->buffer = malloc(sizeof(t_buffer));
-	paquete->buffer->size = 0;
-	paquete->buffer->stream = NULL;
-}
-
-t_paquete* crear_paquete(void){
-	t_paquete* paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = PAQUETE;
-	crear_buffer(paquete);
-	return paquete;
-}
-
-void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio){
-	paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(int));
-
-	memcpy(paquete->buffer->stream + paquete->buffer->size, &tamanio, sizeof(int));
-	memcpy(paquete->buffer->stream + paquete->buffer->size + sizeof(int), valor, tamanio);
-
-	paquete->buffer->size += tamanio + sizeof(int);
-}
-void enviar_paquete(t_paquete* paquete, int socket_cliente){
-	int bytes = paquete->buffer->size + 2*sizeof(int);
-	void* a_enviar = serializar_paquete(paquete, bytes);
-
-	send(socket_cliente, a_enviar, bytes, 0);
-
-	free(a_enviar);
-}
-
-void paquete(int conexion){
-	// Ahora toca lo divertido!
-	char* leido;
-	t_paquete* paquete = crear_paquete();
-
-	// Leemos y esta vez agregamos las lineas al paquete
+        pthread_detach(hilo);
+		log_info(logger, "CHECKPOINT 1"); 
 	
-	printf("Mensaje: ");
+        return 1;
+    }
+    return 0;
+}
+
+void procesar_conexion(void* void_args) {
+    t_procesar_conexion_args* args = (t_procesar_conexion_args*) void_args;
+    t_log* logger = args->log;
+    int cliente_socket = args->fd;
+    char* server_name = args->server_name;
+    free(args);
+	log_info(logger, "CHECKPOINT 2"); 
+	op_code cop;
+
+    while (cliente_socket != -1) {
+  
+		if (recv(cliente_socket, &cop, sizeof(op_code), 0) != sizeof(op_code))
+		{
+			log_debug(logger, "Cliente desconectado.\n");
+			break;
+		}
+
+        switch (cop) {
+            case HANDSHAKE:
+                uint32_t tamanio;
+                recv(cliente_socket, &tamanio, sizeof(uint32_t), MSG_WAITALL);
+
+                char* nombre_cliente = malloc(tamanio);
+                recv(cliente_socket, nombre_cliente, tamanio, MSG_WAITALL);
+
+                log_info(logger, "Handshake recibido de cliente: %s", nombre_cliente);
+                free(nombre_cliente);
+
+                //enviar_mensaje("Hola, handshake recibido",cliente_socket, logger);
+        
+                break;
+            case MENSAJE:
+                recibir_mensaje(logger, cliente_socket);
+                break;
+
+            case PAQUETE:
+            
+                t_list* lista = recibir_paquete(cliente_socket);
+				log_info(logger, "Me llegaron los siguientes valores:\n");
+				list_iterate(lista, (void*) iterator);
 	
-	while((leido = readline("")) != NULL && strcmp(leido, "") != 0) {
-        // Agregar cada línea como un mensaje al paquete
-        agregar_a_paquete(paquete, leido, strlen(leido) + 1);  // +1 para el carácter nulo
-        free(leido);  // Liberar la línea leída
-        printf("> ");
-    };
-	free(leido);
+                break;
+            default:
+                log_error(logger, "Algo anduvo mal en el server de %s", server_name);
+                log_info(logger, "Cop: %d", cop);
+                break;
+        }
+    }
 
-	enviar_paquete(paquete, conexion);
-	
-	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	eliminar_paquete(paquete);
-	
-	
+    log_warning(logger, "El cliente se desconecto de %s server", server_name);
+    return;
 }
 
-int recibir_operacion(int socket_cliente){
-	int cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) > 0)
-		return cod_op;
-	else {
-		close(socket_cliente);
-		return -1;
-	}
-}
-void* recibir_buffer(int* size, int socket_cliente){
-	void * buffer;
 
-	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
-	buffer = malloc(*size);
-	recv(socket_cliente, buffer, *size, MSG_WAITALL);
 
-	return buffer;
-}
 
-void recibir_mensaje(t_log* logger,int socket_cliente) {
-    int size;
-    char* buffer = recibir_buffer(&size, socket_cliente);
-    log_info(logger, "Me llego el mensaje: %s", buffer);
-    free(buffer);
-}
 
-t_list* recibir_paquete(int socket_cliente){
 
-	int size;
-	int desplazamiento = 0;
-	void * buffer;
-	t_list* valores = list_create();
-	int tamanio;
-
-	buffer = recibir_buffer(&size, socket_cliente);
-	while(desplazamiento < size)
-	{
-		memcpy(&tamanio, buffer + desplazamiento, sizeof(int));
-		desplazamiento+=sizeof(int);
-		char* valor = malloc(tamanio);
-		memcpy(valor, buffer+desplazamiento, tamanio);
-		desplazamiento+=tamanio;
-		list_add(valores, valor);
-	}
-	free(buffer);
-	return valores;
-}

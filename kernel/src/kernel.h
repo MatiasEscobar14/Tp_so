@@ -8,6 +8,7 @@
 #include <commons/config.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <utils/utils.h>
+#include "conexionesKernel.h"
 
 #endif

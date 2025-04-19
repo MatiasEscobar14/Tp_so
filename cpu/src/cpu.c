@@ -1,53 +1,28 @@
 #include <utils/utils.h>
+#include <utils/protocolo.h>
 
 int main(int argc, char* argv[]) {
 
-
-    //===========================================CONEXION CPU (CLIENTE) CON MEMORIA (SERVER)========================================================//
     char* ip_memoria;
     char* puerto_memoria;
-	
+    char* ip_kernel;
+    char* puerto_kernel_dispatch;
+    char* puerto_kernel_interrupt;
     t_log* logger = iniciar_logger("loggerCPU.log", "Cpu");
 
     t_config* config = iniciar_config("cpu.config"); 
     
     ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    puerto_memoria= config_get_string_value(config, "PUERTO_MEMORIA");
+    puerto_memoria = config_get_string_value(config,"PUERTO_MEMORIA");
 
+    ip_kernel = config_get_string_value(config, "IP_KERNEL");
+    puerto_kernel_dispatch = config_get_string_value(config,"PUERTO_KERNEL_DISPATCH");
+    puerto_kernel_interrupt= config_get_string_value(config,"PUERTO_KERNEL_INTERRUPT");
 
-    int conexionCpuMemoria = crear_conexion(logger, "memoriaServer", ip_memoria, puerto_memoria);
+    int cliente_de_memoria = crear_conexion(logger, "Server Memoria", ip_memoria, puerto_memoria);
+    int cliente_de_kernel_interrupt = crear_conexion(logger, "Server kernel interrupt", ip_kernel,puerto_kernel_interrupt);
+    int cliente_de_kernel_dispatch = crear_conexion(logger,"Server kernel dispatch",ip_kernel,puerto_kernel_dispatch);
 
-	if (conexionCpuMemoria == -1) {
-		log_error(logger, "No se pudo establecer conexión con el servidor");
-		terminar_programa(conexionCpuMemoria, logger, config);
-		return EXIT_FAILURE;
-	}
-
-    enviar_mensaje("Hola memoria desde CPU", conexionCpuMemoria,logger);   //prueba
-    log_info(logger, "Mensaje enviado, esperando respuesta del memoria...");
-    while (1) {
-        int cod_op = recibir_operacion(conexionCpuMemoria);  
-        switch (cod_op) {
-            case MENSAJE:
-                recibir_mensaje(logger, conexionCpuMemoria);
-                break;
-            case PAQUETE:
-                t_list* paquete = recibir_paquete(conexionCpuMemoria);
-
-                break;
-            case -1:
-                log_error(logger, "Se cerró la conexión con memoria");
-                return EXIT_FAILURE;
-            default:
-                log_warning(logger, "Operación desconocida recibida");
-                break;
-        }
-    }
-
-   paquete(conexionCpuMemoria);
-
-
-
-    //saludar("cpu");
     return 0;
 }
+
