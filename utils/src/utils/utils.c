@@ -193,6 +193,7 @@ void procesar_conexion(void* void_args) {
                 break;
             case MENSAJE:
                 recibir_mensaje(logger, cliente_socket);
+
                 break;
 
             case PAQUETE:

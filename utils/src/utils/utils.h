@@ -11,6 +11,7 @@
 #include<readline/readline.h>
 #include <pthread.h>
 #include "protocolo.h"
+#include <commons/string.h>
 
 typedef struct {
     t_log* log;
