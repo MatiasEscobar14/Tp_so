@@ -1,0 +1,35 @@
+
+/*#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+sem_t sem_kernel; // Semáforo para controlar el inicio de la planificación
+// 
+// int main() {
+    char enter; // Para esperar el ingreso del Enter
+
+    // Inicializar el semáforo (con valor 0 para que el proceso se quede detenido)
+    sem_init(&sem_kernel, 0, 0);
+
+    // Imprimir mensaje informativo
+    printf("Kernel: Estado STOP. Presione Enter para iniciar la planificación.\n");
+
+    // Esperar la entrada del usuario
+    enter = getchar();  // Aquí esperamos el "Enter"
+    
+    // Una vez presionado Enter, liberamos el semáforo para continuar con la planificación
+    sem_post(&sem_kernel);  // Esto despierta el proceso que está esperando
+
+    // Esperamos hasta que el semáforo haya sido liberado para continuar
+    sem_wait(&sem_kernel);  // Este semáforo no permite la continuación hasta que se libere
+
+    // Aquí puede seguir el código de la planificación o lo que corresponda
+    printf("Planificación iniciada.\n");
+
+    // Finalizar semáforo
+    sem_destroy(&sem_kernel);
+
+    return 0;
+}*/
