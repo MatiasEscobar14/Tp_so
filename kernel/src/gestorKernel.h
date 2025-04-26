@@ -26,6 +26,8 @@ typedef struct {
     t_list* metricas_tiempo;
 }pcb_t;
 
+extern bool flag_pedido_de_memoria;
+
 //=======LISTAS======//
 
 extern t_list* lista_new;
@@ -35,6 +37,27 @@ extern t_list* lista_blocked;
 extern t_list* lista_exit;
 extern t_list* lista_susp_blocked;
 extern t_list* lista_susp_ready;
+
+/*extern t_list* lista_new_thread;
+extern t_list* lista_ready_thread;
+extern t_list* lista_execute_thread;
+extern t_list* lista_blocked_thread;
+extern t_list* lista_exit_thread;
+extern t_list* lista_mutex_thread;
+extern t_list* lista_iniciar_estructura;*/
+
+
+
+//======MUTEX=======//
+
+extern pthread_mutex_t mutex_lista_new;
+extern pthread_mutex_t mutex_lista_ready;
+extern pthread_mutex_t mutex_lista_ready_thread;
+extern pthread_mutex_t mutex_flag_pedido_memoria;
+
+
+extern sem_t sem_rpta_estructura_inicializada;
+
 
 //======ESTADOS======//
 

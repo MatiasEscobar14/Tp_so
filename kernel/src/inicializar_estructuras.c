@@ -10,11 +10,11 @@
 
 
 
-void iniciar_logger(){
+void iniciar_logger_kernel(){
 	kernel_logger = log_create("kernel.log","Kernel", 0, LOG_LEVEL_INFO);
 }
 
-void iniciar_config(char* ruta){
+void iniciar_config_kernel(char* ruta){
 	kernel_config = config_create(ruta);
 	
 	if(kernel_config ==  NULL){
@@ -52,7 +52,7 @@ void iniciar_lista(){
 }
 
 void iniciar_kernel(char* ruta_config){
-	iniciar_logger();
-	iniciar_config(ruta_config);
+	iniciar_logger_kernel();
+	iniciar_config_kernel(ruta_config);
 	iniciar_lista();
 }

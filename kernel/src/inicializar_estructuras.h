@@ -8,8 +8,8 @@
 //t_list* metricas_tiempo;
 
 void iniciar_lista();
-void iniciar_logger();
-void iniciar_config(char* ruta);
+void iniciar_logger_kernel();
+void iniciar_config_kernel(char* ruta);
 void iniciar_kernel(char* ruta_config);
 
 #endif

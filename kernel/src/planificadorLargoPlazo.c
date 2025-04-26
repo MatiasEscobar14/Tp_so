@@ -8,10 +8,10 @@ sem_t sem_rpta_estructura_inicializada; // Semaforo para sincronizar la respuest
 pthread_mutex_t mutex_lista_new = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ready = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ready_thread = PTHREAD_MUTEX_INITIALIZER;
-
 bool flag_pedido_de_memoria;
-
 pthread_mutex_t mutex_flag_pedido_memoria;
+
+
 // Funcion principal del PLP que sera llamada cuando el kernel se inicie
 void iniciar_plp() {
     printf("Presione Enter para iniciar el Planificador de Largo Plazo...\n");
