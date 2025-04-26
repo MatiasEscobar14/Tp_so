@@ -14,11 +14,9 @@ bool flag_pedido_de_memoria;
 pthread_mutex_t mutex_flag_pedido_memoria;
 // Funcion principal del PLP que sera llamada cuando el kernel se inicie
 void iniciar_plp() {
-    char tecla;
     printf("Presione Enter para iniciar el Planificador de Largo Plazo...\n");
-    getchar();  // Espera por un Enter para iniciar
-
-    planificadorLargoPlazo();  // Llama al planificador de largo plazo
+    getchar();  
+    planificadorLargoPlazo(); 
 }
 
 // Funcion que implementa el algoritmo del Planificador de Largo Plazo
@@ -35,7 +33,7 @@ void planificadorLargoPlazo() {
             // Enviamos a memoria para inicializar las estructuras del proceso
             t_buffer* buffer = new_buffer();
             add_int_to_buffer(buffer, pcb->pid);
-            add_string_to_buffer(buffer, pcb->path);   //TODO
+            add_string_to_buffer(buffer, pcb->path);   //TODO preguntar si es necesario agregar el path como atributa  de la pcb
             add_int_to_buffer(buffer, pcb->tamanio);
             t_paquete* un_paquete = create_super_pck(INICIALIZAR_ESTRUCTURAS_KM, buffer);
 
@@ -49,7 +47,7 @@ void planificadorLargoPlazo() {
 
             pthread_mutex_lock(&mutex_flag_pedido_memoria);  // Bloqueamos la estructura de la memoria
             if (flag_pedido_de_memoria) {
-                // Si la memoria respondióo correctamente, removemos el PCB de la lista NEW
+                // Si la memoria respondio correctamente, removemos el PCB de la lista NEW
                 list_remove_element(lista_new, pcb);
 
                 log_info(kernel_logger, "Creacion de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);

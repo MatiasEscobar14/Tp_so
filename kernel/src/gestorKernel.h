@@ -48,4 +48,11 @@ typedef enum{
     SUSP_READY_PROCESS
 }estado_pcb;
 
+//=======CONEXIONES======//
+extern int socket_io;
+extern int socket_cpu_dispatch;
+extern int socket_cpu_interrupt;
+extern int socket_memoria;
+
+
 #endif

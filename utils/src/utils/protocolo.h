@@ -7,7 +7,9 @@ typedef enum
 {
 	HANDSHAKE,
 	MENSAJE,
-	PAQUETE
+	PAQUETE,
+	//====KERNEL - MEMORIA====//
+	INICIALIZAR_ESTRUCTURAS_KM
 }op_code;
 
 typedef struct

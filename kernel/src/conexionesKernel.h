@@ -21,7 +21,7 @@ void* hilo_servidor(void* args);
 void* hilo_cliente(void* args);
 void* hilo_servidor_dispatch(void* args);
 void* hilo_servidor_interrupt(void* args);
-void crear_conexiones(t_log* logger, t_config* config);
+void crear_conexiones();
 
 
 

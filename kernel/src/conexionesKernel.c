@@ -1,10 +1,10 @@
 #include "conexionesKernel.h"
 
-void* hilo_servidor(void* args) {
+void* hilo_servidor_io(void* args) {
     datos_servidor_t* datos = (datos_servidor_t*) args;
-    int server_fd = iniciar_servidor(datos->logger, datos->nombre_servidor, datos->puerto);
+    socket_io = iniciar_servidor(datos->logger, datos->nombre_servidor, datos->puerto);
 
-    while(server_escuchar(datos->logger, datos->nombre_servidor, server_fd));
+    while(server_escuchar(datos->logger, datos->nombre_servidor, socket_io));
 
     free(datos);    
     return 0;
@@ -12,9 +12,9 @@ void* hilo_servidor(void* args) {
 
 void* hilo_servidor_dispatch(void* args) {
     datos_servidor_dispatch_t* datos_dispatch = (datos_servidor_dispatch_t*) args;
-    int server_fd = iniciar_servidor(datos_dispatch->logger, datos_dispatch->nombre_servidor, datos_dispatch->puerto);
+    socket_cpu_dispatch = iniciar_servidor(datos_dispatch->logger, datos_dispatch->nombre_servidor, datos_dispatch->puerto);
 
-    while(server_escuchar(datos_dispatch->logger, datos_dispatch->nombre_servidor, server_fd));
+    while(server_escuchar(datos_dispatch->logger, datos_dispatch->nombre_servidor, socket_cpu_dispatch));
 
     free(datos_dispatch);    
     return 0;
@@ -22,20 +22,22 @@ void* hilo_servidor_dispatch(void* args) {
 
 void* hilo_servidor_interrupt(void* args) {
     datos_servidor_interrupt_t* datos_interrupt = (datos_servidor_interrupt_t*) args;
-    int server_fd = iniciar_servidor(datos_interrupt->logger, datos_interrupt->nombre_servidor, datos_interrupt->puerto);
+    socket_cpu_interrupt = iniciar_servidor(datos_interrupt->logger, datos_interrupt->nombre_servidor, datos_interrupt->puerto);
 
-    while(server_escuchar(datos_interrupt->logger, datos_interrupt->nombre_servidor, server_fd));
+    while(server_escuchar(datos_interrupt->logger, datos_interrupt->nombre_servidor, socket_cpu_interrupt));
 
     free(datos_interrupt);    
     return 0;
 } 
 
-void* hilo_cliente(void* args) {
+void* hilo_cliente_memoria(void* args) {
     datos_conexion_t* datos = (datos_conexion_t*) args;
-    int cliente_fd = crear_conexion(datos->logger, datos->nombre_cliente,datos->ip, datos->puerto);
+    socket_memoria = crear_conexion(datos->logger, datos->nombre_cliente,datos->ip, datos->puerto);
     free(datos);
     return 0;
 }
+
+//=====================================================================
 
 void crear_conexiones(){
     pthread_t hilo_servidor_io;
@@ -48,10 +50,12 @@ void crear_conexiones(){
     datos->nombre_servidor = "Kernel";
     datos->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_IO");
 
-    if(pthread_create(&hilo_servidor_io, NULL, hilo_servidor, datos) != 0 ) {
+    if(pthread_create(&hilo_servidor_io, NULL, hilo_servidor_io, datos) != 0 ) {
         perror("Error al crear el hilo del servidor");
         return;
     }
+
+    //=====================================================================
    
     datos_servidor_dispatch_t* datos_dispatch = malloc(sizeof(datos_servidor_dispatch_t));
     datos_dispatch->logger = kernel_logger;
@@ -62,6 +66,8 @@ void crear_conexiones(){
         perror("Error al crear el hilo del servidor");
         return;
     }
+
+    //=====================================================================
     
     datos_servidor_interrupt_t* datos_interrupt = malloc(sizeof(datos_servidor_interrupt_t));
     datos_interrupt->logger = kernel_logger
@@ -72,6 +78,8 @@ void crear_conexiones(){
         perror("Error al crear el hilo del servidor");
         return;
     }
+
+     //=====================================================================
         
     datos_conexion_t* datosConexion = malloc(sizeof(datos_conexion_t));
     datosConexion->logger = kernel_logger;
@@ -79,7 +87,7 @@ void crear_conexiones(){
     datosConexion->ip = config_get_string_value(kernel_config, "IP_MEMORIA");
     datosConexion->puerto = config_get_string_value(kernel_config, "PUERTO_MEMORIA");
 
-    if(pthread_create(&hilo_cliente_memoria, NULL, hilo_cliente, datosConexion) != 0 ) {
+    if(pthread_create(&hilo_cliente_memoria, NULL, hilo_cliente_memoria, datosConexion) != 0 ) {
         perror("Error al crear el hilo del cliente");
         return;
     }
