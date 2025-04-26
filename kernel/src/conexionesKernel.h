@@ -2,6 +2,7 @@
 #define CONEXIONES_KERNEL_H
 
 #include <utils/protocolo.h>
+#include "gestorKernel.h"
 
 typedef struct {
     t_log* logger;
