@@ -12,12 +12,50 @@ bool flag_pedido_de_memoria;
 pthread_mutex_t mutex_flag_pedido_memoria;
 
 
-// Funcion principal del PLP que sera llamada cuando el kernel se inicie
-void iniciar_plp() {
+/*// Funcion principal del PLP que sera llamada cuando el kernel se inicie
+void iniciar_plp(){
     printf("Presione Enter para iniciar el Planificador de Largo Plazo...\n");
     getchar();  
     planificadorLargoPlazo(); 
+}*/
+
+// Definir el semáforo global
+sem_t semaforo_largo_plazo;  // Semáforo que controla la planificación
+
+// Función para esperar a que el usuario presione Enter
+void* esperar_enter(void* arg) {
+    printf("Presione Enter para iniciar el Planificador de Largo Plazo...\n");
+    getchar();  // Espera que el usuario presione Enter
+    printf("Planificador de Largo Plazo iniciado.\n");
+
+    // Liberar el semáforo, permitiendo que el algoritmo de largo plazo continúe
+    sem_post(&semaforo_largo_plazo);  
+    return NULL;
 }
+
+// Función que inicia el Planificador de Largo Plazo (bloqueado por el semáforo)
+void iniciar_plp() {
+    // Inicializar el semáforo en valor 0 (bloqueado)
+    if (sem_init(&semaforo_largo_plazo, 0, 0) != 0) {
+        perror("Error al inicializar el semáforo");
+        return;
+    }
+
+    // Crear un hilo para esperar el Enter del usuario
+    pthread_t hilo_entrada;
+    pthread_create(&hilo_entrada, NULL, esperar_enter, NULL);
+
+    // Bloqueamos el semáforo, esperando a que el usuario presione Enter
+    sem_wait(&semaforo_largo_plazo);
+
+    // Aquí comienza el Planificador de Largo Plazo
+    planificadorLargoPlazo();  // Llamada al planificador de largo plazo
+
+    // Esperar que el hilo de entrada termine
+    pthread_join(hilo_entrada, NULL);
+    sem_destroy(&semaforo_largo_plazo);
+}
+
 
 // Funcion que implementa el algoritmo del Planificador de Largo Plazo
 void planificadorLargoPlazo() {
@@ -31,10 +69,10 @@ void planificadorLargoPlazo() {
         pcb = list_get(lista_new, 0);  
         if (pcb != NULL) {
             // Enviamos a memoria para inicializar las estructuras del proceso
-            t_buffer* buffer = new_buffer();
+            t_buffer* buffer = new_buffer();  
             add_int_to_buffer(buffer, pcb->pid);
-            add_string_to_buffer(buffer, pcb->path);   //TODO preguntar si es necesario agregar el path como atributa  de la pcb
-            add_int_to_buffer(buffer, pcb->tamanio);
+            //add_string_to_buffer(buffer, pcb->path);   //TODO preguntar si es necesario agregar el path como atributa  de la pcb
+            add_int_to_buffer(buffer, pcb->tamanio_proceso);
             t_paquete* un_paquete = create_super_pck(INICIALIZAR_ESTRUCTURAS_KM, buffer);
 
             //conexion_memoria(un_paquete);  // Envia el paquete a la memoria

@@ -1,0 +1,95 @@
+/*#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+// Configuración del socket para la conexión con memoria
+int socket_memoria;
+struct sockaddr_in server_memoria;
+
+#define PUERTO_MEMORIA 5000  // Puerto donde escucha el servidor de memoria
+#define IP_MEMORIA "127.0.0.1"  // IP del servidor de memoria
+
+// Función para establecer la conexión con la memoria
+int conectar_a_memoria() {
+    // Crear el socket
+    socket_memoria = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_memoria == -1) {
+        perror("Error al crear el socket");
+        return -1;
+    }
+
+    // Configurar la dirección del servidor de memoria
+    server_memoria.sin_family = AF_INET;
+    server_memoria.sin_port = htons(PUERTO_MEMORIA);
+    server_memoria.sin_addr.s_addr = inet_addr(IP_MEMORIA);
+
+    // Conectar al servidor de memoria
+    if (connect(socket_memoria, (struct sockaddr*)&server_memoria, sizeof(server_memoria)) < 0) {
+        perror("Conexión fallida");
+        return -1;
+    }
+    return 0;
+}
+
+// Función para verificar si hay memoria disponible
+int hay_memoria_disponible() {
+    char mensaje[256];
+    int respuesta;
+
+    // Enviar solicitud a la memoria para verificar disponibilidad
+    strcpy(mensaje, "VERIFICAR_MEMORIA");
+    if (send(socket_memoria, mensaje, strlen(mensaje), 0) < 0) {
+        perror("Error al enviar mensaje a la memoria");
+        return 0;
+    }
+
+    // Recibir la respuesta de la memoria
+    if (recv(socket_memoria, &respuesta, sizeof(respuesta), 0) < 0) {
+        perror("Error al recibir respuesta de memoria");
+        return 0;
+    }
+
+    // Si la respuesta es 1, significa que hay memoria disponible
+    return respuesta == 1;
+}
+
+// Función que implementa la lógica del PLP
+void iniciar_plp() {
+    // Inicializar el semáforo
+    sem_t semaforo_largo_plazo;
+    sem_init(&semaforo_largo_plazo, 0, 0);
+
+    // Crear el hilo para esperar Enter del usuario
+    pthread_t hilo_entrada;
+    pthread_create(&hilo_entrada, NULL, esperar_enter, NULL);
+
+    // Bloqueamos el semáforo, esperando que el usuario presione Enter
+    sem_wait(&semaforo_largo_plazo);
+
+    // Establecer conexión con la memoria
+    if (conectar_a_memoria() == -1) {
+        printf("No se pudo conectar a la memoria.\n");
+        return;
+    }
+
+    // Verificar si hay memoria disponible
+    if (!hay_memoria_disponible()) {
+        printf("No hay memoria disponible para iniciar el planificador de largo plazo.\n");
+        return;
+    }
+
+    // Si hay memoria disponible, iniciar el planificador
+    planificadorLargoPlazo();
+
+    // Esperar a que el hilo de entrada termine
+    pthread_join(hilo_entrada, NULL);
+
+    // Limpiar el semáforo
+    sem_destroy(&semaforo_largo_plazo);
+
+    // Cerrar la conexión con la memoria
+    close(socket_memoria);
+}*/

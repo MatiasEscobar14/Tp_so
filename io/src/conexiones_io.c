@@ -17,6 +17,3 @@ int crear_conexiones_io(t_log* logger, t_config* config){
 	return conexionKernel;
 }
 
-
-
-

@@ -17,8 +17,8 @@ typedef struct {
     char* puerto;
 }datos_conexion_t;
 
-void* hilo_servidor(void* args);
-void* hilo_cliente(void* args);
+void* hilo_servidor_io_f(void* args);
+void* hilo_cliente_memoria_f(void* args);
 void* hilo_servidor_dispatch(void* args);
 void* hilo_servidor_interrupt(void* args);
 void crear_conexiones();

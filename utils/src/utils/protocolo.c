@@ -37,16 +37,52 @@ void eliminar_paquete(t_paquete* paquete){
 	free(paquete->buffer);
 	free(paquete);
 }
+/*
 void crear_buffer(t_paquete* paquete){
 	paquete->buffer = malloc(sizeof(t_buffer));
 	paquete->buffer->size = 0;
 	paquete->buffer->stream = NULL;
+}*/
+t_buffer* new_buffer(){
+	t_buffer* unBuffer = malloc(sizeof(t_buffer));
+	unBuffer->size = 0;
+	unBuffer->stream = NULL;
+	return unBuffer;
+}
+
+
+
+void add_int_to_buffer(t_buffer* unBuffer, int int_value){
+	add_to_buffer(unBuffer, &int_value, sizeof(int));
+}
+void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size)
+{
+	if(unBuffer->size == 0){
+		unBuffer->stream = malloc(sizeof(int) + new_size);
+		memcpy(unBuffer->stream, &new_size, sizeof(int));
+		memcpy(unBuffer->stream + sizeof(int), new_stream, new_size);
+	}else{
+		unBuffer->stream = realloc(unBuffer->stream, unBuffer->size + sizeof(int) + new_size);
+		memcpy(unBuffer->stream + unBuffer->size, &new_size, sizeof(int));
+		memcpy(unBuffer->stream + unBuffer->size + sizeof(int), new_stream, new_size);
+	}
+	
+	unBuffer->size += sizeof(int);
+	unBuffer->size += new_size;
+}
+
+t_paquete* create_super_pck(op_code code, t_buffer* unBuffer){
+
+	t_paquete* unPaquete = malloc(sizeof(t_paquete));
+	unPaquete->codigo_operacion = code;
+	unPaquete->buffer = unBuffer;
+	return unPaquete;
 }
 
 t_paquete* crear_paquete(void){
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->codigo_operacion = PAQUETE;
-	crear_buffer(paquete);
+	new_buffer();
 	return paquete;
 }
 

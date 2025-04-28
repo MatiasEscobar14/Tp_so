@@ -2,7 +2,8 @@
 #define GESTOR_KERNEL_H
 
 #include <utils/utils.h>
-
+#include<pthread.h>
+#include <semaphore.h>
 
 extern t_log* kernel_logger;
 extern t_config* kernel_config;
@@ -18,15 +19,29 @@ extern char* PUERTO_CPU_INTERRUPT;
 
 //=======PCB========//
 
+typedef enum{
+	NEW_PROCCES,
+	READY_PROCCES,
+	EXEC_PROCCES,
+	BLOCKED_PROCCES,
+	EXIT_PROCCES,
+    SUSP_BLOCKED_PROCESS,
+    SUSP_READY_PROCESS
+}estado_pcb;
+
 typedef struct {
     uint32_t pid;
     uint32_t pc;
     uint32_t tamanio_proceso;
     t_list* metricas_estado;
     t_list* metricas_tiempo;
+    estado_pcb estado;
 }pcb_t;
 
 extern bool flag_pedido_de_memoria;
+
+//========ESTADO PLANIFICACION========//
+
 
 //=======LISTAS======//
 
@@ -57,19 +72,9 @@ extern pthread_mutex_t mutex_flag_pedido_memoria;
 
 
 extern sem_t sem_rpta_estructura_inicializada;
+extern sem_t semaforo_largo_plazo;
 
 
-//======ESTADOS======//
-
-typedef enum{
-	NEW_PROCCES,
-	READY_PROCCES,
-	EXEC_PROCCES,
-	BLOCKED_PROCCES,
-	EXIT_PROCCES,
-    SUSP_BLOCKED_PROCESS,
-    SUSP_READY_PROCESS
-}estado_pcb;
 
 //=======CONEXIONES======//
 extern int socket_io;
@@ -77,5 +82,6 @@ extern int socket_cpu_dispatch;
 extern int socket_cpu_interrupt;
 extern int socket_memoria;
 
-
+//extern bool flag_respuesta_dump;
+//extern sem_t sem_estructura_liberada;
 #endif

@@ -1,6 +1,6 @@
 #include "conexionesKernel.h"
 
-void* hilo_servidor_io(void* args) {
+void* hilo_servidor_io_f(void* args) {
     datos_servidor_t* datos = (datos_servidor_t*) args;
     socket_io = iniciar_servidor(datos->logger, datos->nombre_servidor, datos->puerto);
 
@@ -30,7 +30,7 @@ void* hilo_servidor_interrupt(void* args) {
     return 0;
 } 
 
-void* hilo_cliente_memoria(void* args) {
+void* hilo_cliente_memoria_f(void* args) {
     datos_conexion_t* datos = (datos_conexion_t*) args;
     socket_memoria = crear_conexion(datos->logger, datos->nombre_cliente,datos->ip, datos->puerto);
     free(datos);
@@ -50,7 +50,7 @@ void crear_conexiones(){
     datos->nombre_servidor = "Kernel";
     datos->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_IO");
 
-    if(pthread_create(&hilo_servidor_io, NULL, hilo_servidor_io, datos) != 0 ) {
+    if(pthread_create(&hilo_servidor_io, NULL, hilo_servidor_io_f, datos) != 0 ) {
         perror("Error al crear el hilo del servidor");
         return;
     }
@@ -70,7 +70,7 @@ void crear_conexiones(){
     //=====================================================================
     
     datos_servidor_interrupt_t* datos_interrupt = malloc(sizeof(datos_servidor_interrupt_t));
-    datos_interrupt->logger = kernel_logger
+    datos_interrupt->logger = kernel_logger;
     datos_interrupt->nombre_servidor = "Kernel Interrupt";
     datos_interrupt->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_INTERRUPT");
 
@@ -87,7 +87,7 @@ void crear_conexiones(){
     datosConexion->ip = config_get_string_value(kernel_config, "IP_MEMORIA");
     datosConexion->puerto = config_get_string_value(kernel_config, "PUERTO_MEMORIA");
 
-    if(pthread_create(&hilo_cliente_memoria, NULL, hilo_cliente_memoria, datosConexion) != 0 ) {
+    if(pthread_create(&hilo_cliente_memoria, NULL, hilo_cliente_memoria_f, datosConexion) != 0 ) {
         perror("Error al crear el hilo del cliente");
         return;
     }
