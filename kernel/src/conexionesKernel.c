@@ -47,8 +47,8 @@ void crear_conexiones(){
 
    datos_servidor_t* datos = malloc(sizeof(datos_servidor_t));
     datos->logger = kernel_logger;
-    datos->nombre_servidor = "Kernel";
-    datos->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_IO");
+    datos->nombre_servidor = "Kernel-IO";
+    datos->puerto = PUERTO_ESCUCHA_IO;
 
     if(pthread_create(&hilo_servidor_io, NULL, hilo_servidor_io_f, datos) != 0 ) {
         perror("Error al crear el hilo del servidor");
@@ -60,7 +60,7 @@ void crear_conexiones(){
     datos_servidor_dispatch_t* datos_dispatch = malloc(sizeof(datos_servidor_dispatch_t));
     datos_dispatch->logger = kernel_logger;
     datos_dispatch->nombre_servidor = "Kernel Dispatch";
-    datos_dispatch->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_DISPATCH");
+    datos_dispatch->puerto = PUERTO_ESCUCHA_DISPATCH;
 
     if(pthread_create(&hilo_dispatch, NULL, hilo_servidor_dispatch, datos_dispatch) != 0 ) {
         perror("Error al crear el hilo del servidor");
@@ -72,7 +72,7 @@ void crear_conexiones(){
     datos_servidor_interrupt_t* datos_interrupt = malloc(sizeof(datos_servidor_interrupt_t));
     datos_interrupt->logger = kernel_logger;
     datos_interrupt->nombre_servidor = "Kernel Interrupt";
-    datos_interrupt->puerto = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_INTERRUPT");
+    datos_interrupt->puerto = PUERTO_ESCUCHA_INTERRUPT;
 
     if(pthread_create(&hilo_interrupt, NULL, hilo_servidor_interrupt, datos_interrupt) != 0 ) {
         perror("Error al crear el hilo del servidor");
@@ -85,7 +85,7 @@ void crear_conexiones(){
     datosConexion->logger = kernel_logger;
     datosConexion->nombre_cliente = "Memoria";
     datosConexion->ip = config_get_string_value(kernel_config, "IP_MEMORIA");
-    datosConexion->puerto = config_get_string_value(kernel_config, "PUERTO_MEMORIA");
+    datosConexion->puerto = PUERTO_MEMORIA;
 
     if(pthread_create(&hilo_cliente_memoria, NULL, hilo_cliente_memoria_f, datosConexion) != 0 ) {
         perror("Error al crear el hilo del cliente");

@@ -26,11 +26,11 @@ int main(int argc, char* argv[]) {
 
 	iniciar_kernel("kernel.config");
 
-	crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
+	//crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
 
-	iniciar_plp();
+	//iniciar_plp();
 
-	
+	crear_conexiones();
 	
 	return 0;
 

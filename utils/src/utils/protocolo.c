@@ -71,7 +71,7 @@ void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size)
 	unBuffer->size += new_size;
 }
 
-t_paquete* create_super_pck(op_code code, t_buffer* unBuffer){
+t_paquete* crear_paquete(op_code code, t_buffer* unBuffer){
 
 	t_paquete* unPaquete = malloc(sizeof(t_paquete));
 	unPaquete->codigo_operacion = code;
@@ -79,12 +79,6 @@ t_paquete* create_super_pck(op_code code, t_buffer* unBuffer){
 	return unPaquete;
 }
 
-t_paquete* crear_paquete(void){
-	t_paquete* paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = PAQUETE;
-	new_buffer();
-	return paquete;
-}
 
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio){
 	paquete->buffer->stream = realloc(paquete->buffer->stream, paquete->buffer->size + tamanio + sizeof(int));
@@ -101,31 +95,6 @@ void enviar_paquete(t_paquete* paquete, int socket_cliente){
 	send(socket_cliente, a_enviar, bytes, 0);
 
 	free(a_enviar);
-}
-
-void paquete(int conexion){
-	// Ahora toca lo divertido!
-	char* leido;
-	t_paquete* paquete = crear_paquete();
-
-	// Leemos y esta vez agregamos las lineas al paquete
-	
-	printf("Mensaje: ");
-	
-	while((leido = readline("")) != NULL && strcmp(leido, "") != 0) {
-        // Agregar cada línea como un mensaje al paquete
-        agregar_a_paquete(paquete, leido, strlen(leido) + 1);  // +1 para el carácter nulo
-        free(leido);  // Liberar la línea leída
-        printf("> ");
-    };
-	free(leido);
-
-	enviar_paquete(paquete, conexion);
-	
-	// ¡No te olvides de liberar las líneas y el paquete antes de regresar!
-	eliminar_paquete(paquete);
-	
-	
 }
 
 int recibir_operacion(int socket_cliente){

@@ -1,21 +1,15 @@
-#include <utils/utils.h>
-#include <utils/protocolo.h>
+#include "memoria.h"
 
 int main(int argc, char* argv[]){
 	
-	char* puerto_escucha;
-	
-    t_log* logger = iniciar_logger("loggerMemoria.log", "Memoria");
-
-
-    t_config* config = iniciar_config("memoria.config"); 
-	
-    puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");   
+	logger_memoria = iniciar_logger("memoria.log", "Memoria");
+    iniciar_config_memoria("memoria.config");
     
-    int server_fd =  iniciar_servidor(logger, "Memoria Server",puerto_escucha);
-    log_info(logger, "Esperando cliente en el puerto %s", puerto_escucha);
+    int socket_memoria =  iniciar_servidor(logger_memoria, "Memoria Server",PUERTO_ESCUCHA);
+    log_info(logger_memoria, "Esperando cliente en el puerto %s", PUERTO_ESCUCHA);
     
-	while(server_escuchar(logger, "Memoria Server", server_fd));
+	while(server_escuchar(logger_memoria, "Memoria Server", socket_memoria));
+    
 
 
     return 0;
