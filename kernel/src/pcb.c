@@ -1,7 +1,7 @@
 #include "pcb.h"
 
 
-t_pcb* crear_pcb(char* ruta, int tam_proceso){
+t_pcb* crear_pcb(/*char* ruta,*/ int tam_proceso){
     t_pcb* nueva_pcb = malloc(sizeof(t_pcb));
 
     static int pid_counter = 0;           
@@ -16,7 +16,7 @@ t_pcb* crear_pcb(char* ruta, int tam_proceso){
 
     // Inicializar métricas, son 7 estados y 7 tiempos
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < CANT_ESTADOS; i++) {
         nueva_pcb->metricas_estado[i] = 0;
         nueva_pcb->metricas_tiempo[i] = 0.0;
     }

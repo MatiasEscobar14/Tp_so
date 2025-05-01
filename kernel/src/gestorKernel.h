@@ -1,5 +1,6 @@
 #ifndef GESTOR_KERNEL_H
 #define GESTOR_KERNEL_H
+#define CANT_ESTADOS 7
 
 #include <utils/utils.h>
 #include<pthread.h>
@@ -35,8 +36,8 @@ typedef struct {
     uint32_t pid;
     uint32_t pc;
     uint32_t tamanio_proceso;
-    int metricas_estado[7];      
-    double metricas_tiempo[7];    
+    int metricas_estado[CANT_ESTADOS];
+    double metricas_tiempo[CANT_ESTADOS];    
     estado_pcb estado;
     time_t tiempo_inicio_estado;
 }t_pcb;
