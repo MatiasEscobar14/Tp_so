@@ -14,6 +14,7 @@ extern int TAM_PAGINA;
 //RETARDO_MEMORIA;
 
 extern int socket_memoria;
+extern int memoria_usada;
 
 
 #endif 

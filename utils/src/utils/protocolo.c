@@ -71,6 +71,47 @@ void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size)
 	unBuffer->size += new_size;
 }
 
+
+void* extraer_buffer(t_buffer* buffer){
+
+	int tamanio_datos;									         //leo el tamanio de datos a extraer
+	memcpy(&tamanio_datos, buffer->stream, sizeof(int));
+	void* stream = malloc(tamanio_datos);					     //reservo memoria
+	memcpy(stream, buffer->stream + sizeof(int), tamanio_datos); //copio los dtos extraidos
+	int nuevo_tamanio = buffer->size - sizeof(int) - tamanio_datos;     //calculo el nuevo tamanio
+
+	if(nuevo_tamanio == 0){
+		buffer->size = 0;
+		free(buffer->stream);
+		buffer->stream = NULL;
+		return stream;
+	}
+
+	if(nuevo_tamanio < 0){
+		perror("\n[ERROR] buffer con tamaño negativo");
+		exit(EXIT_FAILURE);
+	}
+
+	//si quedan datos en el buffer
+
+	void* nuevo_stream = malloc(nuevo_tamanio); //reservo memoria para nuevo stream
+	memcpy(nuevo_stream, buffer->stream + sizeof(int) + tamanio_datos, nuevo_tamanio);
+	free(buffer->stream);
+	buffer->size = nuevo_tamanio;
+	buffer->stream = nuevo_stream;
+
+	return stream;
+}
+
+int extraer_int_buffer(t_buffer* buffer){
+	int* int_valor = extraer_buffer(buffer);
+	int valor = *int_valor;
+	free(int_valor);
+	return valor;
+	
+}
+
+
 t_paquete* crear_paquete(op_code code, t_buffer* unBuffer){
 
 	t_paquete* unPaquete = malloc(sizeof(t_paquete));

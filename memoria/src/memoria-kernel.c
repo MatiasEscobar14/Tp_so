@@ -19,10 +19,28 @@ void attender_memoria_kernel(int socket_kernel){
 
 }
 
-
 void inicializar_estructuras(t_buffer* buffer, int socket_kernel){
-    log_info(logger_memoria, "HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    log_info(logger_memoria, "HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    int pid = extraer_int_buffer(buffer);
+    int pc = extraer_int_buffer(buffer);
+    int tamanio = extraer_int_buffer(buffer);
+    
+   
+    log_info(logger_memoria,"Solicitud de inicialización PID: %d, tamanio: %d", pid,tamanio);
 
+    if (hay_espacio_disponible(tamanio)){
+       
+          
+    }else{
+     
+       
+    }
+
+    free(path);
+    
+    
     return;
 }
-
+bool hay_espacio_disponible(int size_proceso) {
+    return (memoria_usada + size_proceso) <= TAM_MEMORIA;
+}

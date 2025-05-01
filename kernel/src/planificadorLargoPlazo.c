@@ -48,44 +48,118 @@ void iniciar_plp() {
 }
 
 
-
+/*
 void planificadorLargoPlazo() {
     pcb_t* pcb = NULL;
     
     pthread_mutex_lock(&mutex_lista_new);  // Bloqueamos la lista de procesos en NEW
-
+    
     // Si la lista de NEW no esta vacia, comenzamos a procesar
     if (!list_is_empty(lista_new)) {
-        // Obtiene el primer proceso en la lista de NEW
-        pcb = list_get(lista_new, 0);  
+        // Se procesa dependiendo del algoritmo de planificación (FIFO o SJF)
+        if (strcmp(ALOGRITMO_PLANIFICACION, "FIFO") == 0) {
+            // FIFO: El primer proceso en la cola se procesa
+            pcb = list_get(lista_new, 0);
+        } else if (strcmp(ALOGRITMO_PLANIFICACION, "SJF") == 0) {
+            // SJF: Ordenamos la lista por el tamaño de memoria solicitado (más chico primero)
+            list_sort(lista_new, comparar_tamanio); // comparador por tamaño
+            pcb = list_get(lista_new, 0);
+        } 
         if (pcb != NULL) {
-            // Enviamos a memoria para inicializar las estructuras del proceso
-            t_buffer* buffer = new_buffer();  
-            add_int_to_buffer(buffer, pcb->pid);
-            //add_string_to_buffer(buffer, pcb->path);                              //TODO preguntar si es necesario agregar el path como atributa  de la pcb
-            add_int_to_buffer(buffer, pcb->tamanio_proceso);
-            t_paquete* un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, buffer);
+            int hay_pcb = 1;
+            while (hay_pcb){
+                // Enviamos a memoria para inicializar las estructuras del proceso
+                t_buffer* buffer = new_buffer();  
+                add_int_to_buffer(buffer, pcb->pid);
+                add_string_to_buffer(buffer, pcb->path);                              //TODO preguntar si es necesario agregar el path como atributa  de la pcb
+                add_int_to_buffer(buffer, pcb->tamanio_proceso);
+                t_paquete* un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, buffer);
 
-            //conexion_memoria(un_paquete);  // Envia el paquete a la memoria
-            enviar_paquete(un_paquete, socket_memoria);
+                //conexion_memoria(un_paquete);  // Envia el paquete a la memoria
+                enviar_paquete(un_paquete, socket_memoria);
 
-            log_info(kernel_logger, "Se aviso a Memoria para la creacion del proceso");
+                log_info(kernel_logger, "Se aviso a Memoria para la creacion del proceso");
 
-            // Espera hasta que la memoria haya inicializado las estructuras
-            sem_wait(&sem_rpta_estructura_inicializada);
+                // Espera hasta que la memoria haya inicializado las estructuras
+                sem_wait(&sem_rpta_estructura_inicializada);
 
-            pthread_mutex_lock(&mutex_flag_pedido_memoria);  // Bloqueamos la estructura de la memoria
-            if (flag_pedido_de_memoria) {
-                // Si la memoria respondio correctamente, removemos el PCB de la lista NEW
-                list_remove_element(lista_new, pcb);
+                pthread_mutex_lock(&mutex_flag_pedido_memoria);  // Bloqueamos la estructura de la memoria
+                if (flag_pedido_de_memoria) {  // Si la memoria respondió correctamente
+                    // Removemos el PCB de la lista NEW y lo agregamos a READY
+                    list_remove_element(lista_new, pcb);
 
-                log_info(kernel_logger, "Creacion de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);
-                agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
-                cambiar_estado(pcb, READY_PROCCES);  // Cambiamos su estado a READY
-                log_info(kernel_logger, "Creacion de Proceso: ## (%d:0) Se cambia el estado a READY", pcb->pid);
+                    log_info(kernel_logger, "Creacion de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);
+                    agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+                    cambiar_estado(pcb, READY_PROCCES);  // Cambiamos su estado a READY
+                    log_info(kernel_logger, "Creacion de Proceso: ## (%d:0) Se cambia el estado a READY", pcb->pid);
+                    // Si no hay más procesos en NEW, salimos del ciclo
+                        if (list_is_empty(lista_new)) {
+                            hay_pcb = 0;
+                        }
+                        } else {
+                            // Si la memoria no respondió correctamente, terminamos el ciclo
+                            hay_pcb = 0;
+                        }
+                         pthread_mutex_unlock(&mutex_flag_pedido_memoria);
             }
-            pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+        }    
+    }    pthread_mutex_unlock(&mutex_lista_new);
+}
+*/
+void planificadorLargoPlazo() {
+    pcb_t* pcb = NULL;
+
+    pthread_mutex_lock(&mutex_lista_new);  // Bloqueamos el acceso a la lista de NEW
+
+    log_info(kernel_logger,"Lista de NEW vacía: %d", list_is_empty(lista_new));
+    
+    if (!list_is_empty(lista_new)) {
+
+        pcb = list_get(lista_new, 0);
+
+        if (pcb != NULL) {
+            int hay_pcb = 1;
+            while (hay_pcb) {
+                // Enviamos un mensaje a memoria para que inicialice las estructuras del proceso
+                t_buffer* a_enviar = new_buffer();
+                add_int_to_buffer(a_enviar, pcb->pid);
+                //add_string_to_buffer(a_enviar, pcb->path);
+                add_int_to_buffer(a_enviar, pcb->tamanio_proceso);
+                t_paquete* un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
+                enviar_paquete(un_paquete, socket_memoria);
+                log_info(kernel_logger, "Se avisó a Memoria del nuevo proceso");
+
+                // Esperamos hasta que la estructura sea creada
+                sem_wait(&sem_rpta_estructura_inicializada);
+
+                pthread_mutex_lock(&mutex_flag_pedido_memoria);
+                
+                if (flag_pedido_de_memoria) {
+                    // Si la memoria respondió correctamente, removemos el PCB de la lista NEW
+                    list_remove_element(lista_new, pcb);
+
+                    log_info(kernel_logger, "Creación de Proceso: ## (%d) Se crea el proceso - Estado: NEW", pcb->pid);
+                    agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+                    cambiar_estado(pcb, READY_PROCCES);
+
+                    // Si no hay más procesos en NEW, salimos del ciclo
+                    if (list_is_empty(lista_new)) {
+                        hay_pcb = 0;
+                    }
+
+                } else {
+                    // Si la memoria no respondió correctamente, terminamos el ciclo
+                    hay_pcb = 0;
+                }
+
+                pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+            }
         }
-    }
-    pthread_mutex_unlock(&mutex_lista_new);
+    }               //TODO: Hace falta volver a verificar si queda algun proceso en NEW?
+}
+
+int comparar_pcb_por_tamanio(const void* a, const void* b) {
+    pcb_t* pcb_a = (pcb_t*)a;
+    pcb_t* pcb_b = (pcb_t*)b;
+    return pcb_a->tamanio_proceso - pcb_b->tamanio_proceso;
 }

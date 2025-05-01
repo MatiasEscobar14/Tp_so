@@ -30,9 +30,10 @@ int main(int argc, char* argv[]) {
 
 	//iniciar_plp();
 
-	crear_conexiones();
-	
+
 	return 0;
 
 }
+
+
 	
