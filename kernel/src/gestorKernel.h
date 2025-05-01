@@ -8,6 +8,7 @@
 extern t_log* kernel_logger;
 extern t_config* kernel_config;
 
+
 //=======CONFIG========//
 extern char* IP_MEMORIA;
 extern char* PUERTO_MEMORIA;
@@ -16,6 +17,7 @@ extern char* PUERTO_ESCUCHA_INTERRUPT;
 extern char* PUERTO_ESCUCHA_IO;
 extern char* PUERTO_CPU_DISPATCH;
 extern char* PUERTO_CPU_INTERRUPT;
+extern char* ALOGRITMO_PLANIFICACION;
 
 //=======PCB========//
 

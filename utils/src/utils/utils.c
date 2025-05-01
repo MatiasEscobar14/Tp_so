@@ -166,6 +166,10 @@ void procesar_conexion(void* void_args) {
     int cliente_socket = args->fd;
     char* server_name = args->server_name;
     free(args);
+<<<<<<< HEAD
+=======
+
+>>>>>>> c047ab4210c130883fab0dfce669ec9e94bab8c5
 	op_code cop;
 
     while (cliente_socket != -1) {

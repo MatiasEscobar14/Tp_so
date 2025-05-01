@@ -8,6 +8,7 @@
 void iniciar_plp();
 void planificadorLargoPlazo();
 void* esperar_enter(void* arg);
+int comparar_pcb_por_tamanio(const void* a, const void* b);
 
 
 

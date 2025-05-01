@@ -3,7 +3,7 @@
 
 #include <gestorKernel.h>
 
-//void* escuchar_memoria(void* arg);
-//void attend_kernel_memoria(int socket_memoria);
+void* escuchar_memoria(void* arg);
+void attender_kernel_memoria(int socket_memoria);
 
 #endif
