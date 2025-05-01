@@ -33,10 +33,11 @@ typedef struct {
     uint32_t pid;
     uint32_t pc;
     uint32_t tamanio_proceso;
-    t_list* metricas_estado;
-    t_list* metricas_tiempo;
+    int metricas_estado[7];      
+    double metricas_tiempo[7];    
     estado_pcb estado;
-}pcb_t;
+    time_t tiempo_inicio_estado;
+}t_pcb;
 
 extern bool flag_pedido_de_memoria;
 

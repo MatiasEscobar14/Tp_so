@@ -166,7 +166,6 @@ void procesar_conexion(void* void_args) {
     int cliente_socket = args->fd;
     char* server_name = args->server_name;
     free(args);
-	log_info(logger, "CHECKPOINT 2"); 
 	op_code cop;
 
     while (cliente_socket != -1) {
