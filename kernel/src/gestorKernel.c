@@ -12,6 +12,7 @@ char* PUERTO_ESCUCHA_IO;
 char* PUERTO_CPU_DISPATCH;
 char* PUERTO_CPU_INTERRUPT;
 char* ALOGRITMO_PLANIFICACION;
+char* ESTIMACION_INICIAL;
 
 int socket_io;
 int socket_cpu_dispatch;

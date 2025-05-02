@@ -32,12 +32,12 @@ void agregar_pcb_lista(t_pcb* pcb, t_list* lista_estado, pthread_mutex_t mutex_l
 }
 
 void cambiar_estado(t_pcb* un_pcb, estado_pcb proximo_estado) {
-
-    double tiempo_en_estado = difftime(time(NULL), un_pcb->tiempo_inicio_estado);
+    time_t ahora = time(NULL);
+    double tiempo_en_estado = difftime(ahora, un_pcb->tiempo_inicio_estado);
     un_pcb->metricas_tiempo[un_pcb->estado] += tiempo_en_estado;
-    log_info("## (%d) Pasa del estado %s al estado %s", un_pcb->pid,estado_a_string(un_pcb->estado),estado_a_string(proximo_estado));
+    log_info(kernel_logger, "## (%d) Pasa del estado %s al estado %s", un_pcb->pid,estado_a_string(un_pcb->estado),estado_a_string(proximo_estado));
     un_pcb->estado = proximo_estado;
-    un_pcb->tiempo_inicio_estado = time(NULL);
+    un_pcb->tiempo_inicio_estado = ahora;
     un_pcb->metricas_estado[proximo_estado]++;
 }
 

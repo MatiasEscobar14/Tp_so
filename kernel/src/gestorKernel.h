@@ -19,6 +19,7 @@ extern char* PUERTO_ESCUCHA_IO;
 extern char* PUERTO_CPU_DISPATCH;
 extern char* PUERTO_CPU_INTERRUPT;
 extern char* ALOGRITMO_PLANIFICACION;
+extern char* ESTIMACION_INICIAL;
 
 //=======PCB========//
 

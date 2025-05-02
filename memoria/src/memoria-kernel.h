@@ -8,4 +8,5 @@ void attender_memoria_kernel(int socket_kernel);
 void inicializar_estructuras(t_buffer* buffer, int socket_kernel);
 bool hay_espacio_disponible(int size_proceso);
 
+t_proceso* crear_proceso(int pid, int tamanio);
 #endif 

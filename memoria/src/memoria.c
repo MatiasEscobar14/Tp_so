@@ -1,20 +1,6 @@
-<<<<<<< HEAD
 #include <utils/utils.h>
 #include <utils/protocolo.h>
 #include "gestorMemoria.h"
-
-int main(int argc, char* argv[]){
-	
-	char* puerto_escucha;
-	
-    logger = iniciar_logger("loggerMemoria.log", "Memoria");
-    config = iniciar_config("memoria.config"); 
-	
-    puerto_escucha = config_get_string_value(config, "PUERTO_ESCUCHA");   
-    
-    socket_memoria =  iniciar_servidor(logger, "Memoria Server",puerto_escucha);
-    log_info(logger, "Esperando cliente en el puerto %s", puerto_escucha);
-=======
 #include "memoria.h"
 
 int main(int argc, char* argv[]){
@@ -27,7 +13,6 @@ int main(int argc, char* argv[]){
     
 	while(server_escuchar(logger_memoria, "Memoria Server", socket_memoria));*/
 
->>>>>>> c047ab4210c130883fab0dfce669ec9e94bab8c5
     
 
 

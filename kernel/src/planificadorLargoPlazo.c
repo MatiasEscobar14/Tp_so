@@ -12,10 +12,7 @@ bool flag_pedido_de_memoria;
 pthread_mutex_t mutex_flag_pedido_memoria;
 
 
-<<<<<<< HEAD
 // Definir el semáforo global
-=======
->>>>>>> c047ab4210c130883fab0dfce669ec9e94bab8c5
 sem_t semaforo_largo_plazo;  // Semáforo que controla la planificación
 
 // Función para esperar a que el usuario presione Enter
@@ -79,12 +76,9 @@ void planificadorLargoPlazo() {
                 add_int_to_buffer(buffer, pcb->tamanio_proceso);
                 t_paquete* un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, buffer);
 
-<<<<<<< HEAD
             enviar_paquete(un_paquete, socket_memoria);
-=======
                 //conexion_memoria(un_paquete);  // Envia el paquete a la memoria
                 enviar_paquete(un_paquete, socket_memoria);
->>>>>>> c047ab4210c130883fab0dfce669ec9e94bab8c5
 
                 log_info(kernel_logger, "Se aviso a Memoria para la creacion del proceso");
 
@@ -115,7 +109,7 @@ void planificadorLargoPlazo() {
 }
 */
 void planificadorLargoPlazo() {
-    pcb_t* pcb = NULL;
+    t_pcb* pcb = NULL;
 
     pthread_mutex_lock(&mutex_lista_new);  // Bloqueamos el acceso a la lista de NEW
 
@@ -167,7 +161,7 @@ void planificadorLargoPlazo() {
 }
 
 int comparar_pcb_por_tamanio(const void* a, const void* b) {
-    pcb_t* pcb_a = (pcb_t*)a;
-    pcb_t* pcb_b = (pcb_t*)b;
+    t_pcb* pcb_a = (t_pcb*)a;
+    t_pcb* pcb_b = (t_pcb*)b;
     return pcb_a->tamanio_proceso - pcb_b->tamanio_proceso;
 }

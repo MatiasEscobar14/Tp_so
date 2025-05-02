@@ -13,9 +13,10 @@ void iniciar_config_memoria(char* ruta){
 PUERTO_ESCUCHA = config_get_string_value(memoria_config, "PUERTO_ESCUCHA");
 TAM_MEMORIA = config_get_int_value(memoria_config, "TAM_MEMORIA");
 TAM_PAGINA = config_get_int_value(memoria_config, "TAM_PAGINA");
-//ENTRADAS_POR_TABLA
-//CANTIDAD_NIVELES
-//RETARDO_MEMORIA
+//ENTRADAS_POR_TABLA = config_get_int_value(memoria_config, "ENTRADAS_POR_TABLA");
+CANTIDAD_NIVELES = config_get_int_value(memoria_config, "CANTIDAD_NIVELES");
+RETARDO_MEMORIA = config_get_int_value(memoria_config, "RETARDO_MEMORIA");
+RETARDO_SWAP = config_get_int_value(memoria_config, "RETARDO_SWAP");
 
 log_info(logger_memoria, "Config de Memoria iniciado.");
 
