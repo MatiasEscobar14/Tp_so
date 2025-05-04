@@ -11,7 +11,8 @@ typedef enum
 
 	//====KERNEL - MEMORIA====//
 	INICIALIZAR_ESTRUCTURAS_KM,
-	//ESTRUCTURA_INICIALIZADA_OK,
+	FINALIZAR_ESTRUCTURAS_KM,
+	//ESTRUCTURA_LIBERADA_OK,
 	//SIN_ESPACIO_EN_MEMORIA,
 	RTA_INICIALIZAR_ESTRUCTURAS_MK,
 	//RTA_CREAR_HILO_SYS_KM,
@@ -54,6 +55,10 @@ void eliminar_paquete(t_paquete* paquete);
 void paquete(int conexion);
 
 
+int extract_int_buffer(t_buffer* unBuffer);
+
+
+t_buffer* recv_buffer(int socket_cliente);
 
 
 

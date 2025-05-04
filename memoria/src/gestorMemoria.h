@@ -2,6 +2,7 @@
 #define GESTOR_MEMORIA_H
 
 #include <utils/utils.h>
+#include <utils/protocolo.h>
 
 extern t_log* logger_memoria;
 extern t_config* memoria_config;
@@ -37,6 +38,12 @@ typedef struct
     uint32_t tamanio;
     
 }t_proceso;
+// Listas
+extern t_list* lista_procesos;
+//MUTEX
+
+extern pthread_mutex_t mutex_lista_procesos;
+
 
 #endif 
 

@@ -5,5 +5,7 @@
 #include "gestorMemoria.h"
 
 void iniciar_config_memoria(char* ruta);
+void iniciar_mutex();
+void iniciar_listas();
 
 #endif

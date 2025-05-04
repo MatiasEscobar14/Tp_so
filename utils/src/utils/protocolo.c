@@ -37,12 +37,7 @@ void eliminar_paquete(t_paquete* paquete){
 	free(paquete->buffer);
 	free(paquete);
 }
-/*
-void crear_buffer(t_paquete* paquete){
-	paquete->buffer = malloc(sizeof(t_buffer));
-	paquete->buffer->size = 0;
-	paquete->buffer->stream = NULL;
-}*/
+
 t_buffer* new_buffer(){
 	t_buffer* unBuffer = malloc(sizeof(t_buffer));
 	unBuffer->size = 0;
@@ -71,44 +66,50 @@ void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size)
 	unBuffer->size += new_size;
 }
 
-
-void* extraer_buffer(t_buffer* buffer){
-
-	int tamanio_datos;									         //leo el tamanio de datos a extraer
-	memcpy(&tamanio_datos, buffer->stream, sizeof(int));
-	void* stream = malloc(tamanio_datos);					     //reservo memoria
-	memcpy(stream, buffer->stream + sizeof(int), tamanio_datos); //copio los dtos extraidos
-	int nuevo_tamanio = buffer->size - sizeof(int) - tamanio_datos;     //calculo el nuevo tamanio
-
-	if(nuevo_tamanio == 0){
-		buffer->size = 0;
-		free(buffer->stream);
-		buffer->stream = NULL;
-		return stream;
+//FUNCIONES PARA RECIBIR DEL BUFFER
+void* extraer_buffer(t_buffer* unBuffer){
+	if(unBuffer->size == 0){
+		perror("\n[ERROR] Al intentar extraer un contenido de un buffer vacio\n");
+		exit(EXIT_FAILURE);
 	}
 
-	if(nuevo_tamanio < 0){
+	if(unBuffer->size < 0){
+		perror("\n[ERROR] size negativo\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int ext_size;
+	memcpy(&ext_size, unBuffer->stream, sizeof(int));
+	void* ext_stream = malloc(ext_size);
+	memcpy(ext_stream, unBuffer->stream + sizeof(int), ext_size);
+
+	int new_size = unBuffer->size - sizeof(int) - ext_size;
+	if(new_size == 0){
+		unBuffer->size = 0;
+		free(unBuffer->stream);
+		unBuffer->stream = NULL;
+		return ext_stream;
+	}
+
+	if(new_size < 0){
 		perror("\n[ERROR] buffer con tamaño negativo");
 		exit(EXIT_FAILURE);
 	}
 
-	//si quedan datos en el buffer
+	void* new_stream = malloc(new_size);
+	memcpy(new_stream, unBuffer->stream + sizeof(int) + ext_size, new_size);
+	free(unBuffer->stream);
+	unBuffer->size = new_size;
+	unBuffer->stream = new_stream;
 
-	void* nuevo_stream = malloc(nuevo_tamanio); //reservo memoria para nuevo stream
-	memcpy(nuevo_stream, buffer->stream + sizeof(int) + tamanio_datos, nuevo_tamanio);
-	free(buffer->stream);
-	buffer->size = nuevo_tamanio;
-	buffer->stream = nuevo_stream;
-
-	return stream;
+	return ext_stream;
 }
 
-int extraer_int_buffer(t_buffer* buffer){
-	int* int_valor = extraer_buffer(buffer);
-	int valor = *int_valor;
-	free(int_valor);
-	return valor;
-	
+int extract_int_buffer(t_buffer* unBuffer){
+	int* ext_int = extraer_buffer(unBuffer);
+	int value = *ext_int;
+	free(ext_int);
+	return value;
 }
 
 
@@ -147,6 +148,31 @@ int recibir_operacion(int socket_cliente){
 		return -1;
 	}
 }
+
+
+t_buffer* recv_buffer(int socket_cliente)
+{
+	t_buffer* unBuffer = malloc(sizeof(t_buffer));
+
+	if(recv(socket_cliente, &(unBuffer->size), sizeof(int), MSG_WAITALL) > 0){
+		unBuffer->stream = malloc(unBuffer->size);
+
+		if(recv(socket_cliente, unBuffer->stream, unBuffer->size, MSG_WAITALL) > 0){
+			return unBuffer;
+		}else{
+			perror("Error al recibir el void* del buffer de la conexion");
+			exit(EXIT_FAILURE);
+		}
+	}else{
+		perror("Error al recibir el tamaño del buffer de la conexion");
+		exit(EXIT_FAILURE);
+	}
+	
+
+	return unBuffer;
+}
+
+
 void* recibir_buffer(int* size, int socket_cliente){
 	void * buffer;
 

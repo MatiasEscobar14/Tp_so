@@ -28,10 +28,13 @@ void iniciar_config_kernel(char* ruta){
     PUERTO_ESCUCHA_IO = config_get_string_value(kernel_config, "PUERTO_ESCUCHA_IO");
 	PUERTO_CPU_DISPATCH = config_get_string_value(kernel_config, "PUERTO_CPU_DISPATCH");
 	PUERTO_CPU_INTERRUPT = config_get_string_value(kernel_config, "PUERTO_CPU_INTERRUPT");
-	ALOGRITMO_PLANIFICACION = config_get_string_value(kernel_config, "ALGORITMO_PLANIFICACION");
+	ALGORITMO_CORTO_PLAZO = config_get_string_value(kernel_config, "ALGORITMO_CORTO_PLAZO");
+	ALGORITMO_INGRESO_A_READY = config_get_string_value(kernel_config, "ALGORITMO_INGRESO_A_READY");
 	ESTIMACION_INICIAL = config_get_string_value(kernel_config,"ESTIMACION_INICIAL" );
 
 	log_info(kernel_logger, "Config de Kernel iniciado.");
+
+	
 
 }
 	
@@ -59,4 +62,8 @@ void iniciar_kernel(char* ruta_config){
 	iniciar_logger_kernel();
 	iniciar_config_kernel(ruta_config);
 	iniciar_lista();
+	initialize_mutex();
+}
+void initialize_mutex(){
+	pthread_mutex_init(&mutex_lista_new, NULL);
 }

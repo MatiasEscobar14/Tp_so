@@ -9,5 +9,4 @@
 
 void crear_proceso_inicial(int tamanio_proceso, char* ruta);
 
-
 #endif

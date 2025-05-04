@@ -4,7 +4,6 @@ void* hilo_servidor_io_f(void* args) {
     datos_servidor_t* datos = (datos_servidor_t*) args;
     socket_io = iniciar_servidor(datos->logger, datos->nombre_servidor, datos->puerto);
 
-    while(server_escuchar(datos->logger, datos->nombre_servidor, socket_io));
 
     free(datos);    
     return 0;
@@ -14,8 +13,6 @@ void* hilo_servidor_dispatch(void* args) {
     datos_servidor_dispatch_t* datos_dispatch = (datos_servidor_dispatch_t*) args;
     socket_cpu_dispatch = iniciar_servidor(datos_dispatch->logger, datos_dispatch->nombre_servidor, datos_dispatch->puerto);
 
-    while(server_escuchar(datos_dispatch->logger, datos_dispatch->nombre_servidor, socket_cpu_dispatch));
-
     free(datos_dispatch);    
     return 0;
 } 
@@ -23,8 +20,6 @@ void* hilo_servidor_dispatch(void* args) {
 void* hilo_servidor_interrupt(void* args) {
     datos_servidor_interrupt_t* datos_interrupt = (datos_servidor_interrupt_t*) args;
     socket_cpu_interrupt = iniciar_servidor(datos_interrupt->logger, datos_interrupt->nombre_servidor, datos_interrupt->puerto);
-
-    while(server_escuchar(datos_interrupt->logger, datos_interrupt->nombre_servidor, socket_cpu_interrupt));
 
     free(datos_interrupt);    
     return 0;

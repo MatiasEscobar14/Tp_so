@@ -2,7 +2,8 @@
 
 
 void iniciar_config_memoria(char* ruta){
-
+	iniciar_listas();
+    iniciar_mutex();
     memoria_config = config_create(ruta);
 	
 	if(memoria_config ==  NULL){
@@ -24,7 +25,14 @@ log_info(logger_memoria, "Config de Memoria iniciado.");
 
 //Falta logger;
 //Faltan listas;
+
 //Falta mutex;
 
 //Agregar una funcion que inicie todo: void iniciar_memoria(char* ruta_del_config);
 
+void iniciar_listas(){
+	lista_procesos = list_create();
+}
+void iniciar_mutex(){
+    pthread_mutex_init(&mutex_lista_procesos, NULL);
+}

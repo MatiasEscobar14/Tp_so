@@ -53,6 +53,67 @@ const char* estado_a_string(estado_pcb estado) {
         default:                  return "ESTADO_DESCONOCIDO";
     }
 }
+/*
+t_pcb* buscar_y_remover_pcb_por_pid(int pid) {
+    t_pcb* pcb_encontrado = NULL;
+
+    // Lista NEW
+    pthread_mutex_lock(&mutex_lista_new);
+    for (int i = 0; i < list_size(lista_new); i++) {
+        t_pcb* pcb = list_get(lista_new, i);
+        if (pcb->pid == pid) {
+            pcb_encontrado = pcb;
+            list_remove(lista_new, i);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_new);
+
+    if (pcb_encontrado != NULL) return pcb_encontrado;
+
+    // Lista READY
+    pthread_mutex_lock(&mutex_lista_ready);
+    for (int i = 0; i < list_size(lista_ready); i++) {
+        t_pcb* pcb = list_get(lista_ready, i);
+        if (pcb->pid == pid) {
+            pcb_encontrado = pcb;
+            list_remove(lista_ready, i);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_ready);
+
+    if (pcb_encontrado != NULL) return pcb_encontrado;
+
+    // Lista BLOCKED
+    pthread_mutex_lock(&mutex_lista_blocked);
+    for (int i = 0; i < list_size(lista_blocked); i++) {
+        t_pcb* pcb = list_get(lista_blocked, i);
+        if (pcb->pid == pid) {
+            pcb_encontrado = pcb;
+            list_remove(lista_blocked, i);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_blocked);
+
+    if (pcb_encontrado != NULL) return pcb_encontrado;
+
+    // Lista SUSP_READY
+    pthread_mutex_lock(&mutex_lista_susp_ready);
+    for (int i = 0; i < list_size(lista_susp_ready); i++) {
+        t_pcb* pcb = list_get(lista_susp_ready, i);
+        if (pcb->pid == pid) {
+            pcb_encontrado = pcb;
+            list_remove(lista_susp_ready, i);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_susp_ready);
+
+    return pcb_encontrado; // Puede ser NULL si no lo encontró en ninguna lista
+}
 
 
 
+*/

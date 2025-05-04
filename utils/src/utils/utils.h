@@ -23,7 +23,7 @@ typedef struct {
 int iniciar_servidor(t_log* logger, const char* name, char* puerto);
 int esperar_cliente(t_log* logger, const char* name, int socket_servidor);
 int crear_conexion(t_log* logger, const char* server_name, char* ip, char* puerto);
-void liberar_conexion(int* socket_cliente);
+void liberar_conexion(int socket_cliente); 
 
 t_config* iniciar_config(char* nombreArchivoConfig);
 t_log* iniciar_logger(char* nombreArchivoLog, char* nombreModulo);

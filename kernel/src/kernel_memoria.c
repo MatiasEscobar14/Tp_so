@@ -1,4 +1,5 @@
 #include<kernel_memoria.h>
+
 void atender_kernel_memoria(){
 t_buffer* un_buffer;
     int cod_op = recibir_operacion(socket_memoria);   
@@ -6,9 +7,8 @@ t_buffer* un_buffer;
     switch (cod_op) {
    
         case RTA_INICIALIZAR_ESTRUCTURAS_MK:
-            int size;
-            un_buffer = recibir_buffer(&size,socket_memoria);
-            respuesta = extraer_int_buffer(un_buffer);
+            un_buffer = recv_buffer(socket_memoria);
+            respuesta = extract_int_buffer(un_buffer);
 
             log_info(kernel_logger,"se recibio respuesta inicial de memoria: %d", respuesta);
 
@@ -27,11 +27,6 @@ t_buffer* un_buffer;
         break;
 
     }
-    free(un_buffer);
-
-
-
-
     
 }
 

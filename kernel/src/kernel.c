@@ -11,10 +11,10 @@ void crear_proceso_inicial(int tamanio_proceso, char* ruta){
 
 	if(list_is_empty(lista_new)){
 		pcb = crear_pcb(/*ruta,*/ tamanio_proceso);
-		//pthread_mutex_lock(&mutex_lista_new);
+		pthread_mutex_lock(&mutex_lista_new);
 		list_add(lista_new, pcb);
 		log_info(kernel_logger,"El PID es %d", pcb->pid);
-		//pthread_mutex_unlock(&mutex_lista_new);
+		pthread_mutex_unlock(&mutex_lista_new);
 		log_info(kernel_logger, "Creación de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);
 		//sem_post(&sem_cpu_disponible); //lo pongo aca porque es el inicio y la cpu esta disponible
 		// Se actualiza la memoria ocupada cuando el proceso es creado
@@ -36,8 +36,9 @@ int main(int argc, char* argv[]) {
     int tamanio_proceso = atoi(argv[2]);
 
 	iniciar_kernel("kernel.config");
-
-	//crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
+	crear_conexiones();
+	crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
+	
 	
 	return 0;
 

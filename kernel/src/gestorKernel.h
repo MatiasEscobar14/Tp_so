@@ -18,7 +18,8 @@ extern char* PUERTO_ESCUCHA_INTERRUPT;
 extern char* PUERTO_ESCUCHA_IO;
 extern char* PUERTO_CPU_DISPATCH;
 extern char* PUERTO_CPU_INTERRUPT;
-extern char* ALOGRITMO_PLANIFICACION;
+extern char* ALGORITMO_CORTO_PLAZO;
+extern char* ALGORITMO_INGRESO_A_READY;
 extern char* ESTIMACION_INICIAL;
 
 //=======PCB========//
@@ -42,6 +43,9 @@ typedef struct {
     estado_pcb estado;
     time_t tiempo_inicio_estado;
 }t_pcb;
+typedef enum{
+	FIFO
+}t_algoritmo;
 
 extern bool flag_pedido_de_memoria;
 
@@ -58,9 +62,9 @@ extern t_list* lista_exit;
 extern t_list* lista_susp_blocked;
 extern t_list* lista_susp_ready;
 
-/*extern t_list* lista_new_thread;
+//extern t_list* lista_new_thread;
 extern t_list* lista_ready_thread;
-extern t_list* lista_execute_thread;
+/*extern t_list* lista_execute_thread;
 extern t_list* lista_blocked_thread;
 extern t_list* lista_exit_thread;
 extern t_list* lista_mutex_thread;
@@ -74,7 +78,10 @@ extern pthread_mutex_t mutex_lista_new;
 extern pthread_mutex_t mutex_lista_ready;
 extern pthread_mutex_t mutex_lista_ready_thread;
 extern pthread_mutex_t mutex_flag_pedido_memoria;
-
+extern pthread_mutex_t mutex_lista_blocked;
+extern pthread_mutex_t mutex_lista_susp_ready;
+extern pthread_mutex_t mutex_lista_exit;
+extern pthread_mutex_t mutex_lista_exec;
 
 extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
@@ -89,4 +96,6 @@ extern int socket_memoria;
 
 //extern bool flag_respuesta_dump;
 //extern sem_t sem_estructura_liberada;
+
+
 #endif
