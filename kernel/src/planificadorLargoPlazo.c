@@ -117,12 +117,11 @@ void finalizar_proceso(int pid)
     t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
     if (un_pcb != NULL)
     {
-        log_info(kernel_logger, "entre a finalizar proceso");
+        log_info(kernel_logger, "entre a finalizar proceso");                           
         t_buffer *a_enviar = new_buffer();
         add_int_to_buffer(a_enviar, un_pcb->pid);
         log_info(kernel_logger, "AGREGO AL BUFFER EL PID A ELIMINAR: %d", un_pcb->pid);
         t_paquete *un_paquete = crear_paquete(FINALIZAR_ESTRUCTURAS_KM, a_enviar);
-        log_info(kernel_logger, "INTENTANDO CONECTAR CON MEMORIA");
 
         enviar_paquete(un_paquete, socket_memoria);
         atender_kernel_memoria();
@@ -147,7 +146,7 @@ void finalizar_proceso(int pid)
         {
             // Reactivar proceso de SUSP_READY -> READY
             pthread_mutex_lock(&mutex_lista_susp_ready);
-            t_pcb *pcb_a_reactivar = list_remove(lista_susp_ready, 0); // No deberia volver a verificar si hay espacio en memoria?
+            t_pcb *pcb_a_reactivar = list_get(lista_susp_ready, 0);
             pthread_mutex_unlock(&mutex_lista_susp_ready);
 
             t_buffer *a_enviar = new_buffer();
