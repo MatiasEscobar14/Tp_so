@@ -76,17 +76,18 @@ extern t_list* lista_iniciar_estructura;*/
 
 extern pthread_mutex_t mutex_lista_new;
 extern pthread_mutex_t mutex_lista_ready;
-extern pthread_mutex_t mutex_lista_ready_thread;
-extern pthread_mutex_t mutex_flag_pedido_memoria;
 extern pthread_mutex_t mutex_lista_blocked;
 extern pthread_mutex_t mutex_lista_susp_ready;
-extern pthread_mutex_t mutex_lista_exit;
+extern pthread_mutex_t mutex_lista_susp_blocked;
 extern pthread_mutex_t mutex_lista_exec;
+extern pthread_mutex_t mutex_lista_exit;
+
 
 extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
+extern sem_t sem_estructura_liberada;
 
-
+extern pthread_mutex_t mutex_flag_pedido_memoria;
 
 //=======CONEXIONES======//
 extern int socket_io;

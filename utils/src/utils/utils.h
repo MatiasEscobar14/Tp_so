@@ -12,6 +12,9 @@
 #include <pthread.h>
 #include "protocolo.h"
 #include <commons/string.h>
+#include  <commons/collections/list.h>
+
+
 
 typedef struct {
     t_log* log;

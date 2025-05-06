@@ -38,11 +38,12 @@ void attender_memoria_kernel(int socket_kernel)
         free(un_buffer->stream);
         free(un_buffer);
         break;
-        /*case FINALIZAR_ESTRUCTURAS_KM:
-            un_buffer = recibir_buffer(&size, socket_kernel);
+     case FINALIZAR_ESTRUCTURAS_KM:
+            un_buffer = recv_buffer(socket_kernel);
           //  finalizar_estructuras(un_buffer, socket_kernel);
             free(un_buffer);
-        break;*/
+        break;
+        
     }   
    // free(un_buffer);
 }
@@ -90,8 +91,7 @@ t_proceso* crear_proceso(int pid, int tamanio_proceso)
     t_proceso* nuevo_proceso = malloc(sizeof(t_proceso));
     nuevo_proceso->pid = pid;
     nuevo_proceso->tamanio = tamanio_proceso;
-    log_info(logger_memoria, "Cree el Proceso");
-
+    
     pthread_mutex_lock(&mutex_lista_procesos);
     list_add(lista_procesos, nuevo_proceso);
     pthread_mutex_unlock(&mutex_lista_procesos);
@@ -111,8 +111,11 @@ void finalizar_estructuras(t_buffer* buffer, int socket_kernel) {
     //eliminar_metricas(pid);
 
     // Enviar confirmación al Kernel
-    t_paquete* respuesta = crear_paquete(ESTRUCTURA_LIBERADA_OK, NULL);
+    t_buffer* a_enviar = new_buffer();
+    add_int_to_buffer(respuesta->buffer, 1); 
+    t_paquete* respuesta = crear_paquete(RTA_ESTRUCTURA_LIBERADA_KM, a_enviar);
     enviar_paquete(respuesta, socket_kernel);
     eliminar_paquete(respuesta);
 }
 */
+

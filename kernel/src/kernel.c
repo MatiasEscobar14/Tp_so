@@ -40,6 +40,11 @@ int main(int argc, char* argv[]) {
 	crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
 	
 	
+	
+
+
+
+
 	return 0;
 
 }

@@ -40,7 +40,6 @@ void iniciar_config_kernel(char* ruta){
 	
 void iniciar_lista(){
 
-    //LISTAS PARA LOS PROCESOS
 	lista_new = list_create();
 	lista_ready = list_create();
 	lista_execute = list_create();
@@ -48,13 +47,6 @@ void iniciar_lista(){
 	lista_exit = list_create();
     lista_susp_blocked = list_create();
     lista_susp_ready = list_create();
-	//LISTAS PARA LOS HILOS
-	//lista_new_thread = list_create();
-	//lista_ready_thread = list_create();
-	//lista_execute_thread = list_create();
-	//lista_blocked_thread= list_create();
-	//lista_exit_thread = list_create();
-	//lista_mutex_thread = list_create();
 	log_info(kernel_logger, "Listas inicializadas.");
 }
 
@@ -63,7 +55,23 @@ void iniciar_kernel(char* ruta_config){
 	iniciar_config_kernel(ruta_config);
 	iniciar_lista();
 	initialize_mutex();
+	initialize_semaphores();
 }
 void initialize_mutex(){
 	pthread_mutex_init(&mutex_lista_new, NULL);
+	pthread_mutex_init(&mutex_lista_ready, NULL);
+	pthread_mutex_init(&mutex_lista_exec, NULL);
+	pthread_mutex_init(&mutex_lista_blocked, NULL);
+	pthread_mutex_init(&mutex_lista_exit, NULL);
+	pthread_mutex_init(&mutex_lista_susp_blocked, NULL);
+	pthread_mutex_init(&mutex_lista_susp_ready, NULL);
+	log_info(kernel_logger, "Mutex inicializados.");
+
+}
+void initialize_semaphores(){
+		sem_init(&semaforo_largo_plazo,0,0);
+		sem_init(&sem_rpta_estructura_inicializada,0,0);
+		sem_init(&sem_estructura_liberada,0,0);
+		log_info(kernel_logger, "Sempaphores inicializados.");
+
 }

@@ -12,4 +12,5 @@ void iniciar_logger_kernel();
 void iniciar_config_kernel(char* ruta);
 void iniciar_kernel(char* ruta_config);
 void initialize_mutex();
+void initialize_semaphores();
 #endif
