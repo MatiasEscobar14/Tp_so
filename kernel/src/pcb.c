@@ -164,3 +164,12 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
 
     return un_pcb;
 }
+
+void enviar_pcb_a_cpu(t_pcb* un_pcb){
+    t_buffer* un_buffer = new_buffer();
+    add_int_to_buffer(un_buffer, un_pcb->pid);
+    add_int_to_buffer(un_buffer, un_pcb->pc);
+    t_paquete* un_paquete = crear_paquete(PCB, un_buffer);  // que mensaje manda a CPU
+    enviar_paquete(un_paquete, socket_cpu_dispatch);
+    eliminar_paquete(un_paquete);
+}

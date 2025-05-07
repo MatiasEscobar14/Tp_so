@@ -110,6 +110,8 @@ void planificadorLargoPlazo()
         }
     }
     pthread_mutex_unlock(&mutex_lista_new);
+
+   // planificadorCortoPlazo();
 }
 
 void finalizar_proceso(int pid)

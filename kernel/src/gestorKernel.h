@@ -9,6 +9,12 @@
 extern t_log* kernel_logger;
 extern t_config* kernel_config;
 
+typedef enum{
+    FIFO, 
+    SJF,
+    SJF_SD, 
+}t_algoritmo;
+
 
 //=======CONFIG========//
 extern char* IP_MEMORIA;
@@ -23,13 +29,6 @@ extern char* ALGORITMO_INGRESO_A_READY;
 extern char* ESTIMACION_INICIAL;
 
 //=======PCB========//
-
-typedef enum{
-    FIFO, 
-    SJF,
-    SJF_SD, 
-}t_algoritmo;
-
 typedef enum{
 	NEW_PROCCES,
 	READY_PROCCES,
@@ -49,9 +48,7 @@ typedef struct {
     estado_pcb estado;
     time_t tiempo_inicio_estado;
 }t_pcb;
-typedef enum{
-	FIFO
-}t_algoritmo;
+
 
 extern bool flag_pedido_de_memoria;
 

@@ -14,13 +14,49 @@
 #include <commons/string.h>
 #include  <commons/collections/list.h>
 
-
-
 typedef struct {
     t_log* log;
     int fd;
     char* server_name;
 }t_procesar_conexion_args;
+
+typedef enum
+{
+    SET,
+    MOV_IN,
+    MOV_OUT,
+    SUM,
+    SUB,
+    JNZ,
+    RESIZE,
+    COPY_STRING,
+    WAIT,
+    SIGNAL,
+    IO_GEN_SLEEP,
+    IO_STDIN_READ,
+    IO_STDOUT_WRITE,
+    IO_FS_CREATE,
+    IO_FS_DELETE,
+    IO_FS_TRUNCATE,
+    IO_FS_WRITE,
+    IO_FS_READ
+} nombre_instruccion;
+
+
+typedef struct
+{
+    nombre_instruccion nombre;
+    char *parametro1;
+    char *parametro2;
+    char *parametro3;
+    char *parametro4;
+    char *parametro5;
+    uint32_t longitud_parametro1;
+    uint32_t longitud_parametro2;
+    uint32_t longitud_parametro4;
+    uint32_t longitud_parametro3;
+    uint32_t longitud_parametro5;
+} t_instruccion;
 
 
 int iniciar_servidor(t_log* logger, const char* name, char* puerto);
@@ -35,5 +71,6 @@ void terminar_programa(int conexion, t_log* logger, t_config* config);
 int server_escuchar(t_log* logger, char* server_name, int server_socket);
 void procesar_conexion(void* void_args);
 void iterator(char* value);
+
 
 #endif

@@ -38,10 +38,10 @@ void iniciar_config_kernel(char* ruta){
 		ALGORITMO_CORTO_PLAZO = FIFO;
 		log_info(kernel_logger,"[Algoritmo de planificación: FIFO]");
 	}else if(strcmp(algoritmo_corto_plazo, "SJF") == 0){
-		ALGORITMO_CORTO_PLAZO = SJF;
+		//ALGORITMO_CORTO_PLAZO = SJF;
 		log_info(kernel_logger,"[Algoritmo de planificación: SJF]");	
 	}else if(strcmp(algoritmo_corto_plazo, "SJF_SD") == 0){
-		ALGORITMO_CORTO_PLAZO = SJF_SD;
+		//ALGORITMO_CORTO_PLAZO = SJF_SD;
 		log_info(kernel_logger,"[Algoritmo de planificación: SJF_SD]");
 	}else{
 		log_error(kernel_logger,"[Algoritmo de planificación no válido]");

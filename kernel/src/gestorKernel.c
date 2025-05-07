@@ -2,7 +2,7 @@
 
 t_log* kernel_logger;
 t_config* kernel_config;
-
+t_algoritmo* ALGORITMO_PLANIFICACION;
 
 char* IP_MEMORIA;
 char* PUERTO_MEMORIA;
@@ -11,7 +11,7 @@ char* PUERTO_ESCUCHA_INTERRUPT;
 char* PUERTO_ESCUCHA_IO;
 char* PUERTO_CPU_DISPATCH;
 char* PUERTO_CPU_INTERRUPT;
-char* ALGORITMO_CORTO_PLAZO;
+t_algoritmo ALGORITMO_CORTO_PLAZO;
 char* ALGORITMO_INGRESO_A_READY;
 char* ESTIMACION_INICIAL;
 
