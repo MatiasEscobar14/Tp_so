@@ -13,6 +13,7 @@ typedef enum{
     FIFO, 
     SJF,
     SJF_SD, 
+    PMCP,
 }t_algoritmo;
 
 
@@ -25,7 +26,7 @@ extern char* PUERTO_ESCUCHA_IO;
 extern char* PUERTO_CPU_DISPATCH;
 extern char* PUERTO_CPU_INTERRUPT;
 extern t_algoritmo ALGORITMO_CORTO_PLAZO;
-extern char* ALGORITMO_INGRESO_A_READY;
+extern t_algoritmo ALGORITMO_INGRESO_A_READY;
 extern char* ESTIMACION_INICIAL;
 
 //=======PCB========//

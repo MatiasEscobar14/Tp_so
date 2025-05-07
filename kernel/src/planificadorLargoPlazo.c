@@ -60,9 +60,13 @@ void planificadorLargoPlazo()
 
     if (!list_is_empty(lista_new))
     {
-
-        pcb = list_get(lista_new, 0); // sale por fifo
-
+        if(ALGORITMO_INGRESO_A_READY == FIFO){
+            pcb = list_get(lista_new, 0); // sale por fifo
+        }else{
+            list_sort(lista_new, (void*)comparar_pcb_por_tamanio);
+            pcb = list_get(lista_new, 0); // sale el de menor tamaño
+        }
+       
         if (pcb != NULL)
         {
             int hay_pcb = 1;

@@ -29,10 +29,8 @@ void iniciar_config_kernel(char* ruta){
 	PUERTO_CPU_DISPATCH = config_get_string_value(kernel_config, "PUERTO_CPU_DISPATCH");
 	PUERTO_CPU_INTERRUPT = config_get_string_value(kernel_config, "PUERTO_CPU_INTERRUPT");
 	char* algoritmo_corto_plazo = config_get_string_value(kernel_config, "ALGORITMO_CORTO_PLAZO");
-	ALGORITMO_INGRESO_A_READY = config_get_string_value(kernel_config, "ALGORITMO_INGRESO_A_READY");
+	char* algoritmo_ingreso_a_ready = config_get_string_value(kernel_config, "ALGORITMO_INGRESO_A_READY");
 	ESTIMACION_INICIAL = config_get_string_value(kernel_config,"ESTIMACION_INICIAL" );
-
-	log_info(kernel_logger, "Config de Kernel iniciado.");
 
 	if(strcmp(algoritmo_corto_plazo, "FIFO") == 0){
 		ALGORITMO_CORTO_PLAZO = FIFO;
@@ -48,7 +46,19 @@ void iniciar_config_kernel(char* ruta){
 		exit(EXIT_FAILURE);
 	}
 
-}
+	if(strcmp(algoritmo_ingreso_a_ready, "FIFO") == 0){
+		ALGORITMO_INGRESO_A_READY = FIFO;
+		log_info(kernel_logger,"[Algoritmo de ingreso a ready: FIFO]");
+	}else if(strcmp(algoritmo_ingreso_a_ready, "PMCP") == 0){
+		ALGORITMO_INGRESO_A_READY = PMCP;
+		log_info(kernel_logger,"[Algoritmo de ingreso a ready: PMCP]");
+	}else{
+		log_error(kernel_logger,"[Algoritmo de ingreso a ready no válido]");
+		exit(EXIT_FAILURE);
+	}
+	log_info(kernel_logger, "Config de Kernel iniciado.");
+	}
+
 	
 void iniciar_lista(){
 
