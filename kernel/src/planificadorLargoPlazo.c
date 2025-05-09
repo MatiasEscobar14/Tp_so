@@ -78,6 +78,7 @@ void planificadorLargoPlazo()
                 // add_string_to_buffer(a_enviar, pcb->path);
                 add_int_to_buffer(a_enviar, pcb->tamanio_proceso);
                 t_paquete *un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
+                socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
                 enviar_paquete(un_paquete, socket_memoria);
                 atender_kernel_memoria();
                 eliminar_paquete(un_paquete);
@@ -123,7 +124,7 @@ void finalizar_proceso(int pid)
     t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
     if (un_pcb != NULL)
     {
-        log_info(kernel_logger, "entre a finalizar proceso");                           
+                                  
         t_buffer *a_enviar = new_buffer();
         add_int_to_buffer(a_enviar, un_pcb->pid);
         log_info(kernel_logger, "AGREGO AL BUFFER EL PID A ELIMINAR: %d", un_pcb->pid);
@@ -144,27 +145,25 @@ void finalizar_proceso(int pid)
         // Verificamos si hay procesos en SUSP_READY
         pthread_mutex_lock(&mutex_lista_susp_ready);
 
-        pthread_mutex_unlock(&mutex_lista_susp_ready);
-
         bool hay_espacio_disponible = true;
 
         while (!list_is_empty(lista_susp_ready) && hay_espacio_disponible)
         {
             // Reactivar proceso de SUSP_READY -> READY
-            pthread_mutex_lock(&mutex_lista_susp_ready);
+    
             t_pcb *pcb_a_reactivar = list_get(lista_susp_ready, 0);
-            pthread_mutex_unlock(&mutex_lista_susp_ready);
-
             t_buffer *a_enviar = new_buffer();
             t_paquete *un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
             add_int_to_buffer(a_enviar, pcb_a_reactivar->pid);
             add_int_to_buffer(a_enviar, pcb_a_reactivar->tamanio_proceso);
+
+            socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
             enviar_paquete(un_paquete, socket_memoria);
             atender_kernel_memoria();
             eliminar_paquete(un_paquete);
             liberar_conexion(socket_memoria);
 
-            sem_wait(&sem_estructura_liberada);
+            sem_wait(&sem_rpta_estructura_inicializada);
 
             pthread_mutex_lock(&mutex_flag_pedido_memoria);
 
@@ -184,6 +183,7 @@ void finalizar_proceso(int pid)
 
             pthread_mutex_unlock(&mutex_flag_pedido_memoria);
         }
+        pthread_mutex_unlock(&mutex_lista_susp_ready);
     }
 
     log_info(kernel_logger, "Métricas de Estado: ## (%d) - Métricas de estado: NEW (%d) (%f), READY (%d) (%f),EXEC (%d) (%f), BLOCKED (%d) (%f), SUSP_READY (%d) (%f), SUSP_BLOCKED (%d) (%f),EXIT (%d) (%f),",
@@ -199,9 +199,8 @@ void finalizar_proceso(int pid)
 
 }
 
-/*int comparar_pcb_por_tamanio(const void* a, const void* b) {
+int comparar_pcb_por_tamanio(const void* a, const void* b) {
     t_pcb* pcb_a = (t_pcb*)a;
     t_pcb* pcb_b = (t_pcb*)b;
     return pcb_a->tamanio_proceso - pcb_b->tamanio_proceso;
 }
-*/

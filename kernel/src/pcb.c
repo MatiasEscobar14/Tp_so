@@ -1,18 +1,20 @@
 #include "pcb.h"
 
-t_pcb *crear_pcb(/*char* ruta,*/ int tam_proceso)
+sem_t sem_rpta_dump_memory;
+
+t_pcb *crear_pcb(char* ruta, int tam_proceso)
 {
     t_pcb *nueva_pcb = malloc(sizeof(t_pcb));
 
     static int pid_counter = 0;
     nueva_pcb->pid = pid_counter++;
-
+    nueva_pcb->nombre_archivo = ruta;
     nueva_pcb->pc = 0;
     nueva_pcb->tamanio_proceso = tam_proceso;
     nueva_pcb->estado = NEW_PROCCES;
     nueva_pcb->tiempo_inicio_estado = time(NULL);
 
-    // nueva_pcb->path = strdup(ruta); // TODO Duda: Deberiamos incluir un atributo "PATH" en el struct de PCB???   Guardás el path asociado al proceso
+    
 
     // Inicializar métricas, son 7 estados y 7 tiempos
 
@@ -172,4 +174,16 @@ void enviar_pcb_a_cpu(t_pcb* un_pcb){
     t_paquete* un_paquete = crear_paquete(PCB, un_buffer);  // que mensaje manda a CPU
     enviar_paquete(un_paquete, socket_cpu_dispatch);
     eliminar_paquete(un_paquete);
+}
+
+void bloquear_proceso_syscall(int pid){
+    
+    t_pcb* un_pcb = buscar_y_remover_pcb_por_pid(pid);
+    cambiar_estado(un_pcb, BLOCKED_PROCCES);
+    agregar_pcb_lista(un_pcb, lista_blocked, mutex_lista_blocked);
+
+    //TODO:MOTIVO?
+
+
+
 }

@@ -43,7 +43,11 @@ void attender_memoria_kernel(int socket_kernel)
           //  finalizar_estructuras(un_buffer, socket_kernel);
             free(un_buffer);
         break;
-        
+    case DUMP_MEMORY_KM:
+        un_buffer = recv_buffer(socket_kernel);
+        dumpear_memoria(un_buffer, socket_kernel);
+        free(un_buffer);
+        break;
     }   
    // free(un_buffer);
 }
@@ -51,8 +55,8 @@ void attender_memoria_kernel(int socket_kernel)
 void inicializar_estructuras(t_buffer *buffer, int socket_kernel)
 {
     log_info(logger_memoria, "HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-    int pid = extract_int_buffer(buffer);
-    int tamanio = extract_int_buffer(buffer);
+    int pid = extraer_int_buffer(buffer);
+    int tamanio = extraer_int_buffer(buffer);
 
     log_info(logger_memoria, "Solicitud de inicialización PID: %d, tamanio: %d", pid, tamanio);
 
@@ -118,4 +122,29 @@ void finalizar_estructuras(t_buffer* buffer, int socket_kernel) {
     eliminar_paquete(respuesta);
 }
 */
+int buscar_valor_pid;
+
+bool buscar_pid(t_proceso* un_proceso){
+    return un_proceso->pid == buscar_valor_pid;
+}
+
+t_proceso* buscar_proceso_pid(int pid){
+    buscar_valor_pid = pid;
+    pthread_mutex_lock(&mutex_lista_procesos);
+    t_proceso* un_proceso = list_find(lista_procesos, (void*)buscar_pid);
+    pthread_mutex_unlock(&mutex_lista_procesos);
+    if(un_proceso == NULL){
+        log_info(logger_memoria, "PID - (%d) no fue encontrado en la lista de procesos", pid);
+        exit(EXIT_FAILURE);
+    }
+    return un_proceso;
+}
+
+
+void dumpear_memoria(t_buffer* un_buffer, int socket){
+    int pid = extraer_int_buffer(un_buffer);
+    log_info(logger_memoria, "## Memory Dump solicitado - (PID) - (%d)", pid);
+    t_proceso* un_proceso = buscar_proceso_pid(pid);
+    
+}
 

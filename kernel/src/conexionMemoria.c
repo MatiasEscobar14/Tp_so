@@ -14,7 +14,7 @@ void attender_kernel_memoria(int socket_memoria){
 			case RTA_INICIALIZAR_ESTRUCTURAS_MK:
 				int tamanio;
 				un_buffer = recibir_buffer(&tamanio, socket_memoria);
-                respuesta = extract_int_buffer(un_buffer);
+                respuesta = extraer_int_buffer(un_buffer);
 				
 				log_info(kernel_logger, "Se recibio respuesta init memo: %d", respuesta);
 				if(respuesta == 1){

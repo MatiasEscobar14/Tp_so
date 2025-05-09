@@ -20,6 +20,7 @@ typedef enum
 	RTA_INICIALIZAR_ESTRUCTURAS_MK,
 	RTA_ESTRUCTURA_LIBERADA_KM,
 	ESTRUCTURA_LIBERADA_OK,
+	DUMP_MEMORY_KM,
 
 	//====KERNEL - CPU====//
 	PCB,
@@ -60,7 +61,8 @@ void* recibir_buffer(int* size, int socket_cliente);
 void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size);
 void add_int_to_buffer(t_buffer* unBuffer, int int_value);
 void* extraer_buffer(t_buffer* buffer);
-int extraer_int_buffer(t_buffer* buffer);
+int extraer_int_buffer(t_buffer* unBuffer);
+char* extraer_string_buffer(t_buffer* unBuffer);
 
 t_paquete* crear_paquete(op_code code, t_buffer* unBuffer);
 t_list* recibir_paquete(int socket_cliente);
@@ -70,8 +72,6 @@ void* serializar_paquete(t_paquete* paquete, int bytes);
 void eliminar_paquete(t_paquete* paquete);
 void paquete(int conexion);
 
-
-int extract_int_buffer(t_buffer* unBuffer);
 
 
 t_buffer* recv_buffer(int socket_cliente);

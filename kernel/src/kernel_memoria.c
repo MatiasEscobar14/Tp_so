@@ -10,7 +10,7 @@ void atender_kernel_memoria()
 
     case RTA_INICIALIZAR_ESTRUCTURAS_MK:
         un_buffer = recv_buffer(socket_memoria);
-        respuesta = extract_int_buffer(un_buffer);
+        respuesta = extraer_int_buffer(un_buffer);
 
         log_info(kernel_logger, "se recibio respuesta inicial de memoria: %d", respuesta);
 
@@ -32,7 +32,7 @@ void atender_kernel_memoria()
         break;
     case RTA_ESTRUCTURA_LIBERADA_KM:
         un_buffer = recv_buffer(socket_memoria);
-        respuesta = extract_int_buffer(un_buffer);
+        respuesta = extraer_int_buffer(un_buffer);
         log_info(kernel_logger, "SE RECIBE RESPUESTA: %d", respuesta);
         if (respuesta == 1)
         {

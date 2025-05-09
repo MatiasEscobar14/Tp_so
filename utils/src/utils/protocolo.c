@@ -105,11 +105,16 @@ void* extraer_buffer(t_buffer* unBuffer){
 	return ext_stream;
 }
 
-int extract_int_buffer(t_buffer* unBuffer){
+int extraer_int_buffer(t_buffer* unBuffer){
 	int* ext_int = extraer_buffer(unBuffer);
 	int value = *ext_int;
 	free(ext_int);
 	return value;
+}
+
+char* extraer_string_buffer(t_buffer* unBuffer){
+	char* ext_string = extraer_buffer(unBuffer);
+	return ext_string;
 }
 
 

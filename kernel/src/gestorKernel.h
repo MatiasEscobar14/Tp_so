@@ -43,6 +43,7 @@ typedef enum{
 typedef struct {
     uint32_t pid;
     uint32_t pc;
+    char nombre_archivo;
     uint32_t tamanio_proceso;
     int metricas_estado[CANT_ESTADOS];
     double metricas_tiempo[CANT_ESTADOS];    
@@ -90,6 +91,7 @@ extern pthread_mutex_t mutex_lista_exit;
 extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
 extern sem_t sem_estructura_liberada;
+extern sem_t sem_rpta_dump_memory;
 
 extern pthread_mutex_t mutex_flag_pedido_memoria;
 
