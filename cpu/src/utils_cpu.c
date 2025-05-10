@@ -3,6 +3,8 @@
 bool esSyscall = false;
 bool envioPcb = false;
 
+bool interrupciones[5] = {0, 0, 0, 0, 0};
+
 static void procesar_conexion_cpu(void *void_args)
 {
 	t_procesar_conexion_args *args = (t_procesar_conexion_args *)void_args;

@@ -38,6 +38,7 @@
 #include <readline/readline.h>
 
 #include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
 
 extern int cliente_de_memoria;
 extern int cliente_de_kernel_interrupt;

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <commons/collections/list.h>
+#include </home/utnso/tp-2025-1c-Linux-Learners/cpu/include/gestor.h>
 
 
 static void procesar_conexion_cpu(void *void_args);
@@ -73,6 +74,7 @@ typedef struct
 extern t_pcb *pcb_actual;
 extern bool esSyscall;
 extern bool envioPcb;
+extern bool interrupciones[5];
 
 
 #endif
