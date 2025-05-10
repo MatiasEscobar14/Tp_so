@@ -7,7 +7,7 @@
 #include "planificadorLargoPlazo.h"
 
 
-
-void attend_kernel_cpu_dispatch();
-
+void atender_kernel_cpu_dispatch(int *socket_cliente);
+void imprimir_modulos_cpu();
+void server_escuchar_cpu_dispatch();
 #endif

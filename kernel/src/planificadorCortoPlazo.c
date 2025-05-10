@@ -49,7 +49,10 @@ void atender_FIFO() {
 
         enviar_pcb_a_cpu(un_pcb);
 
-        // O en otro hilo: atender_cpu_kernel();
+        //atender_kernel_cpu_dispatch();
+        //TDOO: Nos quedamos esperanod el PID y el motivo !!
+
+
 
         // sem_wait(&?);
     } else {

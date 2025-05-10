@@ -60,6 +60,7 @@ t_buffer* new_buffer();
 void* recibir_buffer(int* size, int socket_cliente);
 void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size);
 void add_int_to_buffer(t_buffer* unBuffer, int int_value);
+void add_string_to_buffer(t_buffer* unBuffer, char* string);
 void* extraer_buffer(t_buffer* buffer);
 int extraer_int_buffer(t_buffer* unBuffer);
 char* extraer_string_buffer(t_buffer* unBuffer);

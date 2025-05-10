@@ -62,7 +62,7 @@ void planificadorLargoPlazo()
     {
         if(ALGORITMO_INGRESO_A_READY == FIFO){
             pcb = list_get(lista_new, 0); // sale por fifo
-        }else{
+        }else{ //Proceso mas chico primero
             list_sort(lista_new, (void*)comparar_pcb_por_tamanio);
             pcb = list_get(lista_new, 0); // sale el de menor tamaño
         }
@@ -96,6 +96,7 @@ void planificadorLargoPlazo()
                     list_remove_element(lista_new, pcb);
                     agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
                     cambiar_estado(pcb, READY_PROCCES);
+                    // planificadorCortoPlazo();
                     if (list_is_empty(lista_new))
                     {
                         hay_pcb = 0;
@@ -116,7 +117,9 @@ void planificadorLargoPlazo()
     }
     pthread_mutex_unlock(&mutex_lista_new);
 
-   // planificadorCortoPlazo();
+  
+   //deberia volver a iniciar el plp?para probar con el siguiente proceso?
+
 }
 
 void finalizar_proceso(int pid)

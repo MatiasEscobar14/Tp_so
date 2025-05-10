@@ -3,6 +3,8 @@
 
 #include <utils/protocolo.h>
 #include "gestorKernel.h"
+#include "kernel_cpu.h"
+#include "kernel_IO.h"
 
 typedef struct {
     t_log* logger;
@@ -22,6 +24,7 @@ void* hilo_cliente_memoria_f(void* args);
 void* hilo_servidor_dispatch(void* args);
 void* hilo_servidor_interrupt(void* args);
 void crear_conexiones();
+
 
 
 

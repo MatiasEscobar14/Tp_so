@@ -1,4 +1,4 @@
-#include "include/utils_cpu.h"
+/*
 
 bool esSyscall = false;
 bool envioPcb = false;
@@ -298,3 +298,4 @@ bool hayInterrupciones(void)
 	}
 	return false;
 }
+*/

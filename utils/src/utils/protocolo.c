@@ -50,6 +50,11 @@ t_buffer* new_buffer(){
 void add_int_to_buffer(t_buffer* unBuffer, int int_value){
 	add_to_buffer(unBuffer, &int_value, sizeof(int));
 }
+void add_string_to_buffer(t_buffer* unBuffer, char* string){
+	add_to_buffer(unBuffer, string, strlen(string)+1);
+}
+
+
 void add_to_buffer(t_buffer* unBuffer, void* new_stream, int new_size)
 {
 	if(unBuffer->size == 0){

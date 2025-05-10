@@ -1,4 +1,5 @@
-/*#include "../utils/utils_pcb.h"
+/*
+#include "../utils/utils_pcb.h"
 
 void recibir_pcb(t_pcb *pcb, int socket_cliente)
 {
@@ -90,4 +91,4 @@ t_buffer *crear_buffer_pcb(t_pcb *pcb)
     memcpy(buffer->stream + desplazamiento, &(pcb->contexto_ejecucion->motivo_finalizacion), sizeof(t_motivo_finalizacion));
 
     return buffer;
-}
+}*/

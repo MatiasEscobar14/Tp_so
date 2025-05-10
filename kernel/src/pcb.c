@@ -2,7 +2,7 @@
 
 sem_t sem_rpta_dump_memory;
 
-t_pcb *crear_pcb(char* ruta, int tam_proceso)
+t_pcb *crear_pcb(char *ruta, int tam_proceso)
 {
     t_pcb *nueva_pcb = malloc(sizeof(t_pcb));
 
@@ -13,8 +13,6 @@ t_pcb *crear_pcb(char* ruta, int tam_proceso)
     nueva_pcb->tamanio_proceso = tam_proceso;
     nueva_pcb->estado = NEW_PROCCES;
     nueva_pcb->tiempo_inicio_estado = time(NULL);
-
-    
 
     // Inicializar métricas, son 7 estados y 7 tiempos
 
@@ -69,23 +67,21 @@ const char *estado_a_string(estado_pcb estado)
     }
 }
 
-
 int pid_a_buscar;
 
 bool buscar_pcb(void *elemento)
 {
     t_pcb *pcb = (t_pcb *)elemento;  // Hacemos el cast de void* a t_pcb*
-    return pcb->pid == pid_a_buscar;  // Comparamos el PID
+    return pcb->pid == pid_a_buscar; // Comparamos el PID
 }
 
-
-t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
+t_pcb *buscar_y_remover_pcb_por_pid(int un_pid)
 {
     t_pcb *un_pcb;
     int elemento_encontrado = 0;
 
     pid_a_buscar = un_pid;
-    //NEW
+    // NEW
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_new);
@@ -97,7 +93,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
         }
         pthread_mutex_unlock(&mutex_lista_new);
     }
-    //READY
+    // READY
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_ready);
@@ -109,7 +105,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
         }
         pthread_mutex_unlock(&mutex_lista_ready);
     }
-    
+
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_exit);
@@ -121,7 +117,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
         }
         pthread_mutex_unlock(&mutex_lista_exit);
     }
-    //BLOCKED
+    // BLOCKED
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_blocked);
@@ -133,7 +129,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
         }
         pthread_mutex_unlock(&mutex_lista_blocked);
     }
-    //SUSP_READY
+    // SUSP_READY
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_susp_ready);
@@ -145,7 +141,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
         }
         pthread_mutex_unlock(&mutex_lista_susp_ready);
     }
-    //SUSP_BLOCKED
+    // SUSP_BLOCKED
     if (elemento_encontrado == 0)
     {
         pthread_mutex_lock(&mutex_lista_susp_blocked);
@@ -166,24 +162,40 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid)
 
     return un_pcb;
 }
-
-void enviar_pcb_a_cpu(t_pcb* un_pcb){
-    t_buffer* un_buffer = new_buffer();
-    add_int_to_buffer(un_buffer, un_pcb->pid);
-    add_int_to_buffer(un_buffer, un_pcb->pc);
-    t_paquete* un_paquete = crear_paquete(PCB, un_buffer);  // que mensaje manda a CPU
-    enviar_paquete(un_paquete, socket_cpu_dispatch);
-    eliminar_paquete(un_paquete);
+bool cpu_esta_libre(void *cpu_void)
+{
+    t_cpu *cpu = (t_cpu *)cpu_void;
+    return cpu->libre;
 }
 
-void bloquear_proceso_syscall(int pid){
-    
-    t_pcb* un_pcb = buscar_y_remover_pcb_por_pid(pid);
+void enviar_pcb_a_cpu(t_pcb *un_pcb)
+{
+
+    // TODO: Habria que ver cuales de los CPU's estan conectados y libres.
+    t_cpu *un_cpu = list_find(lista_cpu_conectadas, (void *)cpu_esta_libre);
+
+    if (un_cpu != NULL)
+    {
+        t_buffer *un_buffer = new_buffer();
+        add_int_to_buffer(un_buffer, un_pcb->pid);
+        add_int_to_buffer(un_buffer, un_pcb->pc);
+        t_paquete *un_paquete = crear_paquete(EJECUTAR_PROCESO_KC, un_buffer);
+        enviar_paquete(un_paquete, un_cpu->socket_d);
+        eliminar_paquete(un_paquete);
+    }
+    else
+    {
+        log_error(kernel_logger, "No hay CPU's libres actualmente");
+
+    }
+}
+
+void bloquear_proceso_syscall(int pid)
+{
+
+    t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
     cambiar_estado(un_pcb, BLOCKED_PROCCES);
     agregar_pcb_lista(un_pcb, lista_blocked, mutex_lista_blocked);
 
-    //TODO:MOTIVO?
-
-
-
+    // TODO:MOTIVO?
 }

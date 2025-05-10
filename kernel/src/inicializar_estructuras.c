@@ -5,11 +5,12 @@
 	t_list* lista_exit;
 	t_list* lista_susp_blocked;
 	t_list* lista_susp_ready;
-
-
+	t_list* lista_cpu_conectadas;
+	t_list* lista_modulos_io;
+	t_list* lista_modulos_cpu;
 
 void iniciar_logger_kernel(){
-	kernel_logger = log_create("kernel.log","Kernel", 0, LOG_LEVEL_INFO);
+	kernel_logger = log_create("kernel.log","Kernel", 1, LOG_LEVEL_INFO);
 	log_info(kernel_logger, "Logger de Kernel iniciado.");
 }
 
@@ -69,6 +70,9 @@ void iniciar_lista(){
 	lista_exit = list_create();
     lista_susp_blocked = list_create();
     lista_susp_ready = list_create();
+	lista_cpu_conectadas= list_create();
+	lista_modulos_io = list_create();
+	lista_modulos_cpu = list_create();
 	log_info(kernel_logger, "Listas inicializadas.");
 }
 

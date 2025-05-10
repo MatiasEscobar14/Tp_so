@@ -4,6 +4,7 @@ void* hilo_servidor_io_f(void* args) {
     datos_servidor_t* datos = (datos_servidor_t*) args;
     socket_io = iniciar_servidor(datos->logger, datos->nombre_servidor, datos->puerto);
 
+    server_escuchar_io();
 
     free(datos);    
     return 0;
@@ -13,6 +14,8 @@ void* hilo_servidor_dispatch(void* args) {
     datos_servidor_dispatch_t* datos_dispatch = (datos_servidor_dispatch_t*) args;
     socket_cpu_dispatch = iniciar_servidor(datos_dispatch->logger, datos_dispatch->nombre_servidor, datos_dispatch->puerto);
 
+    //server_escuchar_cpu_dispatch();
+    
     free(datos_dispatch);    
     return 0;
 } 

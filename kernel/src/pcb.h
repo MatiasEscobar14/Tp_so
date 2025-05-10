@@ -15,5 +15,7 @@ t_pcb* buscar_y_remover_pcb_por_pid(int un_pid);
 void enviar_pcb_a_cpu(t_pcb* un_pcb);
 void bloquear_proceso_syscall(int pid);
 
+bool cpu_esta_libre(void* cpu_void);
+
 
 #endif

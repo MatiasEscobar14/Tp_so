@@ -66,17 +66,9 @@ extern t_list* lista_blocked;
 extern t_list* lista_exit;
 extern t_list* lista_susp_blocked;
 extern t_list* lista_susp_ready;
-
-//extern t_list* lista_new_thread;
-extern t_list* lista_ready_thread;
-/*extern t_list* lista_execute_thread;
-extern t_list* lista_blocked_thread;
-extern t_list* lista_exit_thread;
-extern t_list* lista_mutex_thread;
-extern t_list* lista_iniciar_estructura;*/
-
-
-
+extern t_list* lista_modulos_io;
+extern t_list* lista_modulos_cpu;
+extern t_list* lista_cpu_conectadas;
 //======MUTEX=======//
 
 extern pthread_mutex_t mutex_lista_new;
@@ -86,6 +78,7 @@ extern pthread_mutex_t mutex_lista_susp_ready;
 extern pthread_mutex_t mutex_lista_susp_blocked;
 extern pthread_mutex_t mutex_lista_exec;
 extern pthread_mutex_t mutex_lista_exit;
+extern pthread_mutex_t mutex_lista_modulos_cpu;
 
 
 extern sem_t sem_rpta_estructura_inicializada;
@@ -104,5 +97,29 @@ extern int socket_memoria;
 //extern bool flag_respuesta_dump;
 //extern sem_t sem_estructura_liberada;
 
+//======CPU's======//
+
+typedef struct {
+    int identificador;
+    int socket_d;
+    int socket_i;
+    bool libre;
+}t_cpu;
+
+//=====IO=====/
+
+typedef struct {
+    char* nombre;
+    int socket_fd;  
+    //t_list* procesos_activos;
+    //t_list* procesos_en_espera;
+} t_modulo_io;
+
+typedef struct {
+    char* nombre;
+    int socket_fd;  
+    //t_list* procesos_activos;
+    //t_list* procesos_en_espera;
+} t_modulo_cpu;
 
 #endif
