@@ -50,6 +50,7 @@ void atender_kernel_io(int *socket_cliente)
 
 	log_warning(kernel_logger, "El cliente (%d) se desconectó de Kernel Server IO", socket);
 
+	
 	pthread_mutex_lock(&mutex_lista_modulos_io);
 	list_remove(lista_modulos_io, nuevo_modulo);
 	pthread_mutex_unlock(&mutex_lista_modulos_io);

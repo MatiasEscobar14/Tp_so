@@ -117,7 +117,8 @@ typedef struct {
 
 typedef struct {
     char* nombre;
-    int socket_fd;  
+    int socket_fd; 
+    int identificador; 
     //t_list* procesos_activos;
     //t_list* procesos_en_espera;
 } t_modulo_cpu;

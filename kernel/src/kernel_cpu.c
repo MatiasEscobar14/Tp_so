@@ -1,7 +1,8 @@
 #include "kernel_cpu.h"
 pthread_mutex_t mutex_lista_modulos_cpu = PTHREAD_MUTEX_INITIALIZER;
 void atender_kernel_cpu_dispatch(int *socket_cliente) {
-    bool control_key = 1;
+    op_code cop;
+	int control_key = 1;
 	int socket = *socket_cliente;
 	int pid;
 	char* nombre_archivo;
@@ -11,21 +12,35 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 	t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
 	t_buffer *un_buffer;
     while (control_key) {
-		int cod_op = recibir_operacion(socket_cpu_dispatch);
-		switch (cod_op) {
+		//int cod_op = recibir_operacion(socket_cpu_dispatch);
+
+		if (recv(socket, &cop, sizeof(op_code), 0) != sizeof(op_code))
+		{
+			log_debug(kernel_logger, "Cliente desconectado.\n");
+			break;
+		}
+		log_info(kernel_logger, "Código de operación recibido: %d", cop);
+
+		switch (cop) {
 			case HANDSHAKE:
 			un_buffer = recv_buffer(socket);
-			char *nombre = extraer_string_buffer(un_buffer);
-			int socket_fd = extraer_int_buffer(un_buffer);
+			if (!un_buffer) {
+					log_error(kernel_logger, "Error al recibir buffer del HANDSHAKE.");
+					break;
+				}
+			//int socket_fd = extraer_int_buffer(un_buffer);
+			int identificador = extraer_int_buffer(un_buffer);
 
-			nuevo_modulo->nombre = strdup(nombre);
-			nuevo_modulo->socket_fd = socket_fd;
+			nuevo_modulo->socket_fd = socket;
+			nuevo_modulo->identificador = identificador;
 
+		log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd);
 			pthread_mutex_lock(&mutex_lista_modulos_cpu);
-			list_add(lista_cpu_conectadas, nuevo_modulo);
+			list_add(lista_modulos_cpu, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_cpu);
-
-			//imprimir_modulos_io();
+			 log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
+			imprimir_modulos_cpu();
+			free(un_buffer);
 				break;
 		    case MENSAJE:
 			    //
@@ -69,23 +84,38 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 
 	}
 	//list_iterator_destroy(iterator);
-	log_warning(kernel_logger, "El cliente (%d) se desconectó de Kernel Server IO", socket);
+	log_warning(kernel_logger, "El cliente (%d) se desconectó de Kernel Server Cpu dispatch", socket);
 
-	pthread_mutex_lock(&mutex_lista_modulos_cpu);
-	list_remove(lista_modulos_cpu, nuevo_modulo);
-	pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+	 // Eliminar el módulo de la lista por su socket
+    pthread_mutex_lock(&mutex_lista_modulos_cpu);
+    for (int i = 0; i < list_size(lista_modulos_cpu); i++) {
+        t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
+        if (modulo->socket_fd == socket) {
+            list_remove(lista_modulos_cpu, i);
+            free(modulo); // Liberar memoria del módulo
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex_lista_modulos_cpu);
 
 	imprimir_modulos_cpu();
 	close(socket);
 	pthread_exit(NULL);
 }
+
 void imprimir_modulos_cpu()
 {
-	for (int i = 0; i < list_size(lista_modulos_cpu); i++)
-	{
-		t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
-		printf("Módulo CPU conectado: %s\n", modulo->nombre);
-	}
+	 pthread_mutex_lock(&mutex_lista_modulos_cpu);
+	 if (list_size(lista_modulos_cpu) == 0) {
+        log_info(kernel_logger, "No hay CPUs conectadas.");
+    }
+
+    for (int i = 0; i < list_size(lista_modulos_cpu); i++)
+    {
+        t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
+        printf("Módulo CPU conectado: ID=%d\n",modulo->identificador);
+    }
+    pthread_mutex_unlock(&mutex_lista_modulos_cpu);
 }
 
 
@@ -109,7 +139,8 @@ while (1)
 			}
 
 			pthread_detach(hilo);
-		}
 	}	
+	
+	}
 }
 

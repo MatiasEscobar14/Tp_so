@@ -32,16 +32,12 @@ void crear_proceso_inicial(int tamanio_proceso, char* ruta){
 int main(int argc, char* argv[]) {
 	
 
-	char* archivo_pseudocodigo = argv[1];
-    int tamanio_proceso = atoi(argv[2]);
+	//char* archivo_pseudocodigo = argv[1];
+    //int tamanio_proceso = atoi(argv[2]);
 
 	iniciar_kernel("kernel.config");
 	crear_conexiones();
 	//crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
-	
-	
-	
-
 
 
 

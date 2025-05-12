@@ -65,6 +65,11 @@ int esperar_cliente(t_log* logger, const char* name, int socket_servidor) {
 
     int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
 
+    if (socket_cliente == -1) {
+        log_error(logger, "Fallo al aceptar cliente en %s (posiblemente no hay conexiones pendientes o el socket se cerró)", name);
+        return -1;
+    }
+
     log_info(logger, "Cliente conectado (a %s)\n", name);
 
     return socket_cliente;

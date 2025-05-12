@@ -8,7 +8,7 @@ t_pcb *crear_pcb(char *ruta, int tam_proceso)
 
     static int pid_counter = 0;
     nueva_pcb->pid = pid_counter++;
-    nueva_pcb->nombre_archivo = ruta;
+   // nueva_pcb->nombre_archivo = ruta;
     nueva_pcb->pc = 0;
     nueva_pcb->tamanio_proceso = tam_proceso;
     nueva_pcb->estado = NEW_PROCCES;
