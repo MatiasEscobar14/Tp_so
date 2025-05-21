@@ -15,6 +15,8 @@ typedef enum
 	//====KERNEL - MEMORIA====//
 	INICIALIZAR_ESTRUCTURAS_KM,
 	FINALIZAR_ESTRUCTURAS_KM,
+	INICIALIZAR_PROCESO,
+	FINALIZAR_PROCESO,
 	//ESTRUCTURA_LIBERADA_OK,
 	//SIN_ESPACIO_EN_MEMORIA,
 	RTA_INICIALIZAR_ESTRUCTURAS_MK,
@@ -24,10 +26,13 @@ typedef enum
 
 	//====KERNEL - CPU====//
 	PCB,
-	INIT_PROC,
-	IO,
-	DUMP_MEMORY,
-	EXIT,
+	SYSCALL_IO,
+	SYSCALL_INIT_PROC,
+	SYSCALL_DUMP_MEMORY,
+
+	//===MEMORIA - CPU===//
+
+	RESPUESTA_DUMP_MEMORY,
 
 
 	//RTA_DUMP_MEMORY_MK,
@@ -66,7 +71,7 @@ int extraer_int_buffer(t_buffer* unBuffer);
 char* extraer_string_buffer(t_buffer* unBuffer);
 
 t_paquete* crear_paquete(op_code code, t_buffer* unBuffer);
-t_list* recibir_paquete(int socket_cliente);
+t_paquete* recibir_paquete(int socket_cliente);
 void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
 void enviar_paquete(t_paquete* paquete, int socket_cliente);
 void* serializar_paquete(t_paquete* paquete, int bytes);

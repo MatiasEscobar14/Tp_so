@@ -11,7 +11,7 @@ void esperar_kernel()
         log_info(logger_memoria, "## Kernel Conectado - FD: <%d>", fd_conexion);
 
         pthread_t thread;
-        if (pthread_create(&thread, NULL, (void *)attender_memoria_kernel, (void *)(intptr_t)fd_conexion))
+        if (pthread_create(&thread, NULL, (void *)attender_memoria_kernel, (void *)(intptr_t) (fd_conexion)))
         {
             log_error(logger_memoria, "Error al crear hilo para Kernel");
             close(fd_conexion); // Cierra el socket si no se pudo crear el hilo.
@@ -148,3 +148,20 @@ void dumpear_memoria(t_buffer* un_buffer, int socket){
     
 }
 
+//Devolver un valor fijo de espacio libre (mock)
+
+int suma_tamanios = 0;
+
+int valor_memoria_disponible(){
+
+    suma_tamanios = 0;
+    pthread_mutex_lock(&mutex_lista_procesos);
+    list_iterate(lista_procesos, acumular_tamanio);
+    pthread_mutex_unlock(&mutex_lista_procesos);
+    return suma_tamanios;
+}
+
+void acumular_tamanio(void* elemento) {
+    t_proceso_memoria* proceso = (t_proceso_memoria*) elemento;
+    suma_tamanios += proceso->tamanio;
+}

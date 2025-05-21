@@ -12,3 +12,8 @@ char* PUERTO_KERNEL_INTERRUPT;
 
 int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memoria;
 
+pthread_mutex_t mutex_pcb_actual;
+pthread_mutex_t mutex_interrupt;
+
+
+t_pcb *pcb_actual;

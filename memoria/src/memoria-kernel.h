@@ -2,6 +2,7 @@
 #define MEMORIA_KERNEL_H
 
 #include "gestorMemoria.h"
+#include "../include/gestor.h"
 
 
 void attender_memoria_kernel(int socket_kernel);
@@ -11,9 +12,11 @@ void finalizar_estructuras(t_buffer* buffer, int socket_kernel);
 void esperar_kernel();
 void dumpear_memoria(t_buffer* un_buffer,int socket);
 
-
 t_proceso* crear_proceso(int pid, int tamanio_proceso);
 bool buscar_pid(t_proceso* un_proceso);
 t_proceso* buscar_proceso_pid(int pid);
+
+int valor_memoria_disponible();
+void acumular_tamanio(void* elemento);
 
 #endif 

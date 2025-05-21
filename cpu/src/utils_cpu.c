@@ -1,11 +1,11 @@
-/*
+#include "utils_cpu.h"
 
 bool esSyscall = false;
 bool envioPcb = false;
 
 bool interrupciones[5] = {0, 0, 0, 0, 0};
 
-static void procesar_conexion_cpu(void *void_args)
+void procesar_conexion_cpu(void *void_args)
 {
 	t_procesar_conexion_args *args = (t_procesar_conexion_args *)void_args;
 	t_log *logger = args->log;
@@ -18,20 +18,20 @@ static void procesar_conexion_cpu(void *void_args)
 	{
 		if (recv(cliente_socket, &cop, sizeof(op_code), 0) != sizeof(op_code))
 		{
-			log_debug(logger, "Cliente desconectado.\n");
+			log_debug(cpu_logger, "Cliente desconectado.\n");
 			return;
 		}
 
 		switch (cop)
 		{
 		case MENSAJE:
-			recibir_mensaje(cliente_socket, logger);
+			recibir_mensaje(logger, cliente_socket);
 			break;
 
         case PCB:
-			pthread_mutex_lock(&mutex_pcb_actual); // PEPI, NO SE SI ACTUALMENTE YA EMPEZARON CON SEMAFOROS, PREGUNTA
+			pthread_mutex_lock(&mutex_pcb_actual); 
 			recibir_pcb(pcb_actual, cliente_socket); //(2)
-			pthread_mutex_unlock(&mutex_pcb_actual); // PEPI, NO SE SI ACTUALMENTE YA EMPEZARON CON SEMAFOROS, PREGUNTA
+			pthread_mutex_unlock(&mutex_pcb_actual); 
 
 			while (!hayInterrupciones() && pcb_actual != NULL && !esSyscall)
 			{
@@ -49,9 +49,9 @@ static void procesar_conexion_cpu(void *void_args)
 			envioPcb = false;
 			esSyscall = false;
 
-			pthread_mutex_lock(&mutex_interrupt); // PEPI, NO SE SI ACTUALMENTE YA EMPEZARON CON SEMAFOROS, PREGUNTA
+			pthread_mutex_lock(&mutex_interrupt); 
 			limpiar_interrupciones(); //(5)
-			pthread_mutex_unlock(&mutex_interrupt); // PEPI, NO SE SI ACTUALMENTE YA EMPEZARON CON SEMAFOROS, PREGUNTA
+			pthread_mutex_unlock(&mutex_interrupt); 
 			break;
 
     }}}
@@ -67,135 +67,78 @@ void ejecutar_ciclo_instruccion(int socket)
 
 t_instruccion *fetch(uint32_t pid, uint32_t pc)
 {
-    pedir_instruccion_memoria(pid, pc, cliente_de_memoria); //(12)
+    pedir_instruccion_memoria(pid, pc, socket_memoria); //(12)
 
-    op_code codigo_op = recibir_operacion(cliente_de_memoria); //(13)
+    op_code codigo_op = recibir_operacion(socket_memoria); //(13)
 
     t_instruccion *instruccion;
 
     if (codigo_op == INSTRUCCION)
     {
-        instruccion = deserializar_instruccion(cliente_de_memoria); //(14)
+        instruccion = deserializar_instruccion(socket_memoria); //(14)
     }
     else
     {
-        log_warning(logger, "Operación desconocida. No se pudo recibir la instruccion de memoria.");
+        log_warning(cpu_logger, "Operación desconocida. No se pudo recibir la instruccion de memoria.");
         exit(EXIT_FAILURE);
     }
 
-    log_info(logger, "PID: %d - FETCH - Program Counter: %d", pid, pc);
+    log_info(cpu_logger, "PID: %d - FETCH - Program Counter: %d", pid, pc);
 
     return instruccion;
 }
 
 void execute(t_instruccion *instruccion, int socket)
 {
+    int tamanio;
+    int valor;
+    int tiempo;
+
     switch (instruccion->nombre)
     {
-    case SET:
+    case NOOP:
         loguear_y_sumar_pc(instruccion);
-        _set(instruccion->parametro1, instruccion->parametro2); //FUNCION DISTINTA POR CADA OPERACION
+        _noop(); 
         break;
-    case SUM:
+    case WRITE:
         loguear_y_sumar_pc(instruccion);
-        _sum(instruccion->parametro1, instruccion->parametro2); //FUNCION DISTINTA POR CADA OPERACION
+        _write(instruccion->parametro1, instruccion->parametro2, socket_memoria); 
         break;
-    case SUB:
+    case READ:
         loguear_y_sumar_pc(instruccion);
-        _sub(instruccion->parametro1, instruccion->parametro2); //FUNCION DISTINTA POR CADA OPERACION
+        int tamanio = atoi(instruccion->parametro2);
+        _read(instruccion->parametro1, tamanio, socket_memoria); 
         break;
-    case JNZ:
+    case GOTO:
         loguear_y_sumar_pc(instruccion);
-        _jnz(instruccion->parametro1, instruccion->parametro2); //FUNCION DISTINTA POR CADA OPERACION
+        int valor = atoi(instruccion->parametro1);
+        _goto(valor); 
         break;
-    case WAIT:
+    case IO:
         loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_SYSCALL; //FUNCION DISTINTA POR CADA OPERACION
+        int tiempo = atoi(instruccion->parametro2);
+        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_SYSCALL; 
         esSyscall = true;
         envioPcb = true;
-        _wait(instruccion->parametro1, socket); //FUNCION DISTINTA POR CADA OPERACION
+        _IO(instruccion->parametro1, tiempo); 
         break;
-    case SIGNAL:
+    case INIT_PROC:
+        loguear_y_sumar_pc(instruccion);
+        int tamanio = atoi(instruccion->parametro2);
+        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_SYSCALL;
+        esSyscall = true;
+        envioPcb = true;
+        _init_proc(instruccion->parametro1, tamanio);
+        break;
+    case DUMP_MEMORY:
         loguear_y_sumar_pc(instruccion);
         pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_SYSCALL;
         esSyscall = true;
         envioPcb = true;
-        _signal(instruccion->parametro1, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case RESIZE:
-        loguear_y_sumar_pc(instruccion);
-        _resize(instruccion->parametro1); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case MOV_IN:
-        loguear_y_sumar_pc(instruccion);
-        _mov_in(instruccion->parametro1, instruccion->parametro2, cliente_de_memoria); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case MOV_OUT:
-        loguear_y_sumar_pc(instruccion);
-        _mov_out(instruccion->parametro1, instruccion->parametro2, cliente_de_memoria); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case COPY_STRING:
-        loguear_y_sumar_pc(instruccion);
-        _copy_string(instruccion->parametro1, cliente_de_memoria); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_GEN_SLEEP:
-        loguear_y_sumar_pc(instruccion); 
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_gen_sleep(instruccion->parametro1, instruccion->parametro2, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_STDIN_READ:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_stdin_read(instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_STDOUT_WRITE:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_stdout_write(instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_FS_CREATE:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_fs_create(instruccion->parametro1, instruccion->parametro2, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_FS_DELETE:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_fs_delete(instruccion->parametro1, instruccion->parametro2, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_FS_TRUNCATE:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_fs_truncate(instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_FS_WRITE:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_fs_write(instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, instruccion->parametro4, instruccion->parametro5, socket); //FUNCION DISTINTA POR CADA OPERACION
-        break;
-    case IO_FS_READ:
-        loguear_y_sumar_pc(instruccion);
-        pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_BLOQUEO;
-        esSyscall = true;
-        envioPcb = true;
-        _io_fs_read(instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, instruccion->parametro4, instruccion->parametro5, socket); //FUNCION DISTINTA POR CADA OPERACION
+        _dump_memory();
         break;
     case EXIT:
-        log_info(logger, "PID: %d - Ejecutando: %s", pcb_actual->pid, instruccion_to_string(instruccion->nombre));
+        log_info(cpu_logger, "PID: %d - Ejecutando: %s", pcb_actual->pid, instruccion_to_string(instruccion->nombre));
         esSyscall = true;
         pcb_actual->contexto_ejecucion->motivo_desalojo = FINALIZACION;
         pcb_actual->contexto_ejecucion->motivo_finalizacion = SUCCESS;
@@ -203,6 +146,21 @@ void execute(t_instruccion *instruccion, int socket)
     default:
         break;
     }
+}
+
+void log_instruccion_ejecutada(nombre_instruccion nombre, char *param1, char *param2, char *param3, char *param4, char *param5)
+{
+    char *nombre_instruccion = instruccion_to_string(nombre);
+    log_info(cpu_logger, "PID: %d - Ejecutando: %s - Parametros: %s %s %s %s %s", pcb_actual->pid, nombre_instruccion, param1, param2, param3, param4, param5);
+}
+
+void loguear_y_sumar_pc(t_instruccion *instruccion)
+{
+    log_instruccion_ejecutada(instruccion->nombre, instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, instruccion->parametro4, instruccion->parametro5);
+    
+    if((instruccion->nombre) =! GOTO) {
+    pcb_actual->contexto_ejecucion->registros->program_counter++;
+    } else {}
 }
 
 void liberar_instruccion(t_instruccion *instruccion)
@@ -215,6 +173,22 @@ void liberar_instruccion(t_instruccion *instruccion)
     free(instruccion);
 }
 
+void crear_buffer(t_paquete *paquete)
+{
+	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->buffer->size = 0;
+	paquete->buffer->stream = NULL;
+}
+
+
+t_paquete *crear_paquete_con_codigo_de_operacion(op_code codigo)
+{
+	t_paquete *paquete = malloc(sizeof(t_paquete));
+	paquete->codigo_operacion = codigo;
+	crear_buffer(paquete);
+	return paquete;
+}
+
 void pedir_instruccion_memoria(uint32_t pid, uint32_t pc, int socket)
 {
     t_paquete *paquete = crear_paquete_con_codigo_de_operacion(PEDIDO_INSTRUCCION);
@@ -225,6 +199,8 @@ void pedir_instruccion_memoria(uint32_t pid, uint32_t pc, int socket)
     enviar_paquete(paquete, socket);
     eliminar_paquete(paquete);
 }
+
+
 
 t_instruccion *deserializar_instruccion(int socket)
 {
@@ -298,4 +274,61 @@ bool hayInterrupciones(void)
 	}
 	return false;
 }
-*/
+
+void limpiar_interrupciones(void)
+{
+	for (int i = 0; i < 5; i++)
+	{
+		interrupciones[i] = false;
+	}
+}
+
+char *motivo_desalojo_to_string(t_motivo_desalojo motivo)
+{
+	switch (motivo)
+	{
+	case SIN_MOTIVO:
+		return "SIN MOTIVO";
+	case INTERRUPCION_FIN_QUANTUM:
+		return "INTERRUPCION FIN QUANTUM";
+	case INTERRUPCION_BLOQUEO:
+		return "INTERRUPCION BLOQUEO";
+	case INTERRUPCION_FINALIZACION:
+		return "INTERRUPCION FINALIZACION";
+	case FINALIZACION:
+		return "FINALIZACION";
+	case INTERRUPCION_ERROR:
+		return "INTERRUPCION ERROR";
+	case INTERRUPCION_SYSCALL:
+		return "INTERRUPCION SYSCALL";
+    case INTERRUPCION_OUT_OF_MEMORY:
+		return "INTERRUPCION_OUT_OF_MEMORY";
+	default:
+		return "ERROR";
+	}
+}
+
+char *instruccion_to_string(nombre_instruccion nombre)
+{
+    switch (nombre)
+    {
+    case NOOP:
+        return "NOOP";
+    case WRITE:
+        return "WRITE";
+    case READ:
+        return "READ";
+    case GOTO:
+        return "GOTO";
+    case IO:
+        return "IO";
+    case INIT_PROC:
+        return "INIT_PROC";
+    case DUMP_MEMORY:
+        return "DUMP_MEMORY";
+    case EXIT:
+        return "EXIT";
+    default:
+        return "DESCONOCIDA";
+    }
+}

@@ -200,8 +200,31 @@ void recibir_mensaje(t_log* logger,int socket_cliente) {
     free(buffer);
 }
 
-t_list* recibir_paquete(int socket_cliente){
+t_paquete* recibir_paquete(int socket_cliente){
 
+t_paquete *paquete = malloc(sizeof(t_paquete));
+	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->buffer->stream = NULL;
+	paquete->buffer->size = 0;
+	paquete->codigo_operacion = 0;
+
+	if (recv(socket_cliente, &(paquete->buffer->size), sizeof(uint32_t), 0) != sizeof(uint32_t))
+	{
+		printf("Error al recibir el tamanio del buffer\n");
+		return NULL;
+	}
+
+	paquete->buffer->stream = malloc(paquete->buffer->size);
+
+	if (recv(socket_cliente, paquete->buffer->stream, paquete->buffer->size, 0) != paquete->buffer->size)
+	{
+		printf("Error al recibir el buffer\n");
+		return NULL;
+	}
+
+	return paquete;
+
+/*
 	int size;
 	int desplazamiento = 0;
 	void * buffer;
@@ -219,5 +242,5 @@ t_list* recibir_paquete(int socket_cliente){
 		list_add(valores, valor);
 	}
 	free(buffer);
-	return valores;
+	return valores; */
 }

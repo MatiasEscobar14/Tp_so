@@ -9,8 +9,13 @@ pthread_mutex_t mutex_interrupt;*/
 int main(int argc, char *argv[])
 {
 
+    /*
     int identificador = atoi(argv[1]);
-    
+    printf("CPU %d iniciada\n", identificador);
+    */
+
+    int identificador = 0;  // Valor fijo o simbólico
+
     printf("CPU %d iniciada\n", identificador);
 
     char nombre_log[64];
@@ -30,6 +35,12 @@ int main(int argc, char *argv[])
 
 void conectar_con_kernel(int identificador)
 {
+
+    if (cliente_de_kernel_interrupt == -1 || cliente_de_kernel_dispatch == -1) {
+    log_error(cpu_logger, "No se pudo conectar con el Kernel");
+    exit(EXIT_FAILURE);
+    }
+
     cliente_de_kernel_interrupt = crear_conexion(cpu_logger, "Server kernel interrupt", IP_KERNEL, PUERTO_KERNEL_INTERRUPT);
     cliente_de_kernel_dispatch = crear_conexion(cpu_logger, "Server kernel dispatch", IP_KERNEL, PUERTO_KERNEL_DISPATCH);
     t_buffer* un_buffer = new_buffer();

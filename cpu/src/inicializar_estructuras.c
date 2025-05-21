@@ -2,6 +2,7 @@
 
 void iniciar_config_cpu(char* ruta){
     cpu_config = config_create(ruta);
+    
     if(cpu_config == NULL){
         log_error(cpu_logger, "No se pudo leer el archivo de configuracion");
         exit(EXIT_FAILURE);
@@ -15,4 +16,9 @@ void iniciar_config_cpu(char* ruta){
 
 void iniciar_logger_cpu(char* nombre){
     cpu_logger = log_create(nombre, "CPU", 1, LOG_LEVEL_INFO);
+
+     if(cpu_logger == NULL){
+        log_error(cpu_logger, "No se pudo leer el logger");
+        exit(EXIT_FAILURE);
+    }
 }

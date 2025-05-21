@@ -4,10 +4,10 @@
 #include "gestorMemoria.h"
 #include "iniciarMemoria.h"
 #include "memoria-kernel.h"
+#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/gestor.h"
 
-t_list* lista_procesos;
+extern t_list* lista_procesos;
 
-pthread_mutex_t mutex_lista_procesos;
-
+extern pthread_mutex_t mutex_lista_procesos;
 
 #endif

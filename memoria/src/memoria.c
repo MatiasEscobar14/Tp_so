@@ -1,5 +1,11 @@
 #include "memoria.h"
 
+pthread_mutex_t mutex_lista_procesos;
+
+t_proceso_memoria* proceso_memoria;
+
+pthread_mutex_t mutex_procesos;
+
 int main(int argc, char *argv[])
 {
 

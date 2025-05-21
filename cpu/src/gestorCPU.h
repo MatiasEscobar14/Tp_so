@@ -1,8 +1,30 @@
 #ifndef GESTOR_CPU_H_
 #define GESTOR_CPU_H_
 
-#include <utils/utils.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <ctype.h>
+#include <pthread.h>
+#include <inttypes.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+#include <signal.h>
+
+#include <commons/log.h>
+#include <commons/string.h>
+#include <commons/config.h>
+#include <commons/collections/list.h>
+#include <commons/memory.h>
+#include <readline/readline.h>
+
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
 #include "inicializar_estructuras.h"
+#include "contexto.h"
+#include "utils_pcb.h"
+#include "instrucciones.h"
+
 
 
 extern t_log* cpu_logger;
@@ -16,5 +38,10 @@ extern char* PUERTO_KERNEL_INTERRUPT;
 
 extern int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memoria;
 
+
+extern pthread_mutex_t mutex_pcb_actual;
+extern pthread_mutex_t mutex_interrupt;
+
+extern t_pcb* pcb_actual;
 
 #endif

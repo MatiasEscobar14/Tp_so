@@ -1,7 +1,7 @@
 #ifndef ESTRUCTURAS_CPU_H
 #define ESTRUCTURAS_CPU_H
 
-#include <utils/utils.h>
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
 #include "gestorCPU.h"
 
 void iniciar_config_cpu(char* ruta);

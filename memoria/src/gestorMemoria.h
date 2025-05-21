@@ -14,13 +14,14 @@ extern int ENTRADAS_POR_TABLA;
 extern int CANTIDAD_NIVELES;
 extern int RETARDO_MEMORIA;
 extern int RETARDO_SWAP;
+extern char* PATH_INSTRUCCIONES;
 
 extern int socket_memoria;
 
 typedef struct 
 {
     uint32_t pid;
-    uint32_t tamanio;
+    int tamanio;
     
 }t_proceso;
 // Listas

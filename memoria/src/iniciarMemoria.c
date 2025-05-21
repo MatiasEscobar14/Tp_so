@@ -18,6 +18,7 @@ TAM_PAGINA = config_get_int_value(memoria_config, "TAM_PAGINA");
 CANTIDAD_NIVELES = config_get_int_value(memoria_config, "CANTIDAD_NIVELES");
 RETARDO_MEMORIA = config_get_int_value(memoria_config, "RETARDO_MEMORIA");
 RETARDO_SWAP = config_get_int_value(memoria_config, "RETARDO_SWAP");
+PATH_INSTRUCCIONES =config_get_string_value(memoria_config, "PATH_INSTRUCCIONES");
 
 log_info(logger_memoria, "Config de Memoria iniciado.");
 

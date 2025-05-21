@@ -201,13 +201,13 @@ void procesar_conexion(void* void_args) {
 
                 break;
 
-            case PAQUETE:
+            /*case PAQUETE:
             
                 t_list* lista = recibir_paquete(cliente_socket);
 				log_info(logger, "Me llegaron los siguientes valores:\n");
 				list_iterate(lista, (void*) iterator);
 	
-                break;
+                break;*/
             default:
                 log_error(logger, "Algo anduvo mal en el server de %s", server_name);
                 log_info(logger, "Cop: %d", cop);

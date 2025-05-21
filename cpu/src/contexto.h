@@ -1,20 +1,10 @@
-#ifndef UTILS_CPU_H_
-#define UTILS_CPU_H_
+#ifndef CONTEXTO_H_
+#define CONTEXTO_H_
 
 #include <stdint.h>
 #include <commons/collections/list.h>
-#include </home/utnso/tp-2025-1c-Linux-Learners/cpu/include/gestor.h>
-
-
-static void procesar_conexion_cpu(void *void_args);
-void ejecutar_ciclo_instruccion(int socket);
-t_instruccion *fetch(uint32_t pid, uint32_t pc);
-void execute(t_instruccion *instruccion, int socket);
-void liberar_instruccion(t_instruccion *instruccion);
-void pedir_instruccion_memoria(uint32_t pid, uint32_t pc, int socket);
-t_instruccion *deserializar_instruccion(int socket);
-void iniciar_semaforos_etc();
-bool hayInterrupciones(void);
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
+#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
 
 typedef enum
 {
@@ -70,11 +60,6 @@ typedef struct
     t_list *recursos_asignados;
     t_contexto_ejecucion *contexto_ejecucion;
 } t_pcb;
-
-extern t_pcb *pcb_actual;
-extern bool esSyscall;
-extern bool envioPcb;
-extern bool interrupciones[5];
 
 
 #endif

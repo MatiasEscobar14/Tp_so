@@ -1,6 +1,8 @@
 #ifndef UTILS_HELLO_H_
 #define UTILS_HELLO_H_
 
+#define _GNU_SOURCE
+
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -13,6 +15,7 @@
 #include "protocolo.h"
 #include <commons/string.h>
 #include  <commons/collections/list.h>
+#include <stdint.h>
 
 typedef struct {
     t_log* log;
@@ -22,24 +25,14 @@ typedef struct {
 
 typedef enum
 {
-    SET,
-    MOV_IN,
-    MOV_OUT,
-    SUM,
-    SUB,
-    JNZ,
-    RESIZE,
-    COPY_STRING,
-    WAIT,
-    SIGNAL,
-    IO_GEN_SLEEP,
-    IO_STDIN_READ,
-    IO_STDOUT_WRITE,
-    IO_FS_CREATE,
-    IO_FS_DELETE,
-    IO_FS_TRUNCATE,
-    IO_FS_WRITE,
-    IO_FS_READ
+    NOOP,
+    WRITE,
+    READ, 
+    GOTO,
+    IO,
+    INIT_PROC,
+    DUMP_MEMORY,
+    EXIT
 } nombre_instruccion;
 
 

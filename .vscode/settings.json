@@ -1,5 +1,17 @@
 {
     "files.associations": {
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "unistd.h": "c",
+        "memoria-kernel.h": "c",
+        "memory.h": "c",
+        "list.h": "c",
+        "utils_cpu.h": "c",
+        "gestorcpu.h": "c",
+        "inicializar_estructuras.h": "c",
+        "utils_pcb.h": "c",
+        "protocolo.h": "c",
+        "stdint.h": "c",
+        "gestor.h": "c",
+        "instrucciones.h": "c"
     }
 }
