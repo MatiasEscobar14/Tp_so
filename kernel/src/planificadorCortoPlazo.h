@@ -4,6 +4,7 @@
 #include "gestorKernel.h"
 #include "pcb.h"
 #include "kernel_memoria.h"
+#include "kernel_cpu.h"
 
 
 void atender_FIFO();

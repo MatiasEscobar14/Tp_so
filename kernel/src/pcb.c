@@ -171,8 +171,7 @@ bool cpu_esta_libre(void *cpu_void)
 void enviar_pcb_a_cpu(t_pcb *un_pcb)
 {
 
-    // TODO: Habria que ver cuales de los CPU's estan conectados y libres.
-    t_cpu *un_cpu = list_find(lista_cpu_conectadas, (void *)cpu_esta_libre);
+    t_modulo_cpu* un_cpu = list_find(lista_cpu_conectadas, (void *)cpu_esta_libre);
 
     if (un_cpu != NULL)
     {

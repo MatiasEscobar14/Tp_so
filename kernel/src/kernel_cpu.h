@@ -10,4 +10,5 @@
 void atender_kernel_cpu_dispatch(int *socket_cliente);
 void imprimir_modulos_cpu();
 void server_escuchar_cpu_dispatch();
+t_modulo_cpu* buscar_modulo_cpu_por_identificador(int identificador);
 #endif

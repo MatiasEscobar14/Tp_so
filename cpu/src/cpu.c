@@ -14,8 +14,6 @@ int main(int argc, char *argv[])
     printf("CPU %d iniciada\n", identificador);
     */
 
-    int identificador = 0;  // Valor fijo o simbólico
-
     printf("CPU %d iniciada\n", identificador);
 
     char nombre_log[64];
@@ -35,7 +33,7 @@ int main(int argc, char *argv[])
 
 void conectar_con_kernel(int identificador)
 {
-
+    // Para que es esta validacion? TODO valen
     if (cliente_de_kernel_interrupt == -1 || cliente_de_kernel_dispatch == -1) {
     log_error(cpu_logger, "No se pudo conectar con el Kernel");
     exit(EXIT_FAILURE);
@@ -45,10 +43,12 @@ void conectar_con_kernel(int identificador)
     cliente_de_kernel_dispatch = crear_conexion(cpu_logger, "Server kernel dispatch", IP_KERNEL, PUERTO_KERNEL_DISPATCH);
     t_buffer* un_buffer = new_buffer();
     add_int_to_buffer(un_buffer, identificador);
+    add_int_to_buffer(un_buffer, cliente_de_kernel_dispatch);
     log_info(cpu_logger, "llegue hasta el add buffer");
     t_paquete* un_paquete = crear_paquete(HANDSHAKE, un_buffer);
     log_info(cpu_logger, "cree el paquete");
     enviar_paquete(un_paquete, cliente_de_kernel_dispatch);
+    //TODO valen, el socket interrupt deberiaa pasarlo?
     log_info(cpu_logger, "envie el paquete");
      while (1)
     {

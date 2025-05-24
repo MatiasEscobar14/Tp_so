@@ -28,17 +28,17 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					log_error(kernel_logger, "Error al recibir buffer del HANDSHAKE.");
 					break;
 				}
-			//int socket_fd = extraer_int_buffer(un_buffer);
 			int identificador = extraer_int_buffer(un_buffer);
-
-			nuevo_modulo->socket_fd = socket;
+			int socket_fd_dispatch = extraer_int_buffer(un_buffer);
 			nuevo_modulo->identificador = identificador;
+			nuevo_modulo->socket_fd_dispatch = socket;
 
-		log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd);
+
+			log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd_dispatch);
 			pthread_mutex_lock(&mutex_lista_modulos_cpu);
 			list_add(lista_modulos_cpu, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_cpu);
-			 log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
+			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
 			imprimir_modulos_cpu();
 			free(un_buffer);
 				break;
@@ -142,5 +142,27 @@ while (1)
 	}	
 	
 	}
+}
+
+t_modulo_cpu* buscar_modulo_cpu_por_identificador(int identificador) {
+	t_modulo_cpu* modulo_buscado;
+	bool encontrado = false;
+
+	pthread_mutex_lock(&mutex_lista_modulos_cpu);
+	for (int i = 0; i < list_size(lista_modulos_cpu); i++) {
+		t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
+		if (modulo->identificador == identificador) {
+			modulo_buscado = *modulo;
+			encontrado = true;
+			break;
+		}
+	}
+	pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+
+	if (!encontrado) {
+		log_error(kernel_logger, "No se encontró el módulo CPU con ID %d", identificador);
+	}
+
+	return modulo_buscado;
 }
 

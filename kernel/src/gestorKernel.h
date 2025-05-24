@@ -90,8 +90,8 @@ extern pthread_mutex_t mutex_flag_pedido_memoria;
 
 //=======CONEXIONES======//
 extern int socket_io;
-extern int socket_cpu_dispatch;
-extern int socket_cpu_interrupt;
+extern int socket_cpu_dispatch;             //TODO valen,  es necesario esto?
+extern int socket_cpu_interrupt;            //TODO valen,  es necesario esto?  
 extern int socket_memoria;
 
 //extern bool flag_respuesta_dump;
@@ -101,10 +101,10 @@ extern int socket_memoria;
 
 typedef struct {
     int identificador;
-    int socket_d;
-    int socket_i;
+    int socket_fd_dispatch;
+    //int socket_interrupt;
     bool libre;
-}t_cpu;
+}t_modulo_cpu;
 
 //=====IO=====/
 
@@ -115,12 +115,6 @@ typedef struct {
     //t_list* procesos_en_espera;
 } t_modulo_io;
 
-typedef struct {
-    char* nombre;
-    int socket_fd; 
-    int identificador; 
-    //t_list* procesos_activos;
-    //t_list* procesos_en_espera;
-} t_modulo_cpu;
+
 
 #endif
