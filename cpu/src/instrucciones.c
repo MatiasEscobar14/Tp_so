@@ -59,7 +59,7 @@ void _IO (char* dispositivo, int tiempo){
     add_string_to_buffer(buffer, dispositivo);
     add_int_to_buffer(buffer, tiempo);
 
-    t_paquete* paquete = crear_paquete(SYSCALL_IO, buffer);
+    t_paquete* paquete = crear_paquete(IO, buffer);
     enviar_paquete(paquete, cliente_de_kernel_dispatch);
     eliminar_paquete(paquete);
 }
@@ -110,7 +110,7 @@ void _dump_memory(){
     }
 
 }
-
-/*void _exit(){
+/*
+void _exit(){
     printf("entre a exit");
 }*/

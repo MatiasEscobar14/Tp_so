@@ -9,24 +9,18 @@ pthread_mutex_t mutex_interrupt;*/
 int main(int argc, char *argv[])
 {
 
-    /*
     int identificador = atoi(argv[1]);
-    printf("CPU %d iniciada\n", identificador);
-    */
+    char* nombre_log = string_from_format("cpu_%d.log", identificador);
 
-    printf("CPU %d iniciada\n", identificador);
-
-    char nombre_log[64];
-    sprintf(nombre_log, "cpu_%d.log", identificador);
-   
     iniciar_config_cpu("cpu.config");
     iniciar_logger_cpu(nombre_log);
 
     log_info(cpu_logger, "Logger e config iniciados");
 
     conectar_con_kernel(identificador);
+ 
 
-    // cliente_de_memoria = crear_conexion(logger, "Server Memoria", ip_memoria, puerto_memoria);
+    //cliente_de_memoria = crear_conexion(logger, "Server Memoria", ip_memoria, puerto_memoria);
 
     return 0;
 }
@@ -60,6 +54,16 @@ void conectar_con_kernel(int identificador)
         case MENSAJE:
             log_info(cpu_logger, "Recibida solicitud de CPU del Kernel.");
             // Aquí podrías procesar la solicitud de IO
+
+            t_buffer* buffer = new_buffer();
+            add_string_to_buffer(buffer, "teclado");
+            add_int_to_buffer(buffer, 0);
+            add_int_to_buffer(buffer, 1000);
+            t_paquete* nuevo_paquete = crear_paquete(IO, NULL);
+            enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
+
+    log_info(cpu_logger, "Envie SYSCALL-IO al kernel");
+
             break;
 
         case -1:

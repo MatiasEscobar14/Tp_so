@@ -1,5 +1,4 @@
 #include "kernel_cpu.h"
-pthread_mutex_t mutex_lista_modulos_cpu = PTHREAD_MUTEX_INITIALIZER;
 void atender_kernel_cpu_dispatch(int *socket_cliente) {
     op_code cop;
 	int control_key = 1;
@@ -35,10 +34,16 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 
 
 			log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd_dispatch);
-			pthread_mutex_lock(&mutex_lista_modulos_cpu);
-			list_add(lista_modulos_cpu, nuevo_modulo);
-			pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+			pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
+			list_add(lista_modulos_cpu_conectadas, nuevo_modulo);
+			pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
+
+			t_buffer* buffer_handshake = new_buffer();
+			//add_int_buffer(buffer_handshake, 1);
+			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
+			enviar_paquete(paquete_handshake, socket_fd_dispatch);
+			
 			imprimir_modulos_cpu();
 			free(un_buffer);
 				break;
@@ -76,6 +81,22 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 				sem_wait(&sem_rpta_dump_memory);
 
 				break;
+			case IO:
+					un_buffer = recv_buffer(socket);
+					char* nombre_io = extraer_string_buffer(un_buffer);
+					int pid = extraer_int_buffer(un_buffer);
+					int tiempo_ms = extraer_int_buffer(un_buffer);
+					free(un_buffer);
+					t_syscall_io* parametros = malloc(sizeof(t_syscall_io));//FALTA EL FREE OJO
+					parametros->nombre_io = nombre_io;
+					parametros->pid = pid;
+					parametros->miliseg = tiempo_ms;
+					log_info(kernel_logger, "Mandando a dormir al [PID: %d] por %d milisegundos", parametros->pid, parametros->miliseg);
+					pthread_t hilo_io;
+					pthread_create(&hilo_io, NULL, (void*)syscall_io, (void*)parametros);
+					pthread_join(hilo_io, NULL);
+					free(parametros);
+				break;
 		    default:
 			    log_warning(kernel_logger,"OPERACION DESCONOCIDA - KERNEL - CPU DISPATCH");
 				control_key = 0;
@@ -87,16 +108,16 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 	log_warning(kernel_logger, "El cliente (%d) se desconectó de Kernel Server Cpu dispatch", socket);
 
 	 // Eliminar el módulo de la lista por su socket
-    pthread_mutex_lock(&mutex_lista_modulos_cpu);
-    for (int i = 0; i < list_size(lista_modulos_cpu); i++) {
-        t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
-        if (modulo->socket_fd == socket) {
-            list_remove(lista_modulos_cpu, i);
+    pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
+    for (int i = 0; i < list_size(lista_modulos_cpu_conectadas); i++) {
+        t_modulo_cpu *modulo = list_get(lista_modulos_cpu_conectadas, i);
+        if (modulo->socket_fd_dispatch == socket) {
+            list_remove(lista_modulos_cpu_conectadas, i);
             free(modulo); // Liberar memoria del módulo
             break;
         }
     }
-    pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+    pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 
 	imprimir_modulos_cpu();
 	close(socket);
@@ -105,17 +126,17 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 
 void imprimir_modulos_cpu()
 {
-	 pthread_mutex_lock(&mutex_lista_modulos_cpu);
-	 if (list_size(lista_modulos_cpu) == 0) {
+	 pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
+	 if (list_size(lista_modulos_cpu_conectadas) == 0) {
         log_info(kernel_logger, "No hay CPUs conectadas.");
     }
 
-    for (int i = 0; i < list_size(lista_modulos_cpu); i++)
+    for (int i = 0; i < list_size(lista_modulos_cpu_conectadas); i++)
     {
-        t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
+        t_modulo_cpu* modulo = list_get(lista_modulos_cpu_conectadas, i);
         printf("Módulo CPU conectado: ID=%d\n",modulo->identificador);
     }
-    pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+    pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 }
 
 
@@ -126,7 +147,7 @@ while (1)
 
 		if (cliente_socket != -1)
 		{
-			int *socket_cliente_ptr = malloc(sizeof(int)); // Necesario para pasar puntero único al hilo
+			int* socket_cliente_ptr = malloc(sizeof(int)); // Necesario para pasar puntero único al hilo
 			*socket_cliente_ptr = cliente_socket;
 
 			pthread_t hilo;
@@ -148,19 +169,53 @@ t_modulo_cpu* buscar_modulo_cpu_por_identificador(int identificador) {
 	t_modulo_cpu* modulo_buscado;
 	bool encontrado = false;
 
-	pthread_mutex_lock(&mutex_lista_modulos_cpu);
-	for (int i = 0; i < list_size(lista_modulos_cpu); i++) {
-		t_modulo_cpu *modulo = list_get(lista_modulos_cpu, i);
+	pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
+	for (int i = 0; i < list_size(lista_modulos_cpu_conectadas); i++) {
+		t_modulo_cpu *modulo = list_get(lista_modulos_cpu_conectadas, i);
 		if (modulo->identificador == identificador) {
-			modulo_buscado = *modulo;
+			modulo_buscado = modulo;
 			encontrado = true;
 			break;
 		}
 	}
-	pthread_mutex_unlock(&mutex_lista_modulos_cpu);
+	pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 
 	if (!encontrado) {
 		log_error(kernel_logger, "No se encontró el módulo CPU con ID %d", identificador);
+	}
+
+	return modulo_buscado;
+}
+
+
+char* recibir_string(int socket) {
+    uint32_t longitud;
+    recv(socket, &longitud, sizeof(uint32_t), 0);
+
+    char* string = malloc(longitud + 1);
+    recv(socket, string, longitud, 0);
+    string[longitud] = '\0';
+
+    return string;
+}
+
+t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
+	t_modulo_io* modulo_buscado;
+	bool encontrado = false;
+
+	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
+	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
+		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
+		if (strcmp(modulo->nombre, nombre_io) == 0) {
+			modulo_buscado = modulo;
+			encontrado = true;
+			break;
+		}
+	}
+	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+
+	if (!encontrado) {
+		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
 	}
 
 	return modulo_buscado;

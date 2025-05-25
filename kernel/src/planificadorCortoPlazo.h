@@ -7,6 +7,7 @@
 #include "kernel_cpu.h"
 
 
+
 void atender_FIFO();
 void planificadorCortoPlazo();
 

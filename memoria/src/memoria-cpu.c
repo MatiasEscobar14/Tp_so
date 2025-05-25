@@ -54,8 +54,8 @@ static void procesar_conexion_memoria(void *void_args)
 			proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
 			proceso_memoria = iniciar_proceso_path(proceso_memoria); //(6)
 			break;
-
-            /*case FINALIZAR_PROCESO:
+            /*
+            case FINALIZAR_PROCESO:
 			uint32_t pid_a_finalizar;
 			recibir_finalizar_proceso(&pid_a_finalizar, cliente_socket);
 			proceso_memoria = obtener_proceso_pid(pid_a_finalizar);
@@ -358,8 +358,8 @@ bool _buscar_proceso(void *element)
 {
     return element == proceso_memoria;
 }
-
-/*void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
+/*
+void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
 {
     // Liberar elementos de la tabla de páginas
     while (proceso_memoria->tabla_paginas->elements_count > 0)
@@ -377,8 +377,8 @@ bool _buscar_proceso(void *element)
 
     free(proceso_memoria->path);
     free(proceso_memoria);
-}*/
-
+}
+*/
 void liberar_instruccion(t_instruccion *instruccion)
 {
     free(instruccion->parametro1);

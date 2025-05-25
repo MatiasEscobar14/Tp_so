@@ -124,11 +124,11 @@ void execute(t_instruccion *instruccion, int socket)
         break;
     case INIT_PROC:
         loguear_y_sumar_pc(instruccion);
-        int tamanio = atoi(instruccion->parametro2);
+        int tamanio_param = atoi(instruccion->parametro2);
         pcb_actual->contexto_ejecucion->motivo_desalojo = INTERRUPCION_SYSCALL;
         esSyscall = true;
         envioPcb = true;
-        _init_proc(instruccion->parametro1, tamanio);
+        _init_proc(instruccion->parametro1, tamanio_param);
         break;
     case DUMP_MEMORY:
         loguear_y_sumar_pc(instruccion);

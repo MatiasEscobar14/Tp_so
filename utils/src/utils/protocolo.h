@@ -1,6 +1,7 @@
 #ifndef PROTCOLO_H_
 #define PROTCOLO_H_
 
+#include <stdint.h>
 #include "utils.h"
 
 typedef enum
@@ -26,7 +27,7 @@ typedef enum
 
 	//====KERNEL - CPU====//
 	PCB,
-	SYSCALL_IO,
+	IO,
 	SYSCALL_INIT_PROC,
 	SYSCALL_DUMP_MEMORY,
 
@@ -40,7 +41,11 @@ typedef enum
 
 	//===== KERNEl- CPU ======//
 
-	EJECUTAR_PROCESO_KC
+	EJECUTAR_PROCESO_KC,
+
+	//===== KERNEL-IO======//
+	REALIZAR_IO,
+	FIN_IO
 	
 }op_code;
 

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 
     char *nombre_dispositivo = argv[1];
 
-    printf("[INFO] Dispositivo configurado: %s\n", nombre_dispositivo);
+    log_info("Dispositivo configurado: %s", nombre_dispositivo);
 
     char *mensaje_presentacion = string_from_format(nombre_dispositivo);
 
@@ -22,12 +22,13 @@ int main(int argc, char *argv[])
     log_info(logger, "Logger e config iniciados");
 
     int socket_cliente = crear_conexiones_io(logger, config);
+    
     t_buffer *buffer = new_buffer();
     add_string_to_buffer(buffer, mensaje_presentacion);
-    add_int_to_buffer(buffer, socket_cliente);
+    //add_int_to_buffer(buffer, socket_cliente);
     t_paquete *paquete = crear_paquete(HANDSHAKE, buffer);
     enviar_paquete(paquete, socket_cliente);
-
+    eliminar_paquete(paquete);
     // Bucle infinito para mantener el módulo IO activo
     while (1)
     {
@@ -39,6 +40,20 @@ int main(int argc, char *argv[])
         case MENSAJE:
             log_info(logger, "Recibida solicitud de IO del Kernel.");
             // Aquí podrías procesar la solicitud de IO
+            break;
+        case REALIZAR_IO:
+            t_buffer* un_buffer = recv_buffer(socket_cliente);
+            int pid = extraer_int_buffer(un_buffer);
+            int tiempo_ms = extraer_int_buffer(un_buffer);
+            log_info("Inicio de IO: ## PID: <%d> - Inicio de IO - Tiempo: <%d>.", pid, tiempo_ms);
+            usleep(tiempo_ms * 1000);
+            log_info("Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
+            // TODO informar a kernal que finalizo el IO
+            t_buffer *buffer_respuesta = new_buffer();
+            add_int_to_buffer(buffer_respuesta, pid);
+            t_paquete *paquete_respuesta = crear_paquete(FIN_IO, buffer_respuesta);
+            enviar_paquete(paquete_respuesta, socket_cliente);
+            eliminar_paquete(paquete_respuesta);
             break;
 
         case -1:

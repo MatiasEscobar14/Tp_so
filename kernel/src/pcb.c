@@ -164,14 +164,15 @@ t_pcb *buscar_y_remover_pcb_por_pid(int un_pid)
 }
 bool cpu_esta_libre(void *cpu_void)
 {
-    t_cpu *cpu = (t_cpu *)cpu_void;
+    t_modulo_cpu* cpu = (t_modulo_cpu*)cpu_void;
     return cpu->libre;
 }
 
 void enviar_pcb_a_cpu(t_pcb *un_pcb)
-{
-
-    t_modulo_cpu* un_cpu = list_find(lista_cpu_conectadas, (void *)cpu_esta_libre);
+{   
+    pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
+    t_modulo_cpu* un_cpu = list_find(lista_modulos_cpu_conectadas, (void *)cpu_esta_libre);
+    pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 
     if (un_cpu != NULL)
     {
@@ -179,8 +180,11 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
         add_int_to_buffer(un_buffer, un_pcb->pid);
         add_int_to_buffer(un_buffer, un_pcb->pc);
         t_paquete *un_paquete = crear_paquete(EJECUTAR_PROCESO_KC, un_buffer);
-        enviar_paquete(un_paquete, un_cpu->socket_d);
+        enviar_paquete(un_paquete, un_cpu->socket_fd_dispatch);
         eliminar_paquete(un_paquete);
+        //list_add(un_cpu->proceso_en_ejecucion, un_pcb);
+
+        log_info(kernel_logger, "Se envió el proceso %d a la CPU %d (socket %d)", un_pcb->pid, un_cpu->identificador, un_cpu->socket_fd_dispatch);
     }
     else
     {
@@ -197,4 +201,95 @@ void bloquear_proceso_syscall(int pid)
     agregar_pcb_lista(un_pcb, lista_blocked, mutex_lista_blocked);
 
     // TODO:MOTIVO?
+}
+
+t_pcb* buscar_pcb_por_socket(int socket_cpu) {
+    for (int i = 0; i < list_size(lista_modulos_cpu_conectadas); i++) {
+        t_modulo_cpu* cpu = list_get(lista_modulos_cpu_conectadas, i);
+        if (cpu->socket_fd_dispatch == socket_cpu) {
+            return cpu->proceso_en_ejecucion; 
+        }
+    }
+    return NULL;
+}
+
+void enviar_pcb_a_modulo_io(t_modulo_io* modulo, t_pcb* pcb, int tiempo_ms) {
+    t_buffer* buffer = new_buffer();
+    add_int_to_buffer(buffer, pcb->pid);
+    add_int_to_buffer(buffer, tiempo_ms);
+    t_paquete* paquete = crear_paquete(REALIZAR_IO, buffer);
+    enviar_paquete(paquete, modulo->socket_fd);
+    eliminar_paquete(paquete);
+}
+
+int un_pid_a_buscar;
+
+bool __buscar_pcb(t_pcb* void_pcb){
+		if(void_pcb->pid == un_pid_a_buscar){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+t_pcb* buscar_pcb_por_pid(int un_pid){
+	t_pcb* un_pcb;
+	int elemento_encontrado = 0;
+
+	un_pid_a_buscar = un_pid;
+
+	if(elemento_encontrado == 0){
+		pthread_mutex_lock(&mutex_lista_new);
+		if(list_any_satisfy(lista_new, __buscar_pcb)){
+			elemento_encontrado = 1;
+			un_pcb = list_find(lista_new, __buscar_pcb);
+		}
+		pthread_mutex_unlock(&mutex_lista_new);
+	}
+	if(elemento_encontrado == 0){
+		pthread_mutex_lock(&mutex_lista_ready);
+	//	int cantidad = list_size(lista_ready_thread);
+	//	log_info(kernel_logger, "CANTIDAD DE ENTRADAS EN LA LISTA READY: %d", cantidad);
+		if(list_any_satisfy(lista_ready, __buscar_pcb)){
+			elemento_encontrado = 1;
+			un_pcb = list_find(lista_ready, __buscar_pcb);
+		}
+		pthread_mutex_unlock(&mutex_lista_ready);
+	}
+	if(elemento_encontrado == 0){
+		pthread_mutex_lock(&mutex_lista_execute);
+	//	int cantidad = list_size(lista_execute_thread);
+	//	t_tcb* pepe = list_get(lista_execute_thread, 0);
+	//	log_info(kernel_logger, "CANTIDAD DE ENTRADAS EN LA LISTA EXECUTE: %d", cantidad);
+	//	log_info(kernel_logger, "TID DE LA LISTA: %d", pepe->tid);
+		if(list_any_satisfy(lista_execute, __buscar_pcb)){
+			elemento_encontrado = 1;
+			un_pcb = list_find(lista_execute, __buscar_pcb);
+		}
+		pthread_mutex_unlock(&mutex_lista_execute); 
+	}
+	if(elemento_encontrado == 0){
+		pthread_mutex_lock(&mutex_lista_exit);
+		if(list_any_satisfy(lista_exit, __buscar_pcb)){
+			elemento_encontrado = 1;
+			un_pcb = list_find(lista_exit, __buscar_pcb); 
+		}
+		pthread_mutex_unlock(&mutex_lista_exit);
+	}
+	if(elemento_encontrado == 0){
+		pthread_mutex_lock(&mutex_lista_blocked);
+		if(list_any_satisfy(lista_blocked, __buscar_pcb)){
+			elemento_encontrado = 1;
+			un_pcb = list_find(lista_blocked, __buscar_pcb);
+		}
+		pthread_mutex_unlock(&mutex_lista_blocked);
+	}
+	if(elemento_encontrado == 0){
+		//Si es que no se encontro en ninguna lista
+		log_error(kernel_logger, "[PID:%d] no encontrada en ninguna lista",un_pid);
+		un_pcb = NULL;
+		
+	}
+
+	return un_pcb;
 }

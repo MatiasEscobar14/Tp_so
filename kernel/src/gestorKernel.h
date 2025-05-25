@@ -1,10 +1,18 @@
 #ifndef GESTOR_KERNEL_H
 #define GESTOR_KERNEL_H
 #define CANT_ESTADOS 7
+typedef struct{
+char* nombre_io;
+int pid;
+int miliseg;
+}t_syscall_io;
+
 
 #include <utils/utils.h>
 #include<pthread.h>
 #include <semaphore.h>
+#include "syscalls.h"
+
 
 extern t_log* kernel_logger;
 extern t_config* kernel_config;
@@ -43,7 +51,7 @@ typedef enum{
 typedef struct {
     uint32_t pid;
     uint32_t pc;
-    char nombre_archivo;
+    char* nombre_archivo;
     uint32_t tamanio_proceso;
     int metricas_estado[CANT_ESTADOS];
     double metricas_tiempo[CANT_ESTADOS];    
@@ -66,9 +74,8 @@ extern t_list* lista_blocked;
 extern t_list* lista_exit;
 extern t_list* lista_susp_blocked;
 extern t_list* lista_susp_ready;
-extern t_list* lista_modulos_io;
-extern t_list* lista_modulos_cpu;
-extern t_list* lista_cpu_conectadas;
+extern t_list* lista_modulos_io_conectadas;
+extern t_list* lista_modulos_cpu_conectadas;
 //======MUTEX=======//
 
 extern pthread_mutex_t mutex_lista_new;
@@ -76,10 +83,10 @@ extern pthread_mutex_t mutex_lista_ready;
 extern pthread_mutex_t mutex_lista_blocked;
 extern pthread_mutex_t mutex_lista_susp_ready;
 extern pthread_mutex_t mutex_lista_susp_blocked;
-extern pthread_mutex_t mutex_lista_exec;
 extern pthread_mutex_t mutex_lista_exit;
-extern pthread_mutex_t mutex_lista_modulos_cpu;
-
+extern pthread_mutex_t mutex_lista_modulos_cpu_conectadas;
+extern pthread_mutex_t mutex_lista_execute;
+extern pthread_mutex_t mutex_lista_modulos_io_conectadas;
 
 extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
@@ -103,16 +110,23 @@ typedef struct {
     int identificador;
     int socket_fd_dispatch;
     //int socket_interrupt;
+    t_pcb* proceso_en_ejecucion;
     bool libre;
 }t_modulo_cpu;
 
 //=====IO=====/
+typedef struct {
+    t_pcb* pcb;
+    int milisegundos;
+} t_io_esperando;
 
 typedef struct {
     char* nombre;
     int socket_fd;  
     //t_list* procesos_activos;
     //t_list* procesos_en_espera;
+    t_queue* cola_espera;
+    bool libre;
 } t_modulo_io;
 
 

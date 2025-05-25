@@ -13,8 +13,9 @@ pthread_mutex_t mutex_lista_exit = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_blocked = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_susp_blocked = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_susp_ready = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex_lista_exec = PTHREAD_MUTEX_INITIALIZER;
-
+pthread_mutex_t mutex_lista_execute = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_lista_modulos_cpu_conectadas= PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex_lista_modulos_io_conectadas = PTHREAD_MUTEX_INITIALIZER;
 bool flag_pedido_de_memoria;
 pthread_mutex_t mutex_flag_pedido_memoria;
 
@@ -96,7 +97,7 @@ void planificadorLargoPlazo()
                     list_remove_element(lista_new, pcb);
                     agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
                     cambiar_estado(pcb, READY_PROCCES);
-                    // planificadorCortoPlazo();
+                     planificadorCortoPlazo();
                     if (list_is_empty(lista_new))
                     {
                         hay_pcb = 0;

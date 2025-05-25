@@ -5,9 +5,10 @@
 	t_list* lista_exit;
 	t_list* lista_susp_blocked;
 	t_list* lista_susp_ready;
-	t_list* lista_cpu_conectadas;
-	t_list* lista_modulos_io;
-	t_list* lista_modulos_cpu;
+	t_list* lista_modulos_cpu_conectadas;
+	t_list* lista_modulos_io_conectadas;
+
+
 
 void iniciar_logger_kernel(){
 	kernel_logger = log_create("kernel.log","Kernel", 1, LOG_LEVEL_INFO);
@@ -70,9 +71,8 @@ void iniciar_lista(){
 	lista_exit = list_create();
     lista_susp_blocked = list_create();
     lista_susp_ready = list_create();
-	lista_cpu_conectadas= list_create();
-	lista_modulos_io = list_create();
-	lista_modulos_cpu = list_create();
+	lista_modulos_io_conectadas = list_create();
+	lista_modulos_cpu_conectadas = list_create();
 	log_info(kernel_logger, "Listas inicializadas.");
 }
 
@@ -86,11 +86,13 @@ void iniciar_kernel(char* ruta_config){
 void initialize_mutex(){
 	pthread_mutex_init(&mutex_lista_new, NULL);
 	pthread_mutex_init(&mutex_lista_ready, NULL);
-	pthread_mutex_init(&mutex_lista_exec, NULL);
 	pthread_mutex_init(&mutex_lista_blocked, NULL);
 	pthread_mutex_init(&mutex_lista_exit, NULL);
 	pthread_mutex_init(&mutex_lista_susp_blocked, NULL);
 	pthread_mutex_init(&mutex_lista_susp_ready, NULL);
+	pthread_mutex_init(&mutex_lista_execute,NULL);
+	pthread_mutex_init(&mutex_lista_modulos_cpu_conectadas,NULL );
+	pthread_mutex_init(&mutex_lista_modulos_io_conectadas,NULL);
 	log_info(kernel_logger, "Mutex inicializados.");
 
 }

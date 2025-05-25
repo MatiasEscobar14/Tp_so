@@ -81,12 +81,11 @@ void inicializar_estructuras(t_buffer *buffer, int socket_kernel)
     return;
 }
 
-int memoria_ocupada = 0;
+
 
 bool hay_espacio_disponible(int tamanio_proceso)
 {
-
-    return (memoria_ocupada + tamanio_proceso <= TAM_MEMORIA);
+    return true;
 }
 
 t_proceso* crear_proceso(int pid, int tamanio_proceso)

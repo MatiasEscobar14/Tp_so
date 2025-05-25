@@ -14,7 +14,8 @@
 #include <pthread.h>
 #include "protocolo.h"
 #include <commons/string.h>
-#include  <commons/collections/list.h>
+#include <commons/collections/list.h>
+#include<commons/collections/queue.h>
 #include <stdint.h>
 
 typedef struct {
@@ -29,7 +30,7 @@ typedef enum
     WRITE,
     READ, 
     GOTO,
-    IO,
+    //IO,
     INIT_PROC,
     DUMP_MEMORY,
     EXIT

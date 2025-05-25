@@ -35,20 +35,33 @@ void planificadorCortoPlazo()
 void atender_FIFO() {
     log_info(kernel_logger, "Comienzo a ejecutar FIFO");
 
+    // Verificar si EXECUTE está vacío
     pthread_mutex_lock(&mutex_lista_execute);
-    if (list_is_empty(lista_execute)) {
-        pthread_mutex_lock(&mutex_lista_ready);
-        if(!lista_is_empty(lista_ready)){
-            t_pcb *un_pcb = list_remove(lista_ready, 0); // FIFO: primer proceso en READY
-        }
-        pthread_mutex_unlock(&mutex_lista_ready);
-            if(un_pcb != NULL){
-                agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_exec);
-                cambiar_estado(un_pcb, EXEC_PROCCES);
-                enviar_pcb_a_cpu(un_pcb);
-                atender_kernel_cpu_dispatch();   //nos quedamos a la espera de de PID y motivo (?) sera con el "atender"?
-            }else{log_info(kernel_logger, "Lista READY vacia");}
-    }else{log_info(kernel_logger, "Lista EXECUTE no esta vacia");}
-    pthread_mutex_unlock(&mutex_lista_exec); //va aca o va arriba?
+    bool execute_esta_vacia = list_is_empty(lista_execute);
+    pthread_mutex_unlock(&mutex_lista_execute);
+
+    if (!execute_esta_vacia) {
+        log_info(kernel_logger, "Lista EXECUTE no está vacía");
+        return;
+    }
+
+    // Intentar obtener un proceso de la lista READY
+    pthread_mutex_lock(&mutex_lista_ready);
+    t_pcb* un_pcb = NULL;
+
+    if (!list_is_empty(lista_ready)) {
+        un_pcb = list_remove(lista_ready, 0);
+    }
+    pthread_mutex_unlock(&mutex_lista_ready);
+
+    if (un_pcb != NULL) {
+        cambiar_estado(un_pcb, EXEC_PROCCES);
+        agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_execute);
+        enviar_pcb_a_cpu(un_pcb);
+        //atender_kernel_cpu_dispatch(socket_fd_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
+    } else {
+        log_info(kernel_logger, "Lista READY esta vacia");
+    }
 }
+
 
