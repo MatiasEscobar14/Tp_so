@@ -28,8 +28,9 @@ void dump_memory_sys(int pid){
 
 
 void syscall_io(t_syscall_io* param){
+	log_info(kernel_logger,"entre al syscall_io");
+	log_info(kernel_logger,"pid: %d, nombre_io: %s, miliseg: %d", param->pid, param->nombre_io, param->miliseg);
 	t_pcb* pcb = buscar_pcb_por_pid(param->pid); 
-
 	log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: IO '%s' por %d ms", param->pid, param->nombre_io, param->miliseg);
 	
 	
@@ -49,7 +50,7 @@ void syscall_io(t_syscall_io* param){
 		//TODO deberiamos finalizar proceso o simplemente cambiar el estado a EXIT?
 			return;
 		} 
-	
+		log_info(kernel_logger, "Antes de cambiar estado a BLOCKED");	
 		cambiar_estado(pcb, BLOCKED_PROCCES);
     	agregar_pcb_lista(pcb, lista_blocked, mutex_lista_blocked);
 

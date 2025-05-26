@@ -5,6 +5,7 @@
 #include "gestorKernel.h"
 #include "pcb.h"
 #include "kernel_memoria.h"
+#include "planificadorCortoPlazo.h"
 
 void iniciar_plp();
 void planificadorLargoPlazo();

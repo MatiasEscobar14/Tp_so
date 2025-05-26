@@ -11,7 +11,6 @@ int miliseg;
 #include <utils/utils.h>
 #include<pthread.h>
 #include <semaphore.h>
-#include "syscalls.h"
 
 
 extern t_log* kernel_logger;

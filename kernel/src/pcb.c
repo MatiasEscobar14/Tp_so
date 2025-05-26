@@ -248,8 +248,7 @@ t_pcb* buscar_pcb_por_pid(int un_pid){
 	}
 	if(elemento_encontrado == 0){
 		pthread_mutex_lock(&mutex_lista_ready);
-	//	int cantidad = list_size(lista_ready_thread);
-	//	log_info(kernel_logger, "CANTIDAD DE ENTRADAS EN LA LISTA READY: %d", cantidad);
+	
 		if(list_any_satisfy(lista_ready, __buscar_pcb)){
 			elemento_encontrado = 1;
 			un_pcb = list_find(lista_ready, __buscar_pcb);
@@ -258,10 +257,7 @@ t_pcb* buscar_pcb_por_pid(int un_pid){
 	}
 	if(elemento_encontrado == 0){
 		pthread_mutex_lock(&mutex_lista_execute);
-	//	int cantidad = list_size(lista_execute_thread);
-	//	t_tcb* pepe = list_get(lista_execute_thread, 0);
-	//	log_info(kernel_logger, "CANTIDAD DE ENTRADAS EN LA LISTA EXECUTE: %d", cantidad);
-	//	log_info(kernel_logger, "TID DE LA LISTA: %d", pepe->tid);
+	
 		if(list_any_satisfy(lista_execute, __buscar_pcb)){
 			elemento_encontrado = 1;
 			un_pcb = list_find(lista_execute, __buscar_pcb);

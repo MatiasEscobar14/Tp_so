@@ -19,4 +19,4 @@ void enviar_pcb_a_cpu(t_pcb* un_pcb);
 void bloquear_proceso_syscall(int pid);
 void enviar_pcb_a_modulo_io(t_modulo_io* modulo, t_pcb* pcb, int tiempo_ms);
 
-#endif // PCB_H_
+#endif 

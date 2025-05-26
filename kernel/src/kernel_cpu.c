@@ -28,7 +28,6 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					break;
 				}
 			int identificador = extraer_int_buffer(un_buffer);
-			int socket_fd_dispatch = extraer_int_buffer(un_buffer);
 			nuevo_modulo->identificador = identificador;
 			nuevo_modulo->socket_fd_dispatch = socket;
 
@@ -40,9 +39,9 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
 
 			t_buffer* buffer_handshake = new_buffer();
-			//add_int_buffer(buffer_handshake, 1);
+			add_int_to_buffer(buffer_handshake, 1);
 			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
-			enviar_paquete(paquete_handshake, socket_fd_dispatch);
+			enviar_paquete(paquete_handshake, nuevo_modulo->socket_fd_dispatch);
 			
 			imprimir_modulos_cpu();
 			free(un_buffer);
@@ -213,7 +212,7 @@ t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
 		}
 	}
 	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-
+	log_info(kernel_logger,"Modulo IO encontrado: %s", modulo_buscado->nombre); 
 	if (!encontrado) {
 		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
 	}

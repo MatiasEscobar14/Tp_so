@@ -28,7 +28,7 @@ void atender_kernel_io(int *socket_cliente)
 			log_info(kernel_logger, "socket_fd recibido %d", socket_fd);
 			nuevo_modulo->nombre = strdup(nombre);
 			nuevo_modulo->socket_fd = socket_fd;
-			nuevo_modulo->cola_espera = list_create();
+			nuevo_modulo->cola_espera = queue_create();
 			nuevo_modulo->libre = 1;
 
 			pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
@@ -57,8 +57,8 @@ void atender_kernel_io(int *socket_cliente)
 				modulo->libre = 1;
 
 			// Si hay más procesos esperando por este IO, mandá el siguiente
-			if (!list_is_empty(modulo->cola_espera)) {
-				t_io_esperando* espera = list_remove(modulo->cola_espera, 0);
+			if (!queue_is_empty(modulo->cola_espera)) {
+				t_io_esperando* espera = queue_pop(modulo->cola_espera);
 				enviar_pcb_a_modulo_io(modulo, espera->pcb, espera->milisegundos);
 				modulo->libre = 0;
 				free(espera); // liberar memoria auxiliar

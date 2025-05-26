@@ -97,7 +97,7 @@ void planificadorLargoPlazo()
                     list_remove_element(lista_new, pcb);
                     agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
                     cambiar_estado(pcb, READY_PROCCES);
-                     planificadorCortoPlazo();
+                    planificadorCortoPlazo();
                     if (list_is_empty(lista_new))
                     {
                         hay_pcb = 0;
