@@ -174,7 +174,10 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
     t_modulo_cpu* un_cpu = list_find(lista_modulos_cpu_conectadas, (void *)cpu_esta_libre);
     pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 
-    if (un_cpu != NULL)
+    printf("ID: %d, Estado: %d\n", un_cpu->identificador, un_cpu->libre);
+
+
+    if (un_cpu)
     {
         t_buffer *un_buffer = new_buffer();
         add_int_to_buffer(un_buffer, un_pcb->pid);
@@ -217,13 +220,15 @@ void enviar_pcb_a_modulo_io(t_modulo_io* modulo, t_pcb* pcb, int tiempo_ms) {
     t_buffer* buffer = new_buffer();
     add_int_to_buffer(buffer, pcb->pid);
     add_int_to_buffer(buffer, tiempo_ms);
+    log_info(kernel_logger,"entre a la funcion enviar_pcb a modulo io");
     t_paquete* paquete = crear_paquete(REALIZAR_IO, buffer);
     enviar_paquete(paquete, modulo->socket_fd);
+    log_info(kernel_logger,"Enviee el paquete a io");
     eliminar_paquete(paquete);
 }
 
 int un_pid_a_buscar;
-
+/*
 bool __buscar_pcb(t_pcb* void_pcb){
 		if(void_pcb->pid == un_pid_a_buscar){
 			return true;
@@ -231,7 +236,84 @@ bool __buscar_pcb(t_pcb* void_pcb){
 			return false;
 		}
 	}
+    */
 
+
+bool __buscar_pcb(void* void_pcb) {
+    t_pcb* pcb = (t_pcb*)void_pcb;
+      log_info(kernel_logger, "Comparando PCB con PID %d contra %d", pcb->pid, un_pid_a_buscar);
+    if(pcb->pid == un_pid_a_buscar){
+        return true;
+    } else {
+        return false;
+    }
+}
+t_pcb* buscar_pcb_por_pid(int un_pid) {
+   log_info(kernel_logger, "buscar_pcb_por_pid, me llego este PID: %d", un_pid);
+    t_pcb* un_pcb = NULL;
+    int elemento_encontrado = 0;
+
+    un_pid_a_buscar = un_pid;
+
+    if(elemento_encontrado == 0) {
+        pthread_mutex_lock(&mutex_lista_new);
+        un_pcb = list_find(lista_new, __buscar_pcb);
+        if(un_pcb != NULL) {
+            elemento_encontrado = 1;
+        }
+        pthread_mutex_unlock(&mutex_lista_new);
+        printf("Busque en NEW");
+    }
+
+    if(elemento_encontrado == 0) {
+        pthread_mutex_lock(&mutex_lista_ready);
+        un_pcb = list_find(lista_ready, __buscar_pcb);
+        if(un_pcb != NULL) {
+            elemento_encontrado = 1;
+        }
+        pthread_mutex_unlock(&mutex_lista_ready);
+        printf("Busque en READY");
+    }
+
+    if(elemento_encontrado == 0) {
+        pthread_mutex_lock(&mutex_lista_execute);
+        un_pcb = list_find(lista_execute, __buscar_pcb);
+        if(un_pcb != NULL) {
+            elemento_encontrado = 1;
+        }
+        pthread_mutex_unlock(&mutex_lista_execute);
+        printf("Busque en EXEC");
+    }
+
+    if(elemento_encontrado == 0) {
+        pthread_mutex_lock(&mutex_lista_exit);
+        un_pcb = list_find(lista_exit, __buscar_pcb);
+        if(un_pcb != NULL) {
+            elemento_encontrado = 1;
+        }
+        pthread_mutex_unlock(&mutex_lista_exit);
+        printf("Busque en EXIT");
+    }
+
+    if(elemento_encontrado == 0) {
+        pthread_mutex_lock(&mutex_lista_blocked);
+        un_pcb = list_find(lista_blocked, __buscar_pcb);
+        if(un_pcb != NULL) {
+            elemento_encontrado = 1;
+        }
+        pthread_mutex_unlock(&mutex_lista_blocked);
+        printf("Busque en BLOCKED");
+    }
+
+    if(elemento_encontrado == 0) {
+        log_error(kernel_logger, "[PID:%d] no encontrada en ninguna lista", un_pid);
+        un_pcb = NULL;
+    }
+
+    return un_pcb;
+}
+
+/*
 t_pcb* buscar_pcb_por_pid(int un_pid){
 	t_pcb* un_pcb;
 	int elemento_encontrado = 0;
@@ -289,3 +371,4 @@ t_pcb* buscar_pcb_por_pid(int un_pid){
 
 	return un_pcb;
 }
+*/

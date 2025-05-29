@@ -122,7 +122,6 @@ char* extraer_string_buffer(t_buffer* unBuffer){
 	return ext_string;
 }
 
-
 t_paquete* crear_paquete(op_code code, t_buffer* unBuffer){
 
 	t_paquete* unPaquete = malloc(sizeof(t_paquete));

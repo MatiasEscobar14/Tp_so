@@ -36,7 +36,7 @@ void* hilo_cliente_memoria_f(void* args) {
 }
 
 //=====================================================================lani
-void crear_conexiones(void* arg){
+void crear_conexiones(){
     pthread_t hilo_servidor_io;
     pthread_t hilo_cliente_memoria;
     pthread_t hilo_dispatch;

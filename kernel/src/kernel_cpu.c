@@ -199,7 +199,9 @@ char* recibir_string(int socket) {
 }
 
 t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
-	t_modulo_io* modulo_buscado;
+	log_info(kernel_logger, "Entré a buscar el modulo_io_por_nombre con nombre: %s", nombre_io);
+	t_modulo_io* modulo_buscado = NULL;
+
 	bool encontrado = false;
 
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
@@ -212,9 +214,11 @@ t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
 		}
 	}
 	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-	log_info(kernel_logger,"Modulo IO encontrado: %s", modulo_buscado->nombre); 
-	if (!encontrado) {
-		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
+
+	if (encontrado) {
+		log_info(kernel_logger,"Modulo IO encontrado: %s", modulo_buscado->nombre);
+	} else {
+		log_error(kernel_logger, "No se encontró el módulo IO con nombre '%s'", nombre_io);
 	}
 
 	return modulo_buscado;
