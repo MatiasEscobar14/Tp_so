@@ -97,6 +97,7 @@ void initialize_mutex(){
 
 }
 void initialize_semaphores(){
+		sem_init(&sem_cpu_disponible,0,0);
 		sem_init(&semaforo_largo_plazo,0,0);
 		sem_init(&sem_rpta_estructura_inicializada,0,0);
 		sem_init(&sem_estructura_liberada,0,0);

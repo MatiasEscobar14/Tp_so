@@ -30,6 +30,7 @@ void atender_kernel_io(int *socket_cliente)
 			nuevo_modulo->socket_fd = socket_fd;
 			nuevo_modulo->cola_espera = queue_create();
 			nuevo_modulo->libre = 1;
+			nuevo_modulo->en_ejecucion = NULL;
 
 			pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 			list_add(lista_modulos_io_conectadas, nuevo_modulo);
@@ -38,7 +39,7 @@ void atender_kernel_io(int *socket_cliente)
 			log_info(kernel_logger, "Módulo IO conectado: %s, estado: %d", nuevo_modulo->nombre, nuevo_modulo->libre);
 			imprimir_modulos_io();
 			free(nombre);
-			//eliminar_buffer(un_buffer);
+			
 			break;
 		case FIN_IO:
 
@@ -47,37 +48,37 @@ void atender_kernel_io(int *socket_cliente)
 			int pid = extraer_int_buffer(buffer);
 			log_info(kernel_logger, "Recibido FIN_IO del módulo IO para el PID %d", pid);
 
-			t_pcb *pcb = buscar_pcb_por_pid(pid);
-			if (pcb == NULL)
+			t_modulo_io *io = obtener_modulo_io_por_socket(int socket);
+			if (!io)
 			{
-				log_error(kernel_logger, "No se encontró el PCB para PID %d", pid);
+				log_error(kernel_logger, "No se encontró el io para socket %d", socket);
 				break;
 			}
-			cambiar_estado(pcb, READY_PROCCES);
-			log_info(kernel_logger,"Cambie al ready en fin de io");
-			agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
-			// Liberar el IO
-			t_modulo_io *modulo = obtener_modulo_io_por_socket(socket); // función que busca en la lista por socket_fd
-			if (modulo != NULL)
-			{
-				pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
-				modulo->libre = 1;
 
-				// Si hay más procesos esperando por este IO, mandá el siguiente
-				if (!queue_is_empty(modulo->cola_espera))
-				{
-					t_io_esperando *espera = queue_pop(modulo->cola_espera);
-					enviar_pcb_a_modulo_io(modulo, espera->pcb, espera->milisegundos);
-					modulo->libre = 0;
-					free(espera); // liberar memoria auxiliar
-				}
-				pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+			t_pcb* pcb = buscar_pcb_por_pid(pid);
+			
+			cambiar_estado(pcb,EXIT_PROCCES);
+			/* TODO Al momento de recibir un mensaje de una IO se deberá verificar que el mismo sea una confirmación
+			de fin de IO, en caso afirmativo, se deberá validar si hay más procesos esperando realizar dicha IO.
+			En caso de que el mensaje corresponda a una desconexión de la IO, el proceso que estaba ejecutando en
+			dicha IO, se deberá pasar al estado EXIT.*/
+			if (!queue_is_empty(io->cola_espera)) {
+    		t_pcb* siguiente = queue_pop(io->cola_espera);
+    		io->en_ejecucion = siguiente;
+
+		    // Enviás al módulo IO: PID + tiempo que tiene que dormir
+    		t_buffer* buffer = new_buffer();
+    		add_int_to_buffer(buffer, siguiente->pid);
+    		add_int_to_buffer(buffer, siguiente->tiempo_io);
+
+    		t_paquete* paquete = crear_paquete(REALIZAR_IO, buffer);
+    		enviar_paquete(paquete, io->socket);
+    		eliminar_paquete(paquete);
+			} else {
+ 	   			io->en_ejecucion = NULL; // no hay nadie más
 			}
-			else
-			{
-				log_warning(kernel_logger, "No se encontró módulo IO para socket %d", socket);
-			}
-			// eliminar_buffer(buffer);
+
+	
 			break;
 		case MENSAJE:
 			// manejar mensaje

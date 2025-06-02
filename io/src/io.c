@@ -51,8 +51,6 @@ int main(int argc, char *argv[])
 
             usleep(tiempo_ms * 1000);
 
-            log_info(logger,"tiempo total es %d:", tiempo_ms*1000);
-
             log_info(logger, "Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
 
             // Informar al Kernel que finalizó la IO
@@ -68,8 +66,7 @@ int main(int argc, char *argv[])
         case -1:
             log_error(logger, "Se desconectó el Kernel.");
             close(socket_cliente);
-            return;
-
+            break;
         default:
             log_warning(logger, "Código de operación desconocido: %d", cod_op);
             break;

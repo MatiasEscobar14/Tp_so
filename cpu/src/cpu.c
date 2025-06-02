@@ -6,11 +6,9 @@
 /*pthread_mutex_t mutex_pcb_actual;
 pthread_mutex_t mutex_interrupt;*/
 void conectar_con_memoria();
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
 
-    int identificador = 5;
-    //atoi(argv[1]);
+    int identificador = 5; //atoi(argv[1]);
     char *nombre_log = string_from_format("cpu_%d.log", identificador);
 
     iniciar_config_cpu("cpu.config");
@@ -19,8 +17,8 @@ int main(int argc, char *argv[])
     log_info(cpu_logger, "Logger e config iniciados");
 
     conectar_con_kernel(identificador);
-    //conectar_con_memoria();
-    //socket_memoria = crear_conexion(cpu_logger, "Server Memoria", IP_MEMORIA, PUERTO_MEMORIA);
+   // conectar_con_memoria();
+   // socket_memoria = crear_conexion(cpu_logger, "Server Memoria", IP_MEMORIA, PUERTO_MEMORIA);
 
     return 0;
 }
@@ -76,15 +74,21 @@ void conectar_con_kernel(int identificador)
         {
         case MENSAJE:
             log_info(cpu_logger, "Recibida solicitud de CPU del Kernel.");
+            // Supongamos que recibiste una instrucción tipo: IO teclado 100
+           /* t_paquete *paquete_recibido = recibir_paquete(cliente_de_kernel_dispatch);
+            t_buffer *buffer_paquete = paquete_recibido->buffer;
+            char* nombre_io = extraer_string_buffer(buffer_paquete);  // "teclado"
+            int tiempo = extraer_int_buffer(buffer_paquete);          // 100
+            int pid = extraer_int_buffer(buffer_paquete); */            // PID asociado al proceso
             // Aquí podrías procesar la solicitud de IO
 
             t_buffer *buffer = new_buffer();
             add_string_to_buffer(buffer, "teclado");
             add_int_to_buffer(buffer, 0);
-            add_int_to_buffer(buffer, 1);
+            add_int_to_buffer(buffer, 100);
             t_paquete *nuevo_paquete = crear_paquete(IO, buffer);
             enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
-
+            
             log_info(cpu_logger, "Envie SYSCALL-IO al kernel");
 
             break;

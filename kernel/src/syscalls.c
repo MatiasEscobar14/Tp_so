@@ -35,10 +35,10 @@ void syscall_io(t_syscall_io *param)
 
 	t_pcb *pcb = buscar_pcb_por_pid(param->pid);
 	log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: IO '%s' por %d ms", param->pid, param->nombre_io, param->miliseg);
-
-	// pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
+	log_info(kernel_logger, "PCB encontrada: %d ", pcb->pid);
+	
 	t_modulo_io *modulo_io = buscar_modulo_io_por_nombre(param->nombre_io);
-	// pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+	log_info(kernel_logger, "Modulo IO encontrado: %s ", modulo_io->nombre);
 
 	if (!modulo_io)
 	{
@@ -69,7 +69,7 @@ void syscall_io(t_syscall_io *param)
 		enviar_pcb_a_modulo_io(modulo_io, pcb_a_ejecutar, param->miliseg);
 	}
 
-	log_info(kernel_logger, "Fin de IO: ## (<%d>) finalizó IO y pasa a READY", param->pid);
+	//log_info(kernel_logger, "Fin de IO: ## (<%d>) finalizó IO y pasa a READY", param->pid);
 	free(param->nombre_io);
 	free(param);
 }

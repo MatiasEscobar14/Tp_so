@@ -17,60 +17,59 @@ static void procesar_conexion_memoria(void *void_args)
 			return;
 		}
 
-		switch (cop)
-		{
-		case MENSAJE:
-			recibir_mensaje(logger_memoria, cliente_socket);
-			break;
+		switch (cop){
+		    case MENSAJE:
+			    recibir_mensaje(logger_memoria, cliente_socket);
+			    break;
 
-        case PEDIDO_INSTRUCCION: 
-			printf("entre al case pedido de instruccion");
-			uint32_t pid, pc;
-			recibir_pedido_instruccion(&pid, &pc, cliente_socket); //(2)
-			printf("paso bien el pedido de instruccion");
-			// log_debug(logger_memoria, "Se recibio un pedido de instruccion para el PID %d y PC %d", pid, pc);
-			proceso_memoria = obtener_proceso_pid(pid); //(3)
-			if (proceso_memoria == NULL)
-			{
-				log_error(logger_memoria, "No se encontro el proceso con PID %d", pid);
-				break;
-			}
-			else
-			{
-				t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc); //(3)
-				if (instruccion != NULL)
-				{
-					enviar_instruccion(cliente_socket, instruccion); //(4)
-					// log_debug(logger_memoria, "Se envia la instruccion a CPU de PC %d para el PID %d y es: %s - %s - %s", pc, pid, instruccion_to_string(instruccion->nombre), instruccion->parametro1, instruccion->parametro2);
-				}
-				else
-				{
-					log_error(logger_memoria, "No se encontro la instruccion con PC %d para el PID %d", pc, pid);
-				}
-				break;
-			}
+            case PEDIDO_INSTRUCCION: 
+			    printf("entre al case pedido de instruccion");
+			    uint32_t pid, pc;
+			    recibir_pedido_instruccion(&pid, &pc, cliente_socket); //(2)
+			    printf("paso bien el pedido de instruccion");
+			    // log_debug(logger_memoria, "Se recibio un pedido de instruccion para el PID %d y PC %d", pid, pc);
+			    proceso_memoria = obtener_proceso_pid(pid); //(3)
+			    if (proceso_memoria == NULL)
+			    {
+				    log_error(logger_memoria, "No se encontro el proceso con PID %d", pid);
+				    break;
+			    }
+			        else
+			    {
+				    t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc); //(3)
+				    if (instruccion != NULL)
+				    {
+					    enviar_instruccion(cliente_socket, instruccion); //(4)
+					    // log_debug(logger_memoria, "Se envia la instruccion a CPU de PC %d para el PID %d y es: %s - %s - %s", pc, pid, instruccion_to_string(instruccion->nombre), instruccion->parametro1, instruccion->parametro2);
+				    }
+				    else
+				    {
+					    log_error(logger_memoria, "No se encontro la instruccion con PC %d para el PID %d", pc, pid);
+				    }
+				    break;
+			    }
 
 			case INICIALIZAR_PROCESO: 
-			proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
-			proceso_memoria = iniciar_proceso_path(proceso_memoria); //(6)
-			break;
-            /*
+			    proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
+			    proceso_memoria = iniciar_proceso_path(proceso_memoria); //(6)
+			    break;
+                /*
             case FINALIZAR_PROCESO:
-			uint32_t pid_a_finalizar;
-			recibir_finalizar_proceso(&pid_a_finalizar, cliente_socket);
-			proceso_memoria = obtener_proceso_pid(pid_a_finalizar);
-			if (proceso_memoria == NULL)
-			{
-				log_error(logger_memoria, "No se encontro el proceso con PID %d", pid_a_finalizar);
-				break;
-			}
-			else
-			{
-				liberar_estructura_proceso_memoria(proceso_memoria);
-				break;
-			}*/
-}
-}
+			    uint32_t pid_a_finalizar;
+			    recibir_finalizar_proceso(&pid_a_finalizar, cliente_socket);
+			    proceso_memoria = obtener_proceso_pid(pid_a_finalizar);
+			    if (proceso_memoria == NULL)
+			    {
+				    log_error(logger_memoria, "No se encontro el proceso con PID %d", pid_a_finalizar);
+				    break;
+			    }
+			    else
+			    {
+				    liberar_estructura_proceso_memoria(proceso_memoria);
+				    break;
+			    }*/
+        }
+    }
 }
 
 

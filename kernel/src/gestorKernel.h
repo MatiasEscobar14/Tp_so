@@ -91,6 +91,7 @@ extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
 extern sem_t sem_estructura_liberada;
 extern sem_t sem_rpta_dump_memory;
+extern sem_t sem_cpu_disponible;
 
 extern pthread_mutex_t mutex_flag_pedido_memoria;
 
@@ -114,7 +115,7 @@ typedef struct {
 }t_modulo_cpu;
 
 //=====IO=====/
-typedef struct {
+typedef struct {                //?
     t_pcb* pcb;
     int milisegundos;
 } t_io_esperando;
@@ -122,7 +123,7 @@ typedef struct {
 typedef struct {
     char* nombre;
     int socket_fd;  
-    //t_list* procesos_activos;
+    t_pcb* en_ejecucion;
     //t_list* procesos_en_espera;
     t_queue* cola_espera;
     bool libre;

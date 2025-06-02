@@ -11,6 +11,7 @@ void crear_proceso_inicial(int tamanio_proceso, char* ruta){
 		log_info(kernel_logger,"El PID es %d", pcb->pid);
 		pthread_mutex_unlock(&mutex_lista_new);
 		log_info(kernel_logger, "Creación de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);
+		//sem_post(&sem_cpu_disponible); 
 		iniciar_plp();	//	PLANIFICADOR A LARGO PLAZO
 	}else{
 		log_info(kernel_logger, "No hay suficiente espacio para crear el proceso");

@@ -3,7 +3,8 @@
 void planificadorCortoPlazo()
 {
      while (1)
-    {
+    {   
+      //  sem_wait(&sem_cpu_disponible);
         pthread_mutex_lock(&mutex_lista_ready);
         bool lista_vacia = list_is_empty(lista_ready);
         pthread_mutex_unlock(&mutex_lista_ready);
@@ -58,7 +59,7 @@ void atender_FIFO() {
         cambiar_estado(un_pcb, EXEC_PROCCES);
         agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_execute);
         enviar_pcb_a_cpu(un_pcb);
-        //atender_kernel_cpu_dispatch(socket_fd_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
+        //atender_kernel_cpu_dispatch(socket_cpu_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
     } else {
         log_info(kernel_logger, "Lista READY esta vacia");
     }

@@ -40,7 +40,7 @@ void attender_memoria_kernel(int socket_kernel)
         break;
      case FINALIZAR_ESTRUCTURAS_KM:
             un_buffer = recv_buffer(socket_kernel);
-          //  finalizar_estructuras(un_buffer, socket_kernel);
+         //   finalizar_estructuras(un_buffer, socket_kernel);
             free(un_buffer);
         break;
     case DUMP_MEMORY_KM:
