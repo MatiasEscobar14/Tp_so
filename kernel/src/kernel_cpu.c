@@ -94,8 +94,6 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					log_info(kernel_logger, "Mandando a dormir al [PID: %d] por %d milisegundos", parametros->pid, parametros->miliseg);
 					
 					syscall_io(parametros);
-					
-					free(un_buffer);
 				break;
 		    default:
 			    log_warning(kernel_logger,"OPERACION DESCONOCIDA - KERNEL - CPU DISPATCH");
@@ -200,7 +198,7 @@ char* recibir_string(int socket) {
 }
 
 t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
-	t_modulo_io* modulo_buscado;
+	t_modulo_io* modulo_buscado = NULL;
 	bool encontrado = false;
 
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);

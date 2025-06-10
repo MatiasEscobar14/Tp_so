@@ -35,7 +35,7 @@ void syscall_io(t_syscall_io *param){
 	log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: IO '%s' por %d ms",
 			 param->pid, param->nombre_io, param->miliseg);
 
-	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
+	//pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 	t_modulo_io *modulo_io = buscar_modulo_io_por_nombre(param->nombre_io);
 
 	if (!modulo_io)
@@ -43,7 +43,6 @@ void syscall_io(t_syscall_io *param){
 		log_error(kernel_logger, "Dispositivo OP '%s' no encontrado.", param->nombre_io);
 		cambiar_estado(pcb, EXIT_PROCCES);
 		agregar_pcb_lista(pcb, lista_exit, mutex_lista_exit);
-		pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 		free(param->nombre_io);
 		free(param);
 		return;
@@ -60,9 +59,10 @@ void syscall_io(t_syscall_io *param){
 
 	if (modulo_io->libre && !queue_is_empty(modulo_io->cola_espera))
 	{
-		t_pcb *pcb_a_ejecutar = queue_pop(modulo_io->cola_espera);
+		t_io_esperando *trabajo_a_ejecutar = queue_pop(modulo_io->cola_espera);
 		modulo_io->libre = false;
-		enviar_pcb_a_modulo_io(modulo_io, pcb_a_ejecutar, param->miliseg);
+		enviar_pcb_a_modulo_io(modulo_io, trabajo_a_ejecutar->pcb, trabajo_a_ejecutar->milisegundos);
+		free(trabajo_a_ejecutar);
 	}
 
 	log_info(kernel_logger, "Proceso ## (%d) enviado a dispositivo IO '%s'",

@@ -238,8 +238,10 @@ void enviar_pcb_a_modulo_io(t_modulo_io *modulo, t_pcb *pcb, int tiempo_ms)
     add_int_to_buffer(buffer, pcb->pid);
     add_int_to_buffer(buffer, tiempo_ms);
     t_paquete *paquete = crear_paquete(REALIZAR_IO, buffer);
+    log_info(kernel_logger, "Socket de IO teclado %d", modulo->socket_fd);
     enviar_paquete(paquete, modulo->socket_fd);
     eliminar_paquete(paquete);
+    
 }
 
 int un_pid_a_buscar;
