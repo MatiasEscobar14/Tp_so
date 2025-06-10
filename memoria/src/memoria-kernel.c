@@ -161,6 +161,6 @@ int valor_memoria_disponible(){
 }
 
 void acumular_tamanio(void* elemento) {
-    t_proceso_memoria* proceso = (t_proceso_memoria*) elemento;
+    t_proceso* proceso = (t_proceso*) elemento;
     suma_tamanios += proceso->tamanio;
 }

@@ -1,4 +1,4 @@
-#ifndef UTILS_MEMORIA_H_
+/*#ifndef UTILS_MEMORIA_H_
 #define UTILS_MEMORIA_H_
 
 #include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/gestor.h"
@@ -29,4 +29,4 @@ void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria);
 void liberar_instruccion(t_instruccion *instruccion);
 
 
-#endif
+#endif*/

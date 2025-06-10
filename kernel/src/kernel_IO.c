@@ -28,7 +28,8 @@ void atender_kernel_io(int *socket_cliente)
 			log_info(kernel_logger, "socket_fd recibido %d", socket_fd);
 			nuevo_modulo->nombre = strdup(nombre);
 			nuevo_modulo->socket_fd = socket_fd;
-			nuevo_modulo->cola_espera = list_create();
+			nuevo_modulo->pcb_ejecutando = NULL;
+			nuevo_modulo->cola_espera = queue_create();
 			nuevo_modulo->libre = 1;
 
 			pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
@@ -39,41 +40,84 @@ void atender_kernel_io(int *socket_cliente)
 
 			break;
 		case FIN_IO:
-			t_buffer* buffer = recv_buffer(socket);
+			t_buffer *buffer = recv_buffer(socket);
 			int pid = extraer_int_buffer(buffer);
 			log_info(kernel_logger, "Recibido FIN_IO del módulo IO para el PID %d", pid);
 
-			t_pcb* pcb = buscar_pcb_por_pid(pid);
-			if (pcb == NULL) {
+			t_pcb *pcb = buscar_pcb_por_pid(pid);
+			if (pcb == NULL)
+			{
 				log_error(kernel_logger, "No se encontró el PCB para PID %d", pid);
 				break;
 			}
-			cambiar_estado(pcb,READY_PROCCES);
+
+			cambiar_estado(pcb, READY_PROCCES);
 			agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+
 			// Liberar el IO
-			t_modulo_io* modulo = obtener_modulo_io_por_socket(socket);  // función que busca en la lista por socket_fd
-			if (modulo != NULL) {
+			t_modulo_io *modulo = obtener_modulo_io_por_socket(socket); // función que busca en la lista por socket_fd
+			if (modulo != NULL)
+			{
 				pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 				modulo->libre = 1;
 
-			// Si hay más procesos esperando por este IO, mandá el siguiente
-			if (!list_is_empty(modulo->cola_espera)) {
-				t_io_esperando* espera = list_remove(modulo->cola_espera, 0);
-				enviar_pcb_a_modulo_io(modulo, espera->pcb, espera->milisegundos);
-				modulo->libre = 0;
-				free(espera); // liberar memoria auxiliar
+				// Si hay más procesos esperando por este IO, mandá el siguiente
+				if (!list_is_empty(modulo->cola_espera))
+				{
+					t_io_esperando *espera = list_remove(modulo->cola_espera, 0);
+					enviar_pcb_a_modulo_io(modulo, espera->pcb, espera->milisegundos);
+					modulo->libre = 0;
+					free(espera); // liberar memoria auxiliar
+				}
+				pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 			}
-		pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-	} else {
-        log_warning(kernel_logger, "No se encontró módulo IO para socket %d", socket);
-    }
-//eliminar_buffer(buffer);
-		break;
+			else
+			{
+				log_warning(kernel_logger, "No se encontró módulo IO para socket %d", socket);
+			}
+			// eliminar_buffer(buffer);
+			break;
 		case MENSAJE:
 			// manejar mensaje
 			break;
 		case PAQUETE:
 			// manejar paquete
+			break;
+		case -1: // caso de desconexion IO
+			log_warning(kernel_logger, "Módulo IO desconectado en socket %d", socket);
+
+			t_modulo_io *modulo_io = obtener_modulo_io_por_socket(socket);
+			if (modulo_io  != NULL)
+			{
+				pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
+
+				// Buscar proceso que estaba ejecutando en esta IO
+				t_pcb *pcb_ejecutando = modulo_io ->pcb_ejecutando; // Si guardas cuál está ejecutando
+				if (pcb_ejecutando != NULL)
+				{
+					log_info(kernel_logger, "Proceso PID %d pasa a EXIT por desconexión de IO",
+							 pcb_ejecutando->pid);
+					cambiar_estado(pcb_ejecutando, EXIT_PROCCES);
+					remover_pcb_lista(pcb_ejecutando, lista_blocked, mutex_lista_blocked);
+					agregar_pcb_lista(pcb_ejecutando, lista_exit, mutex_lista_exit);
+				}
+				while (!list_is_empty(modulo_io ->cola_espera))
+				{
+					t_io_esperando *espera = list_remove(modulo_io ->cola_espera, 0);
+					log_info(kernel_logger, "Proceso PID %d pasa a EXIT por desconexión de IO",
+							 espera->pcb->pid);
+					cambiar_estado(espera->pcb, EXIT_PROCCES);
+					remover_pcb_lista(espera->pcb, lista_blocked, mutex_lista_blocked);
+					agregar_pcb_lista(espera->pcb, lista_exit, mutex_lista_exit);
+					free(espera);
+				}
+
+				list_remove_element(lista_modulos_io_conectadas, modulo_io );
+				free(modulo_io );
+
+				pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+			}
+			close(socket);
 			break;
 		default:
 			control_key = 0;
@@ -83,22 +127,23 @@ void atender_kernel_io(int *socket_cliente)
 
 	log_warning(kernel_logger, "El cliente (%d) se desconectó de Kernel Server IO", socket);
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
-    for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
-        t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
-        if (modulo->socket_fd == socket) {
-            list_remove(lista_modulos_io_conectadas, i);
-            free(modulo); 
-            break;
-        }
-    }
-    pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++)
+	{
+		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
+		if (modulo->socket_fd == socket)
+		{
+			list_remove(lista_modulos_io_conectadas, i);
+			free(modulo);
+			break;
+		}
+	}
+	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 
 	imprimir_modulos_io();
- 
+
 	close(socket);
 	pthread_exit(NULL);
 }
-
 
 void server_escuchar_io()
 {
@@ -135,25 +180,28 @@ void imprimir_modulos_io()
 	}
 }
 
+t_modulo_io *obtener_modulo_io_por_socket(int socket)
+{
+	t_modulo_io *modulo_encontrado = NULL;
 
-t_modulo_io* obtener_modulo_io_por_socket(int socket) {
-    t_modulo_io* modulo_encontrado = NULL;
+	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 
-    pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
+	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++)
+	{
+		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
+		if (modulo->socket_fd == socket)
+		{
+			modulo_encontrado = modulo;
+			break;
+		}
+	}
 
-    for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
-        t_modulo_io* modulo = list_get(lista_modulos_io_conectadas, i);
-        if (modulo->socket_fd == socket) {
-            modulo_encontrado = modulo;
-            break;
-        }
-    }
+	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 
-    pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+	if (!modulo_encontrado)
+	{
+		log_error(kernel_logger, "No se encontró ningún módulo IO con socket %d", socket);
+	}
 
-    if (!modulo_encontrado) {
-        log_error(kernel_logger, "No se encontró ningún módulo IO con socket %d", socket);
-    }
-
-    return modulo_encontrado;
+	return modulo_encontrado;
 }

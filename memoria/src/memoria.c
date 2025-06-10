@@ -2,7 +2,7 @@
 
 pthread_mutex_t mutex_lista_procesos;
 
-t_proceso_memoria* proceso_memoria;
+t_proceso* proceso_memoria;
 
 pthread_mutex_t mutex_procesos;
 

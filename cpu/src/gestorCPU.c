@@ -16,4 +16,4 @@ pthread_mutex_t mutex_pcb_actual;
 pthread_mutex_t mutex_interrupt;
 
 
-t_pcb *pcb_actual;
+//t_pcb *pcb_actual;

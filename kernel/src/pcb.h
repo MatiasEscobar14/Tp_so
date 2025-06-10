@@ -5,12 +5,13 @@
 
 t_pcb* crear_pcb(char* ruta, int tam_proceso);
 void agregar_pcb_lista(t_pcb* pcb, t_list* lista_estado, pthread_mutex_t mutex_lista);
+void remover_pcb_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* mutex);
 
 void cambiar_estado(t_pcb* un_pcb, estado_pcb proximo_estado);
 const char* estado_a_string(estado_pcb estado);
 
 bool buscar_pcb(void *elemento);
-bool __buscar_pcb(t_pcb* void_pcb);
+bool __buscar_pcb(void* void_pcb);
 t_pcb* buscar_y_remover_pcb_por_pid(int un_pid);
 t_pcb* buscar_pcb_por_pid(int un_pid);
 t_pcb* buscar_pcb_por_socket(int socket_cpu);

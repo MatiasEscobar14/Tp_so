@@ -38,13 +38,13 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			list_add(lista_modulos_cpu_conectadas, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
-
-			t_buffer* buffer_handshake = new_buffer();
-			//add_int_buffer(buffer_handshake, 1);
-			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
-			enviar_paquete(paquete_handshake, socket_fd_dispatch);
-			
 			imprimir_modulos_cpu();
+			t_buffer* buffer_handshake = new_buffer();
+			add_int_to_buffer(buffer_handshake, 1);
+			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
+			enviar_paquete(paquete_handshake, socket);
+			log_info(kernel_logger, "Envie el MENSAJE a CPU");
+			
 			free(un_buffer);
 				break;
 		    case MENSAJE:
@@ -92,10 +92,10 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					parametros->pid = pid;
 					parametros->miliseg = tiempo_ms;
 					log_info(kernel_logger, "Mandando a dormir al [PID: %d] por %d milisegundos", parametros->pid, parametros->miliseg);
-					pthread_t hilo_io;
-					pthread_create(&hilo_io, NULL, (void*)syscall_io, (void*)parametros);
-					pthread_join(hilo_io, NULL);
-					free(parametros);
+					
+					syscall_io(parametros);
+					
+					free(un_buffer);
 				break;
 		    default:
 			    log_warning(kernel_logger,"OPERACION DESCONOCIDA - KERNEL - CPU DISPATCH");

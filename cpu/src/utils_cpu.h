@@ -1,4 +1,4 @@
-#ifndef UTILS_CPU_H_
+/*#ifndef UTILS_CPU_H_
 #define UTILS_CPU_H_
 
 #include "gestorCPU.h"
@@ -27,4 +27,4 @@ extern bool envioPcb;
 extern bool interrupciones[5];
 
 
-#endif
+#endif*/

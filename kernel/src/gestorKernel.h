@@ -123,8 +123,7 @@ typedef struct {
 typedef struct {
     char* nombre;
     int socket_fd;  
-    //t_list* procesos_activos;
-    //t_list* procesos_en_espera;
+    t_pcb* pcb_ejecutando;
     t_queue* cola_espera;
     bool libre;
 } t_modulo_io;

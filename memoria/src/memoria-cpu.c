@@ -1,4 +1,4 @@
-#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/memoria-cpu.h"
+/*#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/memoria-cpu.h"
 
 static void procesar_conexion_memoria(void *void_args)
 {
@@ -54,7 +54,7 @@ static void procesar_conexion_memoria(void *void_args)
 			proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
 			proceso_memoria = iniciar_proceso_path(proceso_memoria); //(6)
 			break;
-            /*
+            
             case FINALIZAR_PROCESO:
 			uint32_t pid_a_finalizar;
 			recibir_finalizar_proceso(&pid_a_finalizar, cliente_socket);
@@ -68,7 +68,7 @@ static void procesar_conexion_memoria(void *void_args)
 			{
 				liberar_estructura_proceso_memoria(proceso_memoria);
 				break;
-			}*/
+			}
 }
 }
 }
@@ -358,7 +358,7 @@ bool _buscar_proceso(void *element)
 {
     return element == proceso_memoria;
 }
-/*
+
 void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
 {
     // Liberar elementos de la tabla de páginas
@@ -378,7 +378,7 @@ void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
     free(proceso_memoria->path);
     free(proceso_memoria);
 }
-*/
+
 void liberar_instruccion(t_instruccion *instruccion)
 {
     free(instruccion->parametro1);
@@ -387,4 +387,4 @@ void liberar_instruccion(t_instruccion *instruccion)
     free(instruccion->parametro4);
     free(instruccion->parametro5);
     free(instruccion);
-}
+}*/

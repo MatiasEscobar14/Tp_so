@@ -1,4 +1,4 @@
-#ifndef GESTOR_H_
+/*#ifndef GESTOR_H_
 #define GESTOR_H_
 
 #include <commons/log.h>
@@ -50,4 +50,4 @@ extern int RETARDO_MEMORIA;
 extern char* PATH_INSTRUCCIONES;
 
 
-#endif 
+#endif */

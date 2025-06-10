@@ -4,7 +4,7 @@
 #include "gestorMemoria.h"
 #include "iniciarMemoria.h"
 #include "memoria-kernel.h"
-#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/gestor.h"
+//#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/gestor.h"
 
 extern t_list* lista_procesos;
 

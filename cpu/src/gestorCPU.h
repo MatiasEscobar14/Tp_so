@@ -18,12 +18,11 @@
 #include <commons/memory.h>
 #include <readline/readline.h>
 
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
-#include "inicializar_estructuras.h"
-#include "contexto.h"
-#include "utils_pcb.h"
-#include "instrucciones.h"
+#include <utils/utils.h>
+//#include "inicializar_estructuras.h"
+//#include "contexto.h"
+//#include "utils_pcb.h"
+//#include "instrucciones.h"
 
 
 
@@ -42,6 +41,6 @@ extern int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memori
 extern pthread_mutex_t mutex_pcb_actual;
 extern pthread_mutex_t mutex_interrupt;
 
-extern t_pcb* pcb_actual;
+//extern t_pcb* pcb_actual;
 
 #endif

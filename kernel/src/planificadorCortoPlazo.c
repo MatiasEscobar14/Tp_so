@@ -55,9 +55,10 @@ void atender_FIFO() {
     pthread_mutex_unlock(&mutex_lista_ready);
 
     if (un_pcb != NULL) {
+        enviar_pcb_a_cpu(un_pcb);
         cambiar_estado(un_pcb, EXEC_PROCCES);
         agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_execute);
-        enviar_pcb_a_cpu(un_pcb);
+        
         //atender_kernel_cpu_dispatch(socket_fd_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
     } else {
         log_info(kernel_logger, "Lista READY esta vacia");

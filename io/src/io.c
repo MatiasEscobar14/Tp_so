@@ -46,7 +46,9 @@ int main(int argc, char *argv[])
             int pid = extraer_int_buffer(un_buffer);
             int tiempo_ms = extraer_int_buffer(un_buffer);
             log_info("Inicio de IO: ## PID: <%d> - Inicio de IO - Tiempo: <%d>.", pid, tiempo_ms);
+
             usleep(tiempo_ms * 1000);
+
             log_info("Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
             // TODO informar a kernal que finalizo el IO
             t_buffer *buffer_respuesta = new_buffer();
@@ -54,6 +56,7 @@ int main(int argc, char *argv[])
             t_paquete *paquete_respuesta = crear_paquete(FIN_IO, buffer_respuesta);
             enviar_paquete(paquete_respuesta, socket_cliente);
             eliminar_paquete(paquete_respuesta);
+            free(un_buffer);
             break;
 
         case -1:

@@ -1,4 +1,4 @@
-#ifndef CONTEXTO_H_
+/*#ifndef CONTEXTO_H_
 #define CONTEXTO_H_
 
 #include <stdint.h>
@@ -62,4 +62,4 @@ typedef struct
 } t_pcb;
 
 
-#endif
+#endif*/

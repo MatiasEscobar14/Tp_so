@@ -1,15 +1,12 @@
-#include <utils/utils.h>
-#include <utils/protocolo.h>
-#include "gestorCPU.h"
 #include "cpu.h"
-
+#include "inicializar_estructuras.h"
 /*pthread_mutex_t mutex_pcb_actual;
 pthread_mutex_t mutex_interrupt;*/
 
 int main(int argc, char *argv[])
 {
 
-    int identificador = atoi(argv[1]);
+    int identificador = 5; //atoi(argv[1]);
     char* nombre_log = string_from_format("cpu_%d.log", identificador);
 
     iniciar_config_cpu("cpu.config");
@@ -38,7 +35,6 @@ void conectar_con_kernel(int identificador)
     t_buffer* un_buffer = new_buffer();
     add_int_to_buffer(un_buffer, identificador);
     add_int_to_buffer(un_buffer, cliente_de_kernel_dispatch);
-    log_info(cpu_logger, "llegue hasta el add buffer");
     t_paquete* un_paquete = crear_paquete(HANDSHAKE, un_buffer);
     log_info(cpu_logger, "cree el paquete");
     enviar_paquete(un_paquete, cliente_de_kernel_dispatch);
@@ -47,7 +43,7 @@ void conectar_con_kernel(int identificador)
      while (1)
     {
         int cod_op = recibir_operacion(cliente_de_kernel_dispatch);
-        t_paquete *paquete_recibido = recibir_paquete(cliente_de_kernel_dispatch);
+        //t_paquete *paquete_recibido = recibir_paquete(cliente_de_kernel_dispatch);
 
         switch (cod_op)
         {
@@ -58,8 +54,8 @@ void conectar_con_kernel(int identificador)
             t_buffer* buffer = new_buffer();
             add_string_to_buffer(buffer, "teclado");
             add_int_to_buffer(buffer, 0);
-            add_int_to_buffer(buffer, 1000);
-            t_paquete* nuevo_paquete = crear_paquete(IO, NULL);
+            add_int_to_buffer(buffer, 100);
+            t_paquete* nuevo_paquete = crear_paquete(IO, buffer);
             enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
 
     log_info(cpu_logger, "Envie SYSCALL-IO al kernel");
