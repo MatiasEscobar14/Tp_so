@@ -201,17 +201,21 @@ t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
 	t_modulo_io* modulo_buscado = NULL;
 	bool encontrado = false;
 
+	log_info(kernel_logger, "DEBUG: Intentando obtener mutex_lista_modulos_io_conectadas");
+
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
 		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
-		if (strcmp(modulo->nombre, nombre_io) == 0) {
+		if (modulo && strcmp(modulo->nombre, nombre_io) == 0) {
+			log_info(kernel_logger, "DEBUG: Revisando módulo %d", i);
 			modulo_buscado = modulo;
 			encontrado = true;
 			break;
 		}
 	}
+	log_info(kernel_logger, "DEBUG: Liberando mutex_lista_modulos_io_conectadas");
 	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-
+	log_info(kernel_logger, "DEBUG: Mutex liberado exitosamente");
 	if (!encontrado) {
 		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
 	}

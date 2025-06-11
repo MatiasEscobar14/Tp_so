@@ -9,7 +9,7 @@ int miliseg;
 
 
 #include <utils/utils.h>
-#include<pthread.h>
+#include <pthread.h>
 #include <semaphore.h>
 #include "syscalls.h"
 
@@ -126,6 +126,7 @@ typedef struct {
     t_pcb* pcb_ejecutando;
     t_queue* cola_espera;
     bool libre;
+    pthread_mutex_t mutex;
 } t_modulo_io;
 
 

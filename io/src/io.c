@@ -33,8 +33,6 @@ int main(int argc, char *argv[])
     while (1)
     {
         int cod_op = recibir_operacion(socket_cliente);
-        t_paquete *paquete_recibido = recibir_paquete(socket_cliente);
-
         switch (cod_op)
         {
         case MENSAJE:
