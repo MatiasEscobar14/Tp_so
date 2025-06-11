@@ -55,7 +55,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			    break;
 			case INIT_PROC:
 				un_buffer = recv_buffer(socket_cpu_dispatch);
-				pid = extraer_int_buffer(un_buffer);
+		
 				nombre_archivo = extraer_string_buffer(un_buffer);
 				tamanio_proceso = extraer_int_buffer(un_buffer);
 
@@ -67,8 +67,6 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			
 			    break;
 			case EXIT:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
-				pid = extraer_int_buffer(un_buffer);
 				log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: EXIT", pid);
 				finalizar_proceso(pid);
 				break;
@@ -87,12 +85,11 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					int pid = extraer_int_buffer(un_buffer);
 					int tiempo_ms = extraer_int_buffer(un_buffer);
 					free(un_buffer);
-					t_syscall_io* parametros = malloc(sizeof(t_syscall_io));//FALTA EL FREE OJO
+					t_syscall_io* parametros = malloc(sizeof(t_syscall_io));
 					parametros->nombre_io = nombre_io;
 					parametros->pid = pid;
 					parametros->miliseg = tiempo_ms;
 					log_info(kernel_logger, "Mandando a dormir al [PID: %d] por %d milisegundos", parametros->pid, parametros->miliseg);
-					
 					syscall_io(parametros);
 				break;
 		    default:
@@ -201,21 +198,16 @@ t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
 	t_modulo_io* modulo_buscado = NULL;
 	bool encontrado = false;
 
-	log_info(kernel_logger, "DEBUG: Intentando obtener mutex_lista_modulos_io_conectadas");
-
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
 		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
 		if (modulo && strcmp(modulo->nombre, nombre_io) == 0) {
-			log_info(kernel_logger, "DEBUG: Revisando módulo %d", i);
 			modulo_buscado = modulo;
 			encontrado = true;
 			break;
 		}
 	}
-	log_info(kernel_logger, "DEBUG: Liberando mutex_lista_modulos_io_conectadas");
 	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-	log_info(kernel_logger, "DEBUG: Mutex liberado exitosamente");
 	if (!encontrado) {
 		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
 	}

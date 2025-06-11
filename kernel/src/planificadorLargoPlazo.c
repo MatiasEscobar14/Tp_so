@@ -125,15 +125,14 @@ void planificadorLargoPlazo()
 
 void finalizar_proceso(int pid)
 {
-    t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
-    if (un_pcb != NULL)
+    t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid); //TODO esta funcion funciona?
+    if (un_pcb)
     {
-                                  
         t_buffer *a_enviar = new_buffer();
         add_int_to_buffer(a_enviar, un_pcb->pid);
-        log_info(kernel_logger, "AGREGO AL BUFFER EL PID A ELIMINAR: %d", un_pcb->pid);
         t_paquete *un_paquete = crear_paquete(FINALIZAR_ESTRUCTURAS_KM, a_enviar);
-
+        //TODO habria que proteger "socket_memoria" con un mutex?
+        socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
         enviar_paquete(un_paquete, socket_memoria);
         atender_kernel_memoria();
         eliminar_paquete(un_paquete);
@@ -149,7 +148,7 @@ void finalizar_proceso(int pid)
         // Verificamos si hay procesos en SUSP_READY
         pthread_mutex_lock(&mutex_lista_susp_ready);
 
-        bool hay_espacio_disponible = true;
+        bool hay_espacio_disponible = true; //TODO: esto es un mock deberiamos cambiarlo cuando la memoria este completa
 
         while (!list_is_empty(lista_susp_ready) && hay_espacio_disponible)
         {

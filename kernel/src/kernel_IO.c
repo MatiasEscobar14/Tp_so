@@ -112,8 +112,6 @@ void atender_kernel_io(int *socket_cliente)
 				t_pcb *pcb_ejecutando = modulo_io ->pcb_ejecutando; // Si guardas cuál está ejecutando
 				if (pcb_ejecutando != NULL)
 				{
-					log_info(kernel_logger, "Proceso PID %d pasa a EXIT por desconexión de IO",
-							 pcb_ejecutando->pid);
 					cambiar_estado(pcb_ejecutando, EXIT_PROCCES);
 					remover_pcb_lista(pcb_ejecutando, lista_blocked, &mutex_lista_blocked);
 					agregar_pcb_lista(pcb_ejecutando, lista_exit, mutex_lista_exit);
@@ -122,8 +120,6 @@ void atender_kernel_io(int *socket_cliente)
 				while (!queue_is_empty(modulo_io ->cola_espera))
 				{
 					t_io_esperando *espera = queue_pop(modulo_io ->cola_espera);
-					log_info(kernel_logger, "Proceso PID %d pasa a EXIT por desconexión de IO",
-							 espera->pcb->pid);
 					cambiar_estado(espera->pcb, EXIT_PROCCES);
 					remover_pcb_lista(espera->pcb, lista_blocked, &mutex_lista_blocked);
 					agregar_pcb_lista(espera->pcb, lista_exit, mutex_lista_exit);
@@ -131,7 +127,7 @@ void atender_kernel_io(int *socket_cliente)
 				}
 				pthread_mutex_unlock(&modulo_io->mutex);
 
-				list_remove_element(lista_modulos_io_conectadas, modulo_io );
+				//list_remove_element(lista_modulos_io_conectadas, modulo_io ); creo queno hace falta ya que se hace abajo
 			
 				pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 
@@ -139,7 +135,7 @@ void atender_kernel_io(int *socket_cliente)
         		queue_destroy(modulo_io->cola_espera);
         		free(modulo_io);
 			}
-			close(socket);
+			//close(socket);
 			break;
 		default:
 			control_key = 0;

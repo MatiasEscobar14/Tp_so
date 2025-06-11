@@ -31,10 +31,8 @@ void dump_memory_sys(int pid)
 void syscall_io(t_syscall_io *param){
 	log_info(kernel_logger, "Entre a syscal_io");
 
-	// PASO 1: Validar que la IO existe (como dice el enunciado)
-    log_info(kernel_logger, "DEBUG: Voy a buscar PID %d", param->pid);
+	// PASO 1: Validar que la IO existe 
     t_modulo_io *modulo_io = buscar_modulo_io_por_nombre(param->nombre_io);
-    log_info(kernel_logger, "MODULO OBTENIDO: %s", modulo_io->nombre);
     if (!modulo_io) {
         // Si no existe, enviar proceso a EXIT
         log_error(kernel_logger, "Dispositivo IO '%s' no encontrado.", param->nombre_io);
@@ -43,7 +41,6 @@ void syscall_io(t_syscall_io *param){
 
 
         if (pcb) {
-            //falta remover de la lista
             remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
             cambiar_estado(pcb, EXIT_PROCCES);
             agregar_pcb_lista(pcb, lista_exit, mutex_lista_exit);
@@ -56,22 +53,20 @@ void syscall_io(t_syscall_io *param){
     log_info(kernel_logger, "Antes de buscar_pcb_por_pid");
 	// PASO 2: Si existe la IO, buscar el PCB y cambiar a BLOCKED
     t_pcb *pcb = buscar_pcb_por_pid(param->pid);
-    log_info(kernel_logger, "Antes de cambiar estado: PCB PID=%d, tiempo_inicio_estado=%ld", pcb->pid, pcb->tiempo_inicio_estado);
+
     if (!pcb) {
         log_error(kernel_logger, "PCB con PID %d no encontrado", param->pid);
         free(param->nombre_io);
         free(param);
         return;
     }
-	// PASO 3: Cambiar proceso a BLOCKED y agregar a cola
-    //falta remover de la listta
     remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
     cambiar_estado(pcb, BLOCKED_PROCCES);
     agregar_pcb_lista(pcb, lista_blocked, mutex_lista_blocked);
 
+	// PASO 4: encolarlo
     pthread_mutex_lock(&modulo_io->mutex);
 
-	// PASO 4: encolarlo
     t_io_esperando *espera = malloc(sizeof(t_io_esperando));
     espera->pcb = pcb;
     espera->milisegundos = param->miliseg;
@@ -81,6 +76,7 @@ void syscall_io(t_syscall_io *param){
 	if (modulo_io->libre && !queue_is_empty(modulo_io->cola_espera)) {
         t_io_esperando *trabajo_a_ejecutar = queue_pop(modulo_io->cola_espera);
         modulo_io->libre = false;
+        modulo_io->pcb_ejecutando = trabajo_a_ejecutar->pcb;
         pthread_mutex_unlock(&modulo_io->mutex);
         enviar_pcb_a_modulo_io(modulo_io, trabajo_a_ejecutar->pcb, trabajo_a_ejecutar->milisegundos);
         free(trabajo_a_ejecutar);
