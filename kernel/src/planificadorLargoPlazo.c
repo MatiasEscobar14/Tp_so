@@ -57,7 +57,6 @@ void iniciar_plp()
 void planificadorLargoPlazo()
 {
 
-    pthread_mutex_lock(&mutex_lista_new);
     if (!list_is_empty(lista_new))
     {
         if(ALGORITMO_INGRESO_A_READY == FIFO){
@@ -66,7 +65,7 @@ void planificadorLargoPlazo()
             planificadorLargoPlazoPMCP();
         }
     }
-    pthread_mutex_unlock(&mutex_lista_new);
+    
     
 }
 
@@ -96,12 +95,12 @@ void planificadorLargoPlazoFifo()
             
 
             sem_wait(&sem_rpta_estructura_inicializada);
-            pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
             
             if (flag_pedido_de_memoria)
             {
                 remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
-                agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+                agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
                 cambiar_estado(pcb, READY_PROCCES);
                 planificadorCortoPlazo();
                 
@@ -119,7 +118,7 @@ void planificadorLargoPlazoFifo()
                 // Se debe esperar la finalizacion de un proceso para volver a intentar? 
                 hay_pcb = 0;
             }
-            pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+            //pthread_mutex_unlock(&mutex_flag_pedido_memoria);
         }
     }
 }
@@ -159,13 +158,15 @@ void planificadorLargoPlazoPMCP()
             
             /* Esperamos hasta que la estructura sea creada */
             sem_wait(&sem_rpta_estructura_inicializada);
-            pthread_mutex_lock(&mutex_flag_pedido_memoria);
-            
+            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            log_info(kernel_logger, "Flag pedido de memoria antes de IF: %d", flag_pedido_de_memoria);
             if (flag_pedido_de_memoria)
             {
                 /* Si la memoria respondió correctamente, removemos el PCB de la lista NEW */
                 remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
-                agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+                log_info(kernel_logger, "Removi correctamente la pcb: %d de la lista NEW", pcb->pid);
+                agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
+                log_info(kernel_logger, "Agregue correctamente la pcb: %d de la lista READY", pcb->pid);
                 cambiar_estado(pcb, READY_PROCCES);
                 log_info(kernel_logger, "PMCP: Proceso PID %d iniciado exitosamente (tamaño: %d)", pcb->pid, pcb->tamanio_proceso);
                 planificadorCortoPlazo();
@@ -178,16 +179,11 @@ void planificadorLargoPlazoPMCP()
                 //TODO se debera esperar a que se libere espacio en memoria para continuar?
                 se_inicio_alguno = false;
             }
-            pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+            //pthread_mutex_unlock(&mutex_flag_pedido_memoria);
         }
     }
     
-    /* Log final del estado */
-    if (!list_is_empty(lista_new)) {
-        t_pcb *primer_pcb = list_get(lista_new, 0);
-        log_info(kernel_logger, "PMCP: Procesos restantes en NEW. Más pequeño: PID %d (tamaño: %d)", 
-                 primer_pcb->pid, primer_pcb->tamanio_proceso);
-    }
+    log_info(kernel_logger, "TERMINO EL PLANIFICADOR PMCP");
 }
 
 
@@ -209,7 +205,7 @@ void finalizar_proceso(int pid)
         log_info(kernel_logger, "Se aviso a Memoria para que libere las estructuras del proceso");
         sem_wait(&sem_estructura_liberada);
 
-        agregar_pcb_lista(un_pcb, lista_exit, mutex_lista_exit);
+        agregar_pcb_lista(un_pcb, lista_exit, &mutex_lista_exit);
 
         log_info(kernel_logger, "Fin de Proceso: ## Finaliza el proceso %d", un_pcb->pid);
 
@@ -243,7 +239,7 @@ void finalizar_proceso(int pid)
                 // Si la memoria respondió correctamente, removemos el PCB de la lista NEW
                 
                 remover_pcb_lista(pcb_a_reactivar, lista_susp_ready, &mutex_lista_susp_ready);
-                agregar_pcb_lista(pcb_a_reactivar, lista_ready, mutex_lista_ready);
+                agregar_pcb_lista(pcb_a_reactivar, lista_ready, &mutex_lista_ready);
                 cambiar_estado(pcb_a_reactivar, READY_PROCCES);
             }
             else

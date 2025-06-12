@@ -10,13 +10,7 @@ void crear_proceso_sys(char *nombre_archivo, int tam_proceso)
 	log_info(kernel_logger, "El PATH del proceso es: [%s] y el tamaño del mismo es: [%d] \n", nombre_archivo, tam_proceso);
 	un_pcb = crear_pcb(nombre_archivo, tam_proceso);
     log_info(kernel_logger, "Se creo la pcb: %d", un_pcb->pid);
-	//agregar_pcb_lista(un_pcb, lista_new, mutex_lista_new);
-
-    pthread_mutex_lock(&mutex_lista_new);
-    list_add(lista_new,un_pcb);
-    pthread_mutex_unlock(&mutex_lista_new);
-    
-    log_info(kernel_logger, "Agregue el: %s a lista NEW",nombre_archivo);
+	agregar_pcb_lista(un_pcb, lista_new, &mutex_lista_new);
 	planificadorLargoPlazo();
 }
 
@@ -48,7 +42,7 @@ void syscall_io(t_syscall_io *param){
         if (pcb) {
             remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
             cambiar_estado(pcb, EXIT_PROCCES);
-            agregar_pcb_lista(pcb, lista_exit, mutex_lista_exit);
+            agregar_pcb_lista(pcb, lista_exit, &mutex_lista_exit);
         }
 
         list_destroy(modulos_con_nombre);
@@ -69,7 +63,7 @@ void syscall_io(t_syscall_io *param){
 
     remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
     cambiar_estado(pcb, BLOCKED_PROCCES);
-    agregar_pcb_lista(pcb, lista_blocked, mutex_lista_blocked);
+    agregar_pcb_lista(pcb, lista_blocked, &mutex_lista_blocked);
 
     // 3. Obtener la cola de espera por nombre
     t_io_espera_por_nombre* espera_nombre = buscar_o_crear_cola_io(param->nombre_io);

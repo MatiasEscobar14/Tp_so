@@ -82,7 +82,7 @@ void atender_kernel_io(int *socket_cliente)
 			// 3. Cambiar estado del proceso: BLOCKED -> READY
 			remover_pcb_lista(pcb, lista_blocked, &mutex_lista_blocked);
 			cambiar_estado(pcb, READY_PROCCES);
-			agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
+			agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
 
 			// 4. Obtener la cola de espera por nombre del módulo
 			log_info(kernel_logger, "ANTES DE BUSCAR LA COLA EN COMUN POR NOMBRE");
@@ -156,7 +156,7 @@ void atender_kernel_io(int *socket_cliente)
 				{
 					cambiar_estado(pcb_ejecutando, EXIT_PROCCES);
 					remover_pcb_lista(pcb_ejecutando, lista_blocked, &mutex_lista_blocked);
-					agregar_pcb_lista(pcb_ejecutando, lista_exit, mutex_lista_exit);
+					agregar_pcb_lista(pcb_ejecutando, lista_exit, &mutex_lista_exit);
 					modulo_io->pcb_ejecutando = NULL;
 				}
 
@@ -193,7 +193,7 @@ void atender_kernel_io(int *socket_cliente)
 						t_io_esperando *trabajo = queue_pop(espera_nombre->cola_espera);
 						cambiar_estado(trabajo->pcb, EXIT_PROCCES);
 						remover_pcb_lista(trabajo->pcb, lista_blocked, &mutex_lista_blocked);
-						agregar_pcb_lista(trabajo->pcb, lista_exit, mutex_lista_exit);
+						agregar_pcb_lista(trabajo->pcb, lista_exit, &mutex_lista_exit);
 						free(trabajo);
 					}
 				}

@@ -78,6 +78,7 @@ void inicializar_estructuras(t_buffer *buffer, int socket_kernel)
     enviar_paquete(rta_kernel, socket_kernel);
     eliminar_paquete(rta_kernel);
     //free(otro_buffer);
+    log_info(logger_memoria, "Envie la rta a KERNEL");
     return;
 }
 

@@ -26,11 +26,11 @@ t_pcb *crear_pcb(char *ruta, int tam_proceso)
     return nueva_pcb;
 }
 
-void agregar_pcb_lista(t_pcb *pcb, t_list *lista_estado, pthread_mutex_t mutex_lista)
+void agregar_pcb_lista(t_pcb *pcb, t_list *lista_estado, pthread_mutex_t *mutex_lista)
 {
-    pthread_mutex_lock(&mutex_lista);
+    pthread_mutex_lock(mutex_lista);
     list_add(lista_estado, pcb);
-    pthread_mutex_unlock(&mutex_lista);
+    pthread_mutex_unlock(mutex_lista);
 }
 
 void cambiar_estado(t_pcb *un_pcb, estado_pcb proximo_estado)
@@ -196,7 +196,7 @@ void bloquear_proceso_syscall(int pid)
 
     t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
     cambiar_estado(un_pcb, BLOCKED_PROCCES);
-    agregar_pcb_lista(un_pcb, lista_blocked, mutex_lista_blocked);
+    agregar_pcb_lista(un_pcb, lista_blocked, &mutex_lista_blocked);
 
     // TODO:MOTIVO?
 }

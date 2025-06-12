@@ -57,7 +57,7 @@ void atender_FIFO() {
     if (un_pcb != NULL) {
         enviar_pcb_a_cpu(un_pcb); //todo DEBERIA CORTAR SI NO HAY cpu
         cambiar_estado(un_pcb, EXEC_PROCCES);
-        agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_execute);
+        agregar_pcb_lista(un_pcb, lista_execute, &mutex_lista_execute);
         
         //atender_kernel_cpu_dispatch(socket_fd_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
     } else {

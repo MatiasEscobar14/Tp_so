@@ -4,7 +4,7 @@
 #include "gestorKernel.h"
 
 t_pcb* crear_pcb(char* ruta, int tam_proceso);
-void agregar_pcb_lista(t_pcb* pcb, t_list* lista_estado, pthread_mutex_t mutex_lista);
+void agregar_pcb_lista(t_pcb *pcb, t_list *lista_estado, pthread_mutex_t *mutex_lista);
 void remover_pcb_lista(t_pcb* pcb, t_list* lista, pthread_mutex_t* mutex);
 
 void cambiar_estado(t_pcb* un_pcb, estado_pcb proximo_estado);

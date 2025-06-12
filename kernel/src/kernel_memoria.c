@@ -3,7 +3,9 @@
 void atender_kernel_memoria()
 {
     t_buffer *un_buffer;
+    log_info(kernel_logger, "Entre a atender memoria");
     int cod_op = recibir_operacion(socket_memoria);
+    log_info(kernel_logger, "COD OP: %d",cod_op);
     int respuesta;
     switch (cod_op)
     {
