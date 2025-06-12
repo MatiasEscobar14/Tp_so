@@ -3,12 +3,20 @@
 #include "planificadorLargoPlazo.h"
 #include "kernel_memoria.h"
 #include "kernel_cpu.h"
+#include "kernel_IO.h"
 void crear_proceso_sys(char *nombre_archivo, int tam_proceso)
 {
 	t_pcb *un_pcb = NULL;
 	log_info(kernel_logger, "El PATH del proceso es: [%s] y el tamaño del mismo es: [%d] \n", nombre_archivo, tam_proceso);
 	un_pcb = crear_pcb(nombre_archivo, tam_proceso);
-	agregar_pcb_lista(un_pcb, lista_new, mutex_lista_new);
+    log_info(kernel_logger, "Se creo la pcb: %d", un_pcb->pid);
+	//agregar_pcb_lista(un_pcb, lista_new, mutex_lista_new);
+
+    pthread_mutex_lock(&mutex_lista_new);
+    list_add(lista_new,un_pcb);
+    pthread_mutex_unlock(&mutex_lista_new);
+    
+    log_info(kernel_logger, "Agregue el: %s a lista NEW",nombre_archivo);
 	planificadorLargoPlazo();
 }
 
@@ -104,4 +112,3 @@ void syscall_io(t_syscall_io *param){
 }
 
 
-}

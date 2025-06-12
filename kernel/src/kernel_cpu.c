@@ -54,7 +54,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			    //
 			    break;
 			case INIT_PROC:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
+				un_buffer = recv_buffer(socket);
 		
 				nombre_archivo = extraer_string_buffer(un_buffer);
 				tamanio_proceso = extraer_int_buffer(un_buffer);
@@ -71,7 +71,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 				finalizar_proceso(pid);
 				break;
 			case DUMP_MEMORY:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
+				un_buffer = recv_buffer(socket);
 				pid = extraer_int_buffer(un_buffer);
 				log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: DUMP_MEMORY", pid);
 				bloquear_proceso_syscall(pid);

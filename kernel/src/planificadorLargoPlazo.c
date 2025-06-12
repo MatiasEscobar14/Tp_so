@@ -1,4 +1,5 @@
 #include "planificadorLargoPlazo.h"
+#include "planificadorCortoPlazo.h"
 
 t_list *lista_new;
 t_list *lista_ready;
@@ -55,10 +56,8 @@ void iniciar_plp()
 
 void planificadorLargoPlazo()
 {
-    t_pcb *pcb = NULL;
 
-    pthread_mutex_lock(&mutex_lista_new); // Bloqueamos el acceso a la lista de NEW
-
+    pthread_mutex_lock(&mutex_lista_new);
     if (!list_is_empty(lista_new))
     {
         if(ALGORITMO_INGRESO_A_READY == FIFO){
@@ -68,6 +67,7 @@ void planificadorLargoPlazo()
         }
     }
     pthread_mutex_unlock(&mutex_lista_new);
+    
 }
 
 
@@ -100,8 +100,7 @@ void planificadorLargoPlazoFifo()
             
             if (flag_pedido_de_memoria)
             {
-
-                list_remove_element(lista_new, pcb);
+                remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
                 agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
                 cambiar_estado(pcb, READY_PROCCES);
                 planificadorCortoPlazo();
@@ -165,7 +164,7 @@ void planificadorLargoPlazoPMCP()
             if (flag_pedido_de_memoria)
             {
                 /* Si la memoria respondió correctamente, removemos el PCB de la lista NEW */
-                list_remove_element(lista_new, pcb);
+                remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
                 agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
                 cambiar_estado(pcb, READY_PROCCES);
                 log_info(kernel_logger, "PMCP: Proceso PID %d iniciado exitosamente (tamaño: %d)", pcb->pid, pcb->tamanio_proceso);
@@ -242,7 +241,8 @@ void finalizar_proceso(int pid)
             if (flag_pedido_de_memoria)
             {
                 // Si la memoria respondió correctamente, removemos el PCB de la lista NEW
-                list_remove_element(lista_susp_ready, pcb_a_reactivar);
+                
+                remover_pcb_lista(pcb_a_reactivar, lista_susp_ready, &mutex_lista_susp_ready);
                 agregar_pcb_lista(pcb_a_reactivar, lista_ready, mutex_lista_ready);
                 cambiar_estado(pcb_a_reactivar, READY_PROCCES);
             }

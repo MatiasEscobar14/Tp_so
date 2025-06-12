@@ -8,7 +8,7 @@ t_pcb *crear_pcb(char *ruta, int tam_proceso)
 
     static int pid_counter = 0;
     nueva_pcb->pid = pid_counter++;
-    // nueva_pcb->nombre_archivo = ruta;
+    // nueva_pcb->nombre_archivo = ruta; strdup(ruta); 
     nueva_pcb->pc = 0;
     nueva_pcb->tamanio_proceso = tam_proceso;
     nueva_pcb->estado = NEW_PROCCES;
@@ -220,8 +220,10 @@ void enviar_pcb_a_modulo_io(t_modulo_io *modulo, t_pcb *pcb, int tiempo_ms)
     add_int_to_buffer(buffer, pcb->pid);
     add_int_to_buffer(buffer, tiempo_ms);
     t_paquete *paquete = crear_paquete(REALIZAR_IO, buffer);
+    log_info(kernel_logger, "Paquete creado con REALIZAR_IO para PID %d", pcb->pid);
     enviar_paquete(paquete, modulo->socket_fd);
     eliminar_paquete(paquete);
+    log_info(kernel_logger, "Paquete enviado exitosamente al módulo IO");
     
 }
 

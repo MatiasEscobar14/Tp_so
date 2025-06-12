@@ -9,9 +9,6 @@ int main(int argc, char *argv[])
     // }
 
     char *nombre_dispositivo = argv[1];
-
-    log_info("Dispositivo configurado: %s", nombre_dispositivo);
-
     char *mensaje_presentacion = string_from_format(nombre_dispositivo);
 
     //===========================================CONEXION IO (CLIENTE) CON KERNEL (SERVER)========================================================//
@@ -43,11 +40,11 @@ int main(int argc, char *argv[])
             t_buffer* un_buffer = recv_buffer(socket_cliente);
             int pid = extraer_int_buffer(un_buffer);
             int tiempo_ms = extraer_int_buffer(un_buffer);
-            log_info("Inicio de IO: ## PID: <%d> - Inicio de IO - Tiempo: <%d>.", pid, tiempo_ms);
+            log_info(logger, "Inicio de IO: ## PID: <%d> - Inicio de IO - Tiempo: <%d>.", pid, tiempo_ms);
 
             usleep(tiempo_ms * 1000);
 
-            log_info("Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
+            log_info(logger,"Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
             // TODO informar a kernal que finalizo el IO
             t_buffer *buffer_respuesta = new_buffer();
             add_int_to_buffer(buffer_respuesta, pid);

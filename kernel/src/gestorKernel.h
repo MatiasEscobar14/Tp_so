@@ -49,7 +49,7 @@ typedef enum{
 }estado_pcb;
 
 typedef struct {
-    uint32_t pid;
+    int pid;
     uint32_t pc;
     char* nombre_archivo;
     uint32_t tamanio_proceso;
@@ -127,7 +127,7 @@ typedef struct {
     t_pcb* pcb_ejecutando;
     //t_queue* cola_espera;
     bool libre;
-    //pthread_mutex_t mutex;
+    pthread_mutex_t mutex;
 } t_modulo_io;
 
 typedef struct {
