@@ -67,6 +67,7 @@ extern bool flag_pedido_de_memoria;
 
 //=======LISTAS======//
 
+
 extern t_list* lista_new;
 extern t_list* lista_ready;
 extern t_list* lista_execute;
@@ -124,11 +125,21 @@ typedef struct {
     char* nombre;
     int socket_fd;  
     t_pcb* pcb_ejecutando;
-    t_queue* cola_espera;
+    //t_queue* cola_espera;
     bool libre;
-    pthread_mutex_t mutex;
+    //pthread_mutex_t mutex;
 } t_modulo_io;
 
+typedef struct {
+    t_queue* cola_espera;
+    char* nombre;                  
+    pthread_mutex_t mutex;
+} t_io_espera_por_nombre;
+
+//Valen prueba
+
+extern t_list* lista_io_esperas;
+extern pthread_mutex_t mutex_lista_io_esperas;
 
 
 #endif

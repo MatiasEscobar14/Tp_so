@@ -31,62 +31,77 @@ void dump_memory_sys(int pid)
 void syscall_io(t_syscall_io *param){
 	log_info(kernel_logger, "Entre a syscal_io");
 
-	// PASO 1: Validar que la IO existe 
-    t_modulo_io *modulo_io = buscar_modulo_io_por_nombre(param->nombre_io);
-    if (!modulo_io) {
-        // Si no existe, enviar proceso a EXIT
+    // 1. Buscar TODAS las instancias con ese nombre
+    t_list* modulos_con_nombre = buscar_modulos_io_por_nombre(param->nombre_io);
+    if (list_is_empty(modulos_con_nombre)) {
         log_error(kernel_logger, "Dispositivo IO '%s' no encontrado.", param->nombre_io);
-        
-        t_pcb *pcb = buscar_pcb_por_pid(param->pid);
 
-
+        t_pcb* pcb = buscar_pcb_por_pid(param->pid);
         if (pcb) {
             remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
             cambiar_estado(pcb, EXIT_PROCCES);
             agregar_pcb_lista(pcb, lista_exit, mutex_lista_exit);
         }
-        
+
+        list_destroy(modulos_con_nombre);
         free(param->nombre_io);
         free(param);
         return;
     }
-    log_info(kernel_logger, "Antes de buscar_pcb_por_pid");
-	// PASO 2: Si existe la IO, buscar el PCB y cambiar a BLOCKED
-    t_pcb *pcb = buscar_pcb_por_pid(param->pid);
 
+    // 2. Cambiar proceso a BLOCKED
+    t_pcb* pcb = buscar_pcb_por_pid(param->pid);
     if (!pcb) {
         log_error(kernel_logger, "PCB con PID %d no encontrado", param->pid);
+        list_destroy(modulos_con_nombre);
         free(param->nombre_io);
         free(param);
         return;
     }
+
     remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
     cambiar_estado(pcb, BLOCKED_PROCCES);
     agregar_pcb_lista(pcb, lista_blocked, mutex_lista_blocked);
 
-	// PASO 4: encolarlo
-    pthread_mutex_lock(&modulo_io->mutex);
+    // 3. Obtener la cola de espera por nombre
+    t_io_espera_por_nombre* espera_nombre = buscar_o_crear_cola_io(param->nombre_io);
 
-    t_io_esperando *espera = malloc(sizeof(t_io_esperando));
+    pthread_mutex_lock(&espera_nombre->mutex);
+
+    // 4. Encolar el proceso en la cola común
+    t_io_esperando* espera = malloc(sizeof(t_io_esperando));
     espera->pcb = pcb;
     espera->milisegundos = param->miliseg;
-    queue_push(modulo_io->cola_espera, espera);
+    queue_push(espera_nombre->cola_espera, espera);
 
-	// PASO 5: Si hay instancia libre, enviar trabajo inmediatamente
-	if (modulo_io->libre && !queue_is_empty(modulo_io->cola_espera)) {
-        t_io_esperando *trabajo_a_ejecutar = queue_pop(modulo_io->cola_espera);
-        modulo_io->libre = false;
-        modulo_io->pcb_ejecutando = trabajo_a_ejecutar->pcb;
-        pthread_mutex_unlock(&modulo_io->mutex);
-        enviar_pcb_a_modulo_io(modulo_io, trabajo_a_ejecutar->pcb, trabajo_a_ejecutar->milisegundos);
-        free(trabajo_a_ejecutar);
-    }else{
-        pthread_mutex_unlock(&modulo_io->mutex);
+    // 5. Ver si hay alguna instancia libre
+    bool asignado = false;
+    for (int i = 0; i < list_size(modulos_con_nombre); i++) {
+        t_modulo_io* modulo = list_get(modulos_con_nombre, i);
+
+        pthread_mutex_lock(&modulo->mutex);
+        if (modulo->libre && !queue_is_empty(espera_nombre->cola_espera)) {
+            t_io_esperando* trabajo = queue_pop(espera_nombre->cola_espera);
+            modulo->libre = false;
+            modulo->pcb_ejecutando = trabajo->pcb;
+            enviar_pcb_a_modulo_io(modulo, trabajo->pcb, trabajo->milisegundos);
+            free(trabajo);
+            asignado = true;
+            pthread_mutex_unlock(&modulo->mutex);
+            break;
+        }
+        pthread_mutex_unlock(&modulo->mutex);
     }
-    
-    log_info(kernel_logger, "Proceso ## (%d) enviado a dispositivo IO '%s'",
-             param->pid, param->nombre_io);
-    
+
+    pthread_mutex_unlock(&espera_nombre->mutex);
+    list_destroy(modulos_con_nombre);
+
+    log_info(kernel_logger, "Proceso PID %d enviado a IO: %s por %d milisegundos",  
+             param->pid, param->nombre_io, param->miliseg); 
+
     free(param->nombre_io);
     free(param);
+}
+
+
 }

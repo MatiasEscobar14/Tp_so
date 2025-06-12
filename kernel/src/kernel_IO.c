@@ -30,23 +30,29 @@ void atender_kernel_io(int *socket_cliente)
 			nuevo_modulo->nombre = strdup(nombre);
 			nuevo_modulo->socket_fd = socket_fd;
 			nuevo_modulo->pcb_ejecutando = NULL;
-			nuevo_modulo->cola_espera = queue_create();
 			nuevo_modulo->libre = 1;
-
-			if (pthread_mutex_init(&nuevo_modulo->mutex, NULL) != 0) {
-				log_error(kernel_logger, "Error inicializando mutex para módulo IO %s", nombre);
-				
-				free(nuevo_modulo->nombre);
-				queue_destroy(nuevo_modulo->cola_espera);
-				free(nuevo_modulo);
-				free(nombre);
-				free(un_buffer);
-				break;
-			}
 
 			pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 			list_add(lista_modulos_io_conectadas, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+
+			t_io_espera_por_nombre *espera = buscar_o_crear_cola_io(nombre);
+
+			pthread_mutex_lock(&espera->mutex);
+			pthread_mutex_lock(&nuevo_modulo->mutex);
+
+			// Si hay procesos esperando y esta instancia está libre, asignarle uno
+			if (nuevo_modulo->libre && !queue_is_empty(espera->cola_espera))
+			{
+				t_io_esperando *trabajo = queue_pop(espera->cola_espera);
+				nuevo_modulo->libre = false;
+				nuevo_modulo->pcb_ejecutando = trabajo->pcb;
+
+				enviar_pcb_a_modulo_io(nuevo_modulo, trabajo->pcb, trabajo->milisegundos);
+				free(trabajo);
+			}
+			pthread_mutex_unlock(&nuevo_modulo->mutex);
+			pthread_mutex_unlock(&espera->mutex);
 
 			imprimir_modulos_io();
 
@@ -83,16 +89,16 @@ void atender_kernel_io(int *socket_cliente)
 				log_warning(kernel_logger, "No se encontró módulo IO para socket %d", socket);
 			}
 			// eliminar_buffer(buffer);
-			log_info(kernel_logger,"SYSCALL IO FINALIZADAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+			log_info(kernel_logger, "SYSCALL IO FINALIZADAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
 			log_info(kernel_logger, "Métricas de Estado: ## (%d) - Métricas de estado: NEW (%d) (%f), READY (%d) (%f),EXEC (%d) (%f), BLOCKED (%d) (%f), SUSP_READY (%d) (%f), SUSP_BLOCKED (%d) (%f),EXIT (%d) (%f),",
-				pcb->pid, pcb->metricas_estado[NEW_PROCCES],pcb->metricas_tiempo[NEW_PROCCES],
-				pcb->metricas_estado[READY_PROCCES], pcb->metricas_tiempo[READY_PROCCES],
-				pcb->metricas_estado[EXEC_PROCCES], pcb->metricas_tiempo[EXEC_PROCCES],
-				pcb->metricas_estado[BLOCKED_PROCCES], pcb->metricas_tiempo[BLOCKED_PROCCES],
-				pcb->metricas_estado[SUSP_READY_PROCESS], pcb->metricas_tiempo[SUSP_READY_PROCESS],
-				pcb->metricas_estado[SUSP_BLOCKED_PROCESS], pcb->metricas_tiempo[SUSP_BLOCKED_PROCESS],
-				pcb->metricas_estado[EXIT_PROCCES], pcb->metricas_tiempo[EXIT_PROCCES]);
+					 pcb->pid, pcb->metricas_estado[NEW_PROCCES], pcb->metricas_tiempo[NEW_PROCCES],
+					 pcb->metricas_estado[READY_PROCCES], pcb->metricas_tiempo[READY_PROCCES],
+					 pcb->metricas_estado[EXEC_PROCCES], pcb->metricas_tiempo[EXEC_PROCCES],
+					 pcb->metricas_estado[BLOCKED_PROCCES], pcb->metricas_tiempo[BLOCKED_PROCCES],
+					 pcb->metricas_estado[SUSP_READY_PROCESS], pcb->metricas_tiempo[SUSP_READY_PROCESS],
+					 pcb->metricas_estado[SUSP_BLOCKED_PROCESS], pcb->metricas_tiempo[SUSP_BLOCKED_PROCESS],
+					 pcb->metricas_estado[EXIT_PROCCES], pcb->metricas_tiempo[EXIT_PROCCES]);
 			break;
 		case MENSAJE:
 			// manejar mensaje
@@ -104,12 +110,12 @@ void atender_kernel_io(int *socket_cliente)
 			log_warning(kernel_logger, "Módulo IO desconectado en socket %d", socket);
 
 			t_modulo_io *modulo_io = obtener_modulo_io_por_socket(socket);
-			if (modulo_io  != NULL)
+			if (modulo_io != NULL)
 			{
 				pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 
 				// Buscar proceso que estaba ejecutando en esta IO
-				t_pcb *pcb_ejecutando = modulo_io ->pcb_ejecutando; // Si guardas cuál está ejecutando
+				t_pcb *pcb_ejecutando = modulo_io->pcb_ejecutando; // Si guardas cuál está ejecutando
 				if (pcb_ejecutando != NULL)
 				{
 					cambiar_estado(pcb_ejecutando, EXIT_PROCCES);
@@ -117,9 +123,9 @@ void atender_kernel_io(int *socket_cliente)
 					agregar_pcb_lista(pcb_ejecutando, lista_exit, mutex_lista_exit);
 				}
 				pthread_mutex_lock(&modulo_io->mutex);
-				while (!queue_is_empty(modulo_io ->cola_espera))
+				while (!queue_is_empty(modulo_io->cola_espera))
 				{
-					t_io_esperando *espera = queue_pop(modulo_io ->cola_espera);
+					t_io_esperando *espera = queue_pop(modulo_io->cola_espera);
 					cambiar_estado(espera->pcb, EXIT_PROCCES);
 					remover_pcb_lista(espera->pcb, lista_blocked, &mutex_lista_blocked);
 					agregar_pcb_lista(espera->pcb, lista_exit, mutex_lista_exit);
@@ -127,15 +133,15 @@ void atender_kernel_io(int *socket_cliente)
 				}
 				pthread_mutex_unlock(&modulo_io->mutex);
 
-				//list_remove_element(lista_modulos_io_conectadas, modulo_io ); creo queno hace falta ya que se hace abajo
-			
+				// list_remove_element(lista_modulos_io_conectadas, modulo_io ); creo queno hace falta ya que se hace abajo
+
 				pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
 
 				free(modulo_io->nombre);
-        		queue_destroy(modulo_io->cola_espera);
-        		free(modulo_io);
+				queue_destroy(modulo_io->cola_espera);
+				free(modulo_io);
 			}
-			//close(socket);
+			// close(socket);
 			break;
 		default:
 			control_key = 0;
@@ -223,3 +229,36 @@ t_modulo_io *obtener_modulo_io_por_socket(int socket)
 
 	return modulo_encontrado;
 }
+
+char* nombre_io_global = NULL;
+
+bool misma_io(void* elemento) {
+    t_io_espera_por_nombre* io = (t_io_espera_por_nombre*) elemento;
+    return strcmp(io->nombre, nombre_io_global) == 0;
+}
+
+t_io_espera_por_nombre* buscar_o_crear_cola_io(char* nombre_io) {
+    t_io_espera_por_nombre* espera = NULL;
+
+    pthread_mutex_lock(&mutex_lista_io_esperas);
+
+    nombre_io_global = nombre_io;  
+    espera = list_find(lista_io_esperas, misma_io);
+    nombre_io_global = NULL;       
+
+    if (espera == NULL) {
+        espera = malloc(sizeof(t_io_espera_por_nombre));
+        espera->nombre = strdup(nombre_io);
+        espera->cola_espera = queue_create();
+        pthread_mutex_init(&espera->mutex, NULL);
+        list_add(lista_io_esperas, espera);
+
+        log_info(kernel_logger, "Creada nueva cola de espera para IO '%s'", nombre_io);
+    }
+
+    pthread_mutex_unlock(&mutex_lista_io_esperas);
+
+    return espera;
+}
+
+
