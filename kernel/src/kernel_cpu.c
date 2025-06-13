@@ -7,7 +7,6 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 	char* nombre_archivo;
 	int tamanio_proceso;
 	//t_pcb* un_pcb = NULL;
-	free(socket_cliente); // Liberar el puntero pasado al hilo
 	t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
 	t_buffer *un_buffer;
     while (control_key) {
@@ -28,10 +27,11 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					break;
 				}
 			int identificador = extraer_int_buffer(un_buffer);
-			int socket_fd_dispatch = extraer_int_buffer(un_buffer);
+			//int socket_fd_dispatch = extraer_int_buffer(un_buffer);
 			nuevo_modulo->identificador = identificador;
 			nuevo_modulo->socket_fd_dispatch = socket;
-
+			nuevo_modulo->libre = true;
+			nuevo_modulo->proceso_en_ejecucion = NULL;
 
 			log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd_dispatch);
 			pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
@@ -40,11 +40,6 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			sem_post(&sem_cpu_disponible);
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
 			imprimir_modulos_cpu();
-			t_buffer* buffer_handshake = new_buffer();
-			add_int_to_buffer(buffer_handshake, 1);
-			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
-			enviar_paquete(paquete_handshake, socket);
-			log_info(kernel_logger, "Envie el MENSAJE a CPU");
 			
 			free(un_buffer);
 				break;

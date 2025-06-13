@@ -51,13 +51,13 @@ void conectar_con_kernel(int identificador)
             log_info(cpu_logger, "Recibida solicitud de CPU del Kernel.");
             // Aquí podrías procesar la solicitud de IO
 
-            t_buffer* buffer = new_buffer();
+            /*t_buffer* buffer = new_buffer();
             add_string_to_buffer(buffer, "proceso2");
             add_int_to_buffer(buffer, 30);
             t_paquete* nuevo_paquete = crear_paquete(INIT_PROC, buffer);
             enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
 
-    log_info(cpu_logger, "Envie SYSCALL-IO al kernel");
+    log_info(cpu_logger, "Envie SYSCALL-IO al kernel");*/
 
             break;
 

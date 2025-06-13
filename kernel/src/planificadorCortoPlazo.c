@@ -52,11 +52,11 @@ void atender_FIFO() {
         cambiar_estado(un_pcb, EXEC_PROCCES);
         remover_pcb_lista(un_pcb, lista_ready, &mutex_lista_ready);
         agregar_pcb_lista(un_pcb, lista_execute, &mutex_lista_execute);
-
-        enviar_pcb_a_cpu(un_pcb); 
-        atender_kernel_cpu_dispatch(socket_fd_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
+    
+        t_modulo_cpu* modulo_cpu = enviar_pcb_a_cpu(un_pcb); 
+        log_info(kernel_logger, "Recibi el modulo: %d", modulo_cpu->identificador);
+        //atender_kernel_cpu_dispatch(&(modulo_cpu->socket_fd_dispatch));  // Espera PID + motivo de finalizacion/interrupcion
         //falta agregar como protocolo los motivos de finalizacion/interrupcion
-    } else {
         log_info(kernel_logger, "Lista READY esta vacia");
     }
 }

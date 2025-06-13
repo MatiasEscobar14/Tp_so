@@ -152,7 +152,7 @@ bool cpu_esta_libre(void *cpu_void)
     return cpu->libre;
 }
 
-void enviar_pcb_a_cpu(t_pcb *un_pcb)
+t_modulo_cpu* enviar_pcb_a_cpu(t_pcb *un_pcb)
 {
 
     if (un_pcb == NULL)
@@ -163,6 +163,7 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
     pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
 
     t_modulo_cpu* un_cpu = list_find(lista_modulos_cpu_conectadas, cpu_esta_libre);
+
 
     if (un_cpu != NULL)
     {
@@ -179,6 +180,8 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
         t_paquete *un_paquete = crear_paquete(EJECUTAR_PROCESO_KC, un_buffer);
 
         enviar_paquete(un_paquete, un_cpu->socket_fd_dispatch);
+        un_cpu->libre = false;
+        un_cpu->proceso_en_ejecucion = un_pcb;
 
         eliminar_paquete(un_paquete);
     }else
@@ -186,6 +189,7 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
         pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
         log_error(kernel_logger, "No hay CPU's libres para enviar el PCB con PID %d", un_pcb->pid);
     }
+    return un_cpu;
 }
 
 void bloquear_proceso_syscall(int pid)
