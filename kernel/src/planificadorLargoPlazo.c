@@ -8,6 +8,7 @@ sem_t sem_rpta_estructura_inicializada;
 sem_t semaforo_largo_plazo;
 sem_t sem_estructura_liberada;
 
+
 pthread_mutex_t mutex_lista_new = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ready = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_exit = PTHREAD_MUTEX_INITIALIZER;

@@ -103,6 +103,7 @@ void initialize_semaphores(){
 		sem_init(&sem_rpta_estructura_inicializada,0,0);
 		sem_init(&sem_estructura_liberada,0,0);
 		sem_init(&sem_rpta_dump_memory,0,0);
+		sem_init(&sem_cpu_disponible,0,0);
 		log_info(kernel_logger, "Sempaphores inicializados.");
 
 }

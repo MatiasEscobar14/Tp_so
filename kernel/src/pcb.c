@@ -1,4 +1,5 @@
 #include "pcb.h"
+#include <kernel_cpu.h> 
 
 sem_t sem_rpta_dump_memory;
 
@@ -163,7 +164,6 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
 
     t_modulo_cpu* un_cpu = list_find(lista_modulos_cpu_conectadas, cpu_esta_libre);
 
-    
     if (un_cpu != NULL)
     {
 
@@ -179,15 +179,12 @@ void enviar_pcb_a_cpu(t_pcb *un_pcb)
         t_paquete *un_paquete = crear_paquete(EJECUTAR_PROCESO_KC, un_buffer);
 
         enviar_paquete(un_paquete, un_cpu->socket_fd_dispatch);
+
         eliminar_paquete(un_paquete);
-    }
-    else
+    }else
     {
         pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
-        log_warning(kernel_logger, "No hay CPUs libres. Proceso %d queda en cola READY", un_pcb->pid);
-
-        // El proceso debería volver a la cola READY o mantenerse ahí
-        // Esto depende de tu implementación del planificador
+        log_error(kernel_logger, "No hay CPU's libres para enviar el PCB con PID %d", un_pcb->pid);
     }
 }
 

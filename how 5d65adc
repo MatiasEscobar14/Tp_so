@@ -1,8 +1,0 @@
-[33m074aac2[m[33m ([m[1;36mHEAD -> [m[1;32mprueba[m[33m, [m[1;31morigin/prueba[m[33m)[m prueba kernel
-[33m5d65adc[m[33m ([m[1;33mtag: checkpoint-1[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Checkpoint-1.1
-[33mfcf84d0[m[33m ([m[1;33mtag: checkpoint-{1}[m[33m, [m[1;32mprueba2[m[33m, [m[1;32mmain[m[33m)[m Checkpoint 1 Terminado
-[33mdfbbf06[m conexion cpu memoria
-[33m5600c57[m Conexion Kernel-Io
-[33mdc1072d[m commit 2
-[33m6a143f7[m Conexion memoria y kernel
-[33mfaa14b7[m Initial commit

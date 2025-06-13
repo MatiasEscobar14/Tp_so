@@ -37,6 +37,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
 			list_add(lista_modulos_cpu_conectadas, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
+			sem_post(&sem_cpu_disponible);
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
 			imprimir_modulos_cpu();
 			t_buffer* buffer_handshake = new_buffer();

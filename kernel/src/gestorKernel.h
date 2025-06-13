@@ -93,6 +93,7 @@ extern sem_t sem_rpta_estructura_inicializada;
 extern sem_t semaforo_largo_plazo;
 extern sem_t sem_estructura_liberada;
 extern sem_t sem_rpta_dump_memory;
+extern sem_t sem_cpu_disponible;
 
 extern pthread_mutex_t mutex_flag_pedido_memoria;
 
