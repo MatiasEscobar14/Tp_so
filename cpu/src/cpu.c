@@ -15,8 +15,17 @@ int main(int argc, char *argv[])
     log_info(cpu_logger, "Logger e config iniciados");
 
     conectar_con_kernel(identificador);
- 
 
+    log_info(cpu_logger, "===================================================");
+    t_buffer* buffer = new_buffer();
+            add_string_to_buffer(buffer, "proceso2");
+            add_int_to_buffer(buffer, 30);
+            t_paquete* nuevo_paquete = crear_paquete(INIT_PROC, buffer);
+            enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
+            log_info(cpu_logger, "Envie SYSCALL-INITI al kernel");
+            atender_peticion_kernel(cliente_de_kernel_dispatch);
+            log_info(cpu_logger, "El proceso se creo pelucheee.");
+    log_info(cpu_logger, "===================================================");
     //cliente_de_memoria = crear_conexion(logger, "Server Memoria", ip_memoria, puerto_memoria);
 
     return 0;
@@ -34,40 +43,39 @@ void conectar_con_kernel(int identificador)
     cliente_de_kernel_dispatch = crear_conexion(cpu_logger, "Server kernel dispatch", IP_KERNEL, PUERTO_KERNEL_DISPATCH);
     t_buffer* un_buffer = new_buffer();
     add_int_to_buffer(un_buffer, identificador);
-    add_int_to_buffer(un_buffer, cliente_de_kernel_dispatch);
     t_paquete* un_paquete = crear_paquete(HANDSHAKE, un_buffer);
-    log_info(cpu_logger, "cree el paquete");
+    log_info(cpu_logger, "HANDSHAKE de la CPU: %d enviado.", identificador);
     enviar_paquete(un_paquete, cliente_de_kernel_dispatch);
     //TODO valen, el socket interrupt deberiaa pasarlo?
-    log_info(cpu_logger, "envie el paquete");
-     while (1)
-    {
-        int cod_op = recibir_operacion(cliente_de_kernel_dispatch);
-        //t_paquete *paquete_recibido = recibir_paquete(cliente_de_kernel_dispatch);
 
-        switch (cod_op)
-        {
+    
+    return;
+}  
+
+void atender_peticion_kernel(int cliente_de_kernel_dispatch) {
+    int cod_op = recibir_operacion(cliente_de_kernel_dispatch);
+    
+    switch (cod_op) {
         case MENSAJE:
             log_info(cpu_logger, "Recibida solicitud de CPU del Kernel.");
             // Aquí podrías procesar la solicitud de IO
-
-            /*t_buffer* buffer = new_buffer();
+            /*
+            t_buffer* buffer = new_buffer();
             add_string_to_buffer(buffer, "proceso2");
             add_int_to_buffer(buffer, 30);
             t_paquete* nuevo_paquete = crear_paquete(INIT_PROC, buffer);
             enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
-
-    log_info(cpu_logger, "Envie SYSCALL-IO al kernel");*/
-
+            log_info(cpu_logger, "Envie SYSCALL-IO al kernel");
+            */
             break;
-
+            
         case -1:
             log_error(cpu_logger, "Se desconectó el Kernel.");
             close(cliente_de_kernel_dispatch);
-            return;
-
+            break;
+            
         default:
-        }
+            break;
     }
     return;
-}   
+}

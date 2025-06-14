@@ -7,7 +7,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 	char* nombre_archivo;
 	int tamanio_proceso;
 	//t_pcb* un_pcb = NULL;
-	t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
+	
 	t_buffer *un_buffer;
     while (control_key) {
 		//int cod_op = recibir_operacion(socket_cpu_dispatch);
@@ -21,13 +21,15 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 
 		switch (cop) {
 			case HANDSHAKE:
+			t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
+
 			un_buffer = recv_buffer(socket);
 			if (!un_buffer) {
 					log_error(kernel_logger, "Error al recibir buffer del HANDSHAKE.");
 					break;
 				}
 			int identificador = extraer_int_buffer(un_buffer);
-			//int socket_fd_dispatch = extraer_int_buffer(un_buffer);
+	
 			nuevo_modulo->identificador = identificador;
 			nuevo_modulo->socket_fd_dispatch = socket;
 			nuevo_modulo->libre = true;
@@ -59,6 +61,11 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			    crear_proceso_sys(nombre_archivo, tamanio_proceso);
 				//aviso_finalizacion_syscall?
 				//free(nombre_archivo);
+				t_buffer* rta = new_buffer();
+				t_paquete* rta_paquete = crear_paquete(MENSAJE, rta);
+				enviar_paquete(rta_paquete, socket);
+
+
 				free(un_buffer);
 			
 			    break;

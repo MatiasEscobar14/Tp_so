@@ -165,9 +165,8 @@ void planificadorLargoPlazoPMCP()
             {
                 /* Si la memoria respondió correctamente, removemos el PCB de la lista NEW */
                 remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
-                log_info(kernel_logger, "Removi correctamente la pcb: %d de la lista NEW", pcb->pid);
+                
                 agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
-                log_info(kernel_logger, "Agregue correctamente la pcb: %d de la lista READY", pcb->pid);
                 cambiar_estado(pcb, READY_PROCCES);
                 log_info(kernel_logger, "PMCP: Proceso PID %d iniciado exitosamente (tamaño: %d)", pcb->pid, pcb->tamanio_proceso);
                 planificadorCortoPlazo();

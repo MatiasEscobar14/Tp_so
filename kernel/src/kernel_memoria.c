@@ -3,9 +3,7 @@
 void atender_kernel_memoria()
 {
     t_buffer *un_buffer;
-    log_info(kernel_logger, "Entre a atender memoria");
     int cod_op = recibir_operacion(socket_memoria);
-    log_info(kernel_logger, "COD OP: %d",cod_op);
     int respuesta;
     switch (cod_op)
     {
@@ -20,7 +18,6 @@ void atender_kernel_memoria()
         {
             pthread_mutex_lock(&mutex_flag_pedido_memoria);
             flag_pedido_de_memoria = true;
-            log_info(kernel_logger, "entramos a la respuesta correcta, flag: %d", flag_pedido_de_memoria);
             pthread_mutex_unlock(&mutex_flag_pedido_memoria);
         }
         else
