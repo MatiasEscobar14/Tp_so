@@ -17,6 +17,7 @@
 #include <commons/collections/list.h>
 #include <commons/memory.h>
 #include <readline/readline.h>
+#include <semaphore.h>
 
 #include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
 #include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
@@ -41,6 +42,8 @@ extern int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memori
 
 extern pthread_mutex_t mutex_pcb_actual;
 extern pthread_mutex_t mutex_interrupt;
+
+extern sem_t sem_rta_instruccion;
 
 extern t_pcb* pcb_actual;
 

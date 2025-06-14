@@ -34,6 +34,7 @@ typedef enum
 	//===MEMORIA - CPU===//
 
 	RESPUESTA_DUMP_MEMORY,
+	RTA_INSTRUCCION,
 
 
 	//RTA_DUMP_MEMORY_MK,

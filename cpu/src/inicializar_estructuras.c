@@ -22,3 +22,10 @@ void iniciar_logger_cpu(char* nombre){
         exit(EXIT_FAILURE);
     }
 }
+
+void initialize_semaphores(){
+    sem_init(&sem_rta_instruccion,0,0);
+    
+    log_info(kernel_logger, "Sempaphores inicializados.");
+
+}

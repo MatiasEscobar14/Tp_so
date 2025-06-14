@@ -1,11 +1,10 @@
-#include "/home/utnso/tp-2025-1c-Linux-Learners/memoria/include/memoria-cpu.h"
+#include "memoria-cpu.h"
 
-static void procesar_conexion_memoria(void *void_args)
+void procesar_conexion_memoria(void *void_args)
 {
 	t_procesar_conexion_args *args = (t_procesar_conexion_args *)void_args;
 	t_log *logger_memoria = args->log;
 	int cliente_socket = args->fd;
-	char *server_name = args->server_name;
 	free(args);
 
 	op_code cop;
@@ -18,36 +17,42 @@ static void procesar_conexion_memoria(void *void_args)
 		}
 
 		switch (cop){
+            case PAQUETE:
+                break;
+            case HANDSHAKE: 
+                break;
 		    case MENSAJE:
 			    recibir_mensaje(logger_memoria, cliente_socket);
 			    break;
 
             case PEDIDO_INSTRUCCION: 
 			    printf("entre al case pedido de instruccion");
-			    uint32_t pid, pc;
-			    recibir_pedido_instruccion(&pid, &pc, cliente_socket); //(2)
+			
+			    //recibir_pedido_instruccion(&pid, &pc, cliente_socket); //(2)
+                t_buffer* un_buffer = recv_buffer(cliente_socket);
+                int pid = extraer_int_buffer(un_buffer);
+                int pc = extraer_int_buffer(un_buffer);
+
 			    printf("paso bien el pedido de instruccion");
 			    // log_debug(logger_memoria, "Se recibio un pedido de instruccion para el PID %d y PC %d", pid, pc);
-			    proceso_memoria = obtener_proceso_pid(pid); //(3)
+			    t_proceso_memoria* proceso_memoria = obtener_proceso_pid(pid); //(3)
 			    if (proceso_memoria == NULL)
 			    {
 				    log_error(logger_memoria, "No se encontro el proceso con PID %d", pid);
 				    break;
 			    }
-			        else
-			    {
-				    t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc); //(3)
-				    if (instruccion != NULL)
-				    {
-					    enviar_instruccion(cliente_socket, instruccion); //(4)
-					    // log_debug(logger_memoria, "Se envia la instruccion a CPU de PC %d para el PID %d y es: %s - %s - %s", pc, pid, instruccion_to_string(instruccion->nombre), instruccion->parametro1, instruccion->parametro2);
-				    }
-				    else
-				    {
-					    log_error(logger_memoria, "No se encontro la instruccion con PC %d para el PID %d", pc, pid);
-				    }
-				    break;
-			    }
+
+				t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc); //(3)
+				if (instruccion != NULL)
+				{
+					//enviar_instruccion(cliente_socket, instruccion); //(4)
+				    // log_debug(logger_memoria, "Se envia la instruccion a CPU de PC %d para el PID %d y es: %s - %s - %s", pc, pid, instruccion_to_string(instruccion->nombre), instruccion->parametro1, instruccion->parametro2);
+				}
+				else
+				{
+					log_error(logger_memoria, "No se encontro la instruccion con PC %d para el PID %d", pc, pid);
+				}
+				break;
 
 			case INICIALIZAR_PROCESO: 
 			    proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
@@ -73,14 +78,14 @@ static void procesar_conexion_memoria(void *void_args)
 }
 
 
-void recibir_pedido_instruccion(uint32_t *pid, uint32_t *pc, int socket)
+void recibir_pedido_instruccion(int *pid, int *pc, int socket)
 {
     t_paquete *paquete = recibir_paquete(socket);
     deserializar_pedido_instruccion(pid, pc, paquete->buffer);
     eliminar_paquete(paquete);
 }
 
-void deserializar_pedido_instruccion(uint32_t *pid, uint32_t *pc, t_buffer *buffer)
+void deserializar_pedido_instruccion(int *pid, int *pc, t_buffer *buffer)
 {
     int desplazamiento = 0;
     memcpy(pid, buffer->stream + desplazamiento, sizeof(uint32_t));
@@ -88,14 +93,14 @@ void deserializar_pedido_instruccion(uint32_t *pid, uint32_t *pc, t_buffer *buff
     memcpy(pc, buffer->stream + desplazamiento, sizeof(uint32_t));
 }
 
-static uint32_t pid_a_buscar;
+static int pid_a_buscar;
 
 bool id_process(void *elemento)
 {
     return ((t_proceso_memoria *)elemento)->pid == pid_a_buscar;
 }
 
-t_proceso_memoria *obtener_proceso_pid(uint32_t pid_pedido)
+t_proceso_memoria *obtener_proceso_pid(int pid_pedido)
 {
     t_proceso_memoria *proceso;
     pid_a_buscar = pid_pedido;
@@ -109,8 +114,9 @@ t_proceso_memoria *obtener_proceso_pid(uint32_t pid_pedido)
 
 void enviar_instruccion(int socket, t_instruccion *instruccion)
 {
+    usleep(RETARDO_MEMORIA*1000);
     t_buffer* un_buffer = new_buffer();
-    t_paquete *paquete = crear_paquete(INSTRUCCION, un_buffer);
+    t_paquete *paquete = crear_paquete(RTA_INSTRUCCION, un_buffer);
     serializar_instruccion(paquete, instruccion);
     enviar_paquete(paquete, socket);
     eliminar_paquete(paquete);
@@ -344,7 +350,7 @@ t_instruccion *armar_estructura_instruccion(nombre_instruccion instruccion, char
     return estructura;
 }
 
-void recibir_finalizar_proceso(uint32_t *pid, int socket)
+void recibir_finalizar_proceso(int *pid, int socket)
 {
     uint32_t size;
     recv(socket, &size, sizeof(uint32_t), 0);
@@ -353,7 +359,7 @@ void recibir_finalizar_proceso(uint32_t *pid, int socket)
 }
 
 // tambien deberia eliminarlo de la lista de procesos totales
-bool _buscar_proceso(void *element)
+/*bool _buscar_proceso(void *element)
 {
     return element == proceso_memoria;
 }

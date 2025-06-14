@@ -54,7 +54,7 @@ void attender_memoria_kernel(int socket_kernel)
 
 void inicializar_estructuras(t_buffer *buffer, int socket_kernel)
 {
-    log_info(logger_memoria, "HOLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
     int pid = extraer_int_buffer(buffer);
     int tamanio = extraer_int_buffer(buffer);
 
@@ -99,7 +99,6 @@ t_proceso* crear_proceso(int pid, int tamanio_proceso)
     list_add(lista_procesos, nuevo_proceso);
     pthread_mutex_unlock(&mutex_lista_procesos);
     
-    log_info(logger_memoria, "Return Proceso");
     return nuevo_proceso;
 }
 /*

@@ -33,8 +33,8 @@ void _goto(int valor){
     return;
     }
 
-    log_info(cpu_logger, "_goto: PC previo = %d", pcb_actual->contexto_ejecucion->registros->program_counter);
-    pcb_actual->contexto_ejecucion->registros->program_counter = valor;
+    log_info(cpu_logger, "_goto: PC previo = %d", pcb_actual->pc);
+    pcb_actual-> pc = valor;
     log_info(cpu_logger, "_goto ejecutado. PC actualizado a %d", valor);
    
 }

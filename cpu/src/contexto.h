@@ -46,18 +46,16 @@ typedef enum
 
 typedef struct
 {
-    t_registros *registros;
     t_motivo_desalojo motivo_desalojo;
     t_motivo_finalizacion motivo_finalizacion;
 } t_contexto_ejecucion;
 
 typedef struct
 {
-    uint32_t pid;
+    int pid;
+    int pc;
     t_estado_proceso estado;
-    uint32_t quantum;
-    uint64_t tiempo_q;
-    t_list *recursos_asignados;
+    //t_list *recursos_asignados;
     t_contexto_ejecucion *contexto_ejecucion;
 } t_pcb;
 

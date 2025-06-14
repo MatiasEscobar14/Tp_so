@@ -24,6 +24,17 @@ typedef struct
     int tamanio;
     
 }t_proceso;
+
+typedef struct
+{
+    uint32_t pid;
+    char *path;
+    int tamanio;
+    t_list *instrucciones;
+    t_list *tabla_paginas;
+    //t_tabla_paginas *tabla_paginas;
+} t_proceso_memoria;
+
 // Listas
 extern t_list* lista_procesos;
 //MUTEX

@@ -29,9 +29,21 @@ void procesar_conexion_cpu(void *void_args)
 			break;
 
         case PCB:
-			pthread_mutex_lock(&mutex_pcb_actual); 
-			recibir_pcb(pcb_actual, cliente_socket); //(2)
-			pthread_mutex_unlock(&mutex_pcb_actual); 
+			//pthread_mutex_lock(&mutex_pcb_actual); 
+			//recibir_pcb(pcb_actual, cliente_socket); //(2)
+			//pthread_mutex_unlock(&mutex_pcb_actual); 
+
+            t_buffer* recibir_kernel = recv_buffer(cliente_socket);
+            int pid = extraer_int_buffer(recibir_kernel);
+            int pc = extraer_int_buffer(recibir_kernel);
+
+            t_buffer* solicitud_instruccion = new_buffer();
+            add_int_to_buffer(solicitud_instruccion, pid);
+            t_paquete* un_paquete = crear_paquete(PEDIDO_INSTRUCCION, solicitud_instruccion);
+            enviar_paquete(un_paquete, cliente_socket);
+            
+
+            //sem_wait(&sem_rta_intruccion);
 
 			while (!hayInterrupciones() && pcb_actual != NULL && !esSyscall)
 			{
@@ -59,8 +71,8 @@ void procesar_conexion_cpu(void *void_args)
 
 void ejecutar_ciclo_instruccion(int socket)
 {
-    t_instruccion *instruccion = fetch(pcb_actual->pid, pcb_actual->contexto_ejecucion->registros->program_counter); 
-    // TODO decode: manejo de TLB y MMU
+    t_instruccion *instruccion = fetch(pcb_actual->pid, pcb_actual->pc); 
+    // TODO decode: manejo de TLB y MMU 
     execute(instruccion, socket); 
     liberar_instruccion(instruccion); //(11)
 }
@@ -159,7 +171,7 @@ void loguear_y_sumar_pc(t_instruccion *instruccion)
     log_instruccion_ejecutada(instruccion->nombre, instruccion->parametro1, instruccion->parametro2, instruccion->parametro3, instruccion->parametro4, instruccion->parametro5);
     
     if((instruccion->nombre) =! GOTO) {
-    pcb_actual->contexto_ejecucion->registros->program_counter++;
+    pcb_actual->pc++;
     } else {}
 }
 

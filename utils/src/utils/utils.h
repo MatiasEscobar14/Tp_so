@@ -30,7 +30,7 @@ typedef enum
     WRITE,
     READ, 
     GOTO,
-    //IO,
+    SYSCALL_IO,
     INIT_PROC,
     DUMP_MEMORY,
     EXIT
