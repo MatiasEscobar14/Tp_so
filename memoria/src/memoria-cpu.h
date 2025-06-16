@@ -3,8 +3,7 @@
 
 #include "utils/utils.h"
 #include "gestorMemoria.h"
-
-void procesar_conexion_memoria(void *void_args);
+void attender_memoria_cpu(int socket);
 void recibir_pedido_instruccion(int *pid, int *pc, int socket);
 void deserializar_pedido_instruccion(int *pid, int *pc, t_buffer *buffer);
 bool id_process(void *elemento);
@@ -24,6 +23,6 @@ t_proceso_memoria *deserializar_proceso(t_buffer *buffer);
 t_proceso_memoria *recibir_proceso_memoria(int socket_cliente);
 t_instruccion *obtener_instruccion_del_proceso_pc(t_proceso_memoria *proceso, uint32_t pc);
 
-
+void esperar_cpu();
 
 #endif

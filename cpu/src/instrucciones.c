@@ -1,4 +1,4 @@
-#include "instrucciones.h"
+/*#include "instrucciones.h"
 
 //Representa la instrucción No Operation, es decir, va a consumir solamente el tiempo del ciclo de instrucción.
 
@@ -110,7 +110,7 @@ void _dump_memory(){
     }
 
 }
-/*
+
 void _exit(){
     printf("entre a exit");
 }*/

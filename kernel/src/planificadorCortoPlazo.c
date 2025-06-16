@@ -1,5 +1,7 @@
 #include <planificadorCortoPlazo.h>
 
+sem_t sem_cpu_disponible;
+
 void planificadorCortoPlazo()
 {
      while (1)
@@ -34,35 +36,31 @@ void planificadorCortoPlazo()
 }
 
 void atender_FIFO() {
-    log_info(kernel_logger, "Comienzo a ejecutar FIFO");
-
-    // Verificar si EXECUTE está vacío
-    pthread_mutex_lock(&mutex_lista_execute);
-    bool execute_esta_vacia = list_is_empty(lista_execute);
-    pthread_mutex_unlock(&mutex_lista_execute);
-
-    if (!execute_esta_vacia) {
-        log_info(kernel_logger, "Lista EXECUTE no está vacía");
-        return;
-    }
-
+    log_info(kernel_logger, "Comienzo a ejecutar FIFO (planificador corto plazo)");
     // Intentar obtener un proceso de la lista READY
     pthread_mutex_lock(&mutex_lista_ready);
     t_pcb* un_pcb = NULL;
 
     if (!list_is_empty(lista_ready)) {
-        un_pcb = list_remove(lista_ready, 0);
+        un_pcb = list_get(lista_ready, 0);
     }
     pthread_mutex_unlock(&mutex_lista_ready);
 
     if (un_pcb != NULL) {
+        log_info(kernel_logger, "Esperando a que se conecte una CPU...", un_pcb->pid);
+        sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
+        log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.", un_pcb->pid);  
         cambiar_estado(un_pcb, EXEC_PROCCES);
-        agregar_pcb_lista(un_pcb, lista_execute, mutex_lista_execute);
-        enviar_pcb_a_cpu(un_pcb);
-        //atender_kernel_cpu_dispatch(socket_cpu_dispatch);  // Espera PID + motivo de finalizacion/interrupcion
-    } else {
-        log_info(kernel_logger, "Lista READY esta vacia");
+        remover_pcb_lista(un_pcb, lista_ready, &mutex_lista_ready);
+        agregar_pcb_lista(un_pcb, lista_execute, &mutex_lista_execute);
+    
+        t_modulo_cpu* modulo_cpu = enviar_pcb_a_cpu(un_pcb); 
+
+        //atender_kernel_cpu_dispatch(&(modulo_cpu->socket_fd_dispatch));  // Espera PID + motivo de finalizacion/interrupcion
+        //falta agregar como protocolo los motivos de finalizacion/interrupcion
     }
 }
+
+
 
 

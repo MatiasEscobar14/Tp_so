@@ -1,17 +1,13 @@
-#include <utils/utils.h>
-#include <utils/protocolo.h>
-#include "gestorCPU.h"
 #include "cpu.h"
-#include "utils_cpu.h"
-sem_t sem_rta_instruccion;
-
+#include "inicializar_estructuras.h"
 /*pthread_mutex_t mutex_pcb_actual;
 pthread_mutex_t mutex_interrupt;*/
-void conectar_con_memoria();
-int main(int argc, char *argv[]){
+
+int main(int argc, char *argv[])
+{
 
     int identificador = 5; //atoi(argv[1]);
-    char *nombre_log = string_from_format("cpu_%d.log", identificador);
+    char* nombre_log = string_from_format("cpu_%d.log", identificador);
 
     iniciar_config_cpu("cpu.config");
     iniciar_logger_cpu(nombre_log);
@@ -19,8 +15,21 @@ int main(int argc, char *argv[]){
     log_info(cpu_logger, "Logger e config iniciados");
 
     conectar_con_kernel(identificador);
-   // conectar_con_memoria();
-   // socket_memoria = crear_conexion(cpu_logger, "Server Memoria", IP_MEMORIA, PUERTO_MEMORIA);
+    conectar_con_memoria();
+    
+    /*log_info(cpu_logger, "===================================================");
+    t_buffer* buffer = new_buffer();
+            add_string_to_buffer(buffer, "proceso2");
+            add_int_to_buffer(buffer, 30);
+            t_paquete* nuevo_paquete = crear_paquete(INIT_PROC, buffer);
+            enviar_paquete(nuevo_paquete, cliente_de_kernel_dispatch);
+            log_info(cpu_logger, "Envie SYSCALL-INITI al kernel");
+            atender_peticion_kernel(cliente_de_kernel_dispatch);
+            log_info(cpu_logger, "El proceso se creo pelucheee.");
+    log_info(cpu_logger, "===================================================");*/
+
+
+   
 
     return 0;
 }
@@ -99,7 +108,7 @@ void atender_peticion_kernel(int cliente_de_kernel_dispatch) {
             t_paquete* un_paquete = crear_paquete(PEDIDO_INSTRUCCION, solicitud_instruccion);
             enviar_paquete(un_paquete, cliente_de_kernel_dispatch);
 
-            atender_peticion_memoria();
+            //atender_peticion_memoria();
             sem_wait(&sem_rta_instruccion);
             
             log_info(cpu_logger, "Sali del semafoto SEM_RTA_INSTRUCCION");
@@ -148,7 +157,7 @@ void atender_peticion_memoria() {
         
             break;
         case RTA_INSTRUCCION:
-            t_instruccion* instruccion = deserializar_instruccion(socket_memoria);
+            //t_instruccion* instruccion = deserializar_instruccion(socket_memoria);
             sem_post(&sem_rta_instruccion);
             break;
         case -1:

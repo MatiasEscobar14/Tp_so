@@ -1,4 +1,4 @@
-#include "utils_cpu.h"
+/*#include "utils_cpu.h"
 
 bool esSyscall = false;
 bool envioPcb = false;
@@ -343,4 +343,4 @@ char *instruccion_to_string(nombre_instruccion nombre)
     default:
         return "DESCONOCIDA";
     }
-}
+}*/

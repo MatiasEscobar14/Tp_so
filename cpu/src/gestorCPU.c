@@ -16,4 +16,5 @@ pthread_mutex_t mutex_pcb_actual;
 pthread_mutex_t mutex_interrupt;
 
 
+sem_t sem_rta_instruccion;
 t_pcb *pcb_actual;

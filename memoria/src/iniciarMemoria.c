@@ -31,9 +31,13 @@ log_info(logger_memoria, "Config de Memoria iniciado.");
 
 //Agregar una funcion que inicie todo: void iniciar_memoria(char* ruta_del_config);
 
+
 void iniciar_listas(){
 	lista_procesos = list_create();
 }
+
+pthread_mutex_t mutex_lista_modulos_io_conectadas = PTHREAD_MUTEX_INITIALIZER;
+
 void iniciar_mutex(){
-    pthread_mutex_init(&mutex_lista_procesos, NULL);
+    pthread_mutex_init(&mutex_procesos, NULL);
 }

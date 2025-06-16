@@ -19,3 +19,8 @@ int socket_io;
 int socket_cpu_dispatch;
 int socket_cpu_interrupt;
 int socket_memoria;
+
+
+t_list* lista_io_esperas;
+pthread_mutex_t mutex_lista_io_esperas = PTHREAD_MUTEX_INITIALIZER;
+

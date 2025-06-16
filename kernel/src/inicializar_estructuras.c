@@ -73,6 +73,7 @@ void iniciar_lista(){
     lista_susp_ready = list_create();
 	lista_modulos_io_conectadas = list_create();
 	lista_modulos_cpu_conectadas = list_create();
+	lista_io_esperas = list_create();
 	log_info(kernel_logger, "Listas inicializadas.");
 }
 
@@ -93,6 +94,7 @@ void initialize_mutex(){
 	pthread_mutex_init(&mutex_lista_execute,NULL);
 	pthread_mutex_init(&mutex_lista_modulos_cpu_conectadas,NULL );
 	pthread_mutex_init(&mutex_lista_modulos_io_conectadas,NULL);
+	pthread_mutex_init(&mutex_lista_io_esperas, NULL);
 	log_info(kernel_logger, "Mutex inicializados.");
 
 }
@@ -102,6 +104,7 @@ void initialize_semaphores(){
 		sem_init(&sem_rpta_estructura_inicializada,0,0);
 		sem_init(&sem_estructura_liberada,0,0);
 		sem_init(&sem_rpta_dump_memory,0,0);
+		sem_init(&sem_cpu_disponible,0,0);
 		log_info(kernel_logger, "Sempaphores inicializados.");
 
 }

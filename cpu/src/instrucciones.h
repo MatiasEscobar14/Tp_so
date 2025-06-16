@@ -1,4 +1,4 @@
-#ifndef INSTRUCCIONES_H_
+/*#ifndef INSTRUCCIONES_H_
 #define INSTRUCCIONES_H_
 
 #include "gestorCPU.h"
@@ -12,4 +12,4 @@ void _init_proc(char* path, int tamanio);
 void _dump_memory();
 //void _exit();
 
-#endif
+#endif*/

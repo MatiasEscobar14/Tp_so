@@ -18,6 +18,9 @@ extern char* PATH_INSTRUCCIONES;
 
 extern int socket_memoria;
 
+extern pthread_mutex_t mutex_procesos;
+
+
 typedef struct 
 {
     uint32_t pid;

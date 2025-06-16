@@ -1,4 +1,5 @@
 #include "planificadorLargoPlazo.h"
+#include "planificadorCortoPlazo.h"
 
 t_list *lista_new;
 t_list *lista_ready;
@@ -7,6 +8,7 @@ sem_t sem_rpta_estructura_inicializada;
 sem_t semaforo_largo_plazo;
 sem_t sem_estructura_liberada;
 sem_t sem_cpu_disponible;
+
 
 pthread_mutex_t mutex_lista_new = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t mutex_lista_ready = PTHREAD_MUTEX_INITIALIZER;
@@ -56,85 +58,146 @@ void iniciar_plp()
 
 void planificadorLargoPlazo()
 {
-    t_pcb *pcb = NULL;
-
-    pthread_mutex_lock(&mutex_lista_new); // Bloqueamos el acceso a la lista de NEW
 
     if (!list_is_empty(lista_new))
     {
         if(ALGORITMO_INGRESO_A_READY == FIFO){
-            pcb = list_get(lista_new, 0); // sale por fifo
+            planificadorLargoPlazoFifo();
         }else{ //Proceso mas chico primero
-            list_sort(lista_new, (void*)comparar_pcb_por_tamanio);
-            pcb = list_get(lista_new, 0); // sale el de menor tamaño
-        }
-       
-        if (pcb != NULL)
-        {
-            int hay_pcb = 1;
-            while (hay_pcb)
-            {
-                // Enviamos un mensaje a memoria para que inicialice las estructuras del proceso
-                t_buffer *a_enviar = new_buffer();
-                add_int_to_buffer(a_enviar, pcb->pid);
-                // add_string_to_buffer(a_enviar, pcb->path);
-                add_int_to_buffer(a_enviar, pcb->tamanio_proceso);
-                t_paquete *un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
-                socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
-                enviar_paquete(un_paquete, socket_memoria);
-                atender_kernel_memoria();
-                eliminar_paquete(un_paquete);
-                liberar_conexion(socket_memoria);
-                log_info(kernel_logger, "Se avisó a Memoria del nuevo proceso");
-
-                // Esperamos hasta que la estructura sea creada
-                sem_wait(&sem_rpta_estructura_inicializada);
-
-                pthread_mutex_lock(&mutex_flag_pedido_memoria);
-
-                if (flag_pedido_de_memoria)
-                {
-                    // Si la memoria respondió correctamente, removemos el PCB de la lista NEW
-                    list_remove_element(lista_new, pcb);
-                    agregar_pcb_lista(pcb, lista_ready, mutex_lista_ready);
-                    cambiar_estado(pcb, READY_PROCCES);
-                    planificadorCortoPlazo();
-                    if (list_is_empty(lista_new))
-                    {
-                        hay_pcb = 0;
-                    }
-                }
-                else
-                {
-                    // Si la memoria no respondió correctamente, terminamos el ciclo
-                    log_info(kernel_logger, "Memoria no tiene espacio para PID %d, se mantiene en NEW", pcb->pid);
-                    // Se debe esperar la finalizacion de un proceso para volver a intentar?
-
-                    hay_pcb = 0;
-                }
-
-                pthread_mutex_unlock(&mutex_flag_pedido_memoria);
-            }
+            planificadorLargoPlazoPMCP();
         }
     }
-    pthread_mutex_unlock(&mutex_lista_new);
-
-  
-   //deberia volver a iniciar el plp?para probar con el siguiente proceso?
-
+    
+    
 }
+
+
+void planificadorLargoPlazoFifo()
+{
+    t_pcb *pcb = list_get(lista_new, 0); 
+    
+    if (pcb != NULL)
+    {
+        int hay_pcb = 1;
+        while (hay_pcb)
+        {
+
+            t_buffer *a_enviar = new_buffer();
+            add_int_to_buffer(a_enviar, pcb->pid);
+            add_int_to_buffer(a_enviar, pcb->tamanio_proceso);
+            t_paquete *un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
+
+            socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
+            enviar_paquete(un_paquete, socket_memoria);
+            atender_kernel_memoria();
+            eliminar_paquete(un_paquete);
+            liberar_conexion(socket_memoria);
+
+            log_info(kernel_logger, "Se avisó a Memoria del nuevo proceso");
+            
+
+            sem_wait(&sem_rpta_estructura_inicializada);
+            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            
+            if (flag_pedido_de_memoria)
+            {
+                remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
+                agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
+                cambiar_estado(pcb, READY_PROCCES);
+                planificadorCortoPlazo();
+                
+                if (list_is_empty(lista_new))
+                {
+                    hay_pcb = 0;
+                } else {
+                    pcb = list_get(lista_new, 0); 
+                }
+            }
+            else
+            {
+
+                log_info(kernel_logger, "Memoria no tiene espacio para PID %d, se mantiene en NEW", pcb->pid);
+                // Se debe esperar la finalizacion de un proceso para volver a intentar? 
+                hay_pcb = 0;
+            }
+            //pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+        }
+    }
+}
+
+void planificadorLargoPlazoPMCP()
+{
+
+    list_sort(lista_new, (void*)comparar_pcb_por_tamanio);
+    
+    /* Intentamos inicializar procesos en orden de tamaño hasta que no se pueda más */
+    bool se_inicio_alguno = true;
+    
+    while (se_inicio_alguno && !list_is_empty(lista_new))
+    {
+        se_inicio_alguno = false;
+        
+        /* Reordenar la lista después de cada cambio para mantener el orden */
+        list_sort(lista_new, (void*)comparar_pcb_por_tamanio);
+        
+        /* Intentar con el proceso más pequeño actual */
+        t_pcb *pcb = list_get(lista_new, 0); /* sale el de menor tamaño */
+        
+        if (pcb != NULL)
+        {
+            /* Enviamos un mensaje a memoria para que inicialice las estructuras del proceso */
+            t_buffer *a_enviar = new_buffer();
+            add_int_to_buffer(a_enviar, pcb->pid);
+            add_int_to_buffer(a_enviar, pcb->tamanio_proceso);
+            t_paquete *un_paquete = crear_paquete(INICIALIZAR_ESTRUCTURAS_KM, a_enviar);
+            
+            socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
+            enviar_paquete(un_paquete, socket_memoria);
+            atender_kernel_memoria();
+            eliminar_paquete(un_paquete);
+            liberar_conexion(socket_memoria);
+            log_info(kernel_logger, "PMCP: Se avisó a Memoria del proceso PID %d (tamaño: %d)", pcb->pid, pcb->tamanio_proceso);
+            
+            /* Esperamos hasta que la estructura sea creada */
+            sem_wait(&sem_rpta_estructura_inicializada);
+            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            log_info(kernel_logger, "Flag pedido de memoria antes de IF: %d", flag_pedido_de_memoria);
+            if (flag_pedido_de_memoria)
+            {
+                /* Si la memoria respondió correctamente, removemos el PCB de la lista NEW */
+                remover_pcb_lista(pcb, lista_new, &mutex_lista_new);
+                
+                agregar_pcb_lista(pcb, lista_ready, &mutex_lista_ready);
+                cambiar_estado(pcb, READY_PROCCES);
+                log_info(kernel_logger, "PMCP: Proceso PID %d iniciado exitosamente (tamaño: %d)", pcb->pid, pcb->tamanio_proceso);
+                planificadorCortoPlazo();
+                se_inicio_alguno = true; /* Seguimos intentando con otros procesos */
+            }
+            else
+            {
+                /* Si la memoria no respondió correctamente, terminamos el ciclo */
+                log_info(kernel_logger, "PMCP: Memoria no tiene espacio para PID %d (tamaño: %d), terminando intentos", pcb->pid, pcb->tamanio_proceso);
+                //TODO se debera esperar a que se libere espacio en memoria para continuar?
+                se_inicio_alguno = false;
+            }
+            //pthread_mutex_unlock(&mutex_flag_pedido_memoria);
+        }
+    }
+    
+    log_info(kernel_logger, "TERMINO EL PLANIFICADOR PMCP");
+}
+
 
 void finalizar_proceso(int pid)
 {
-    t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid);
-    if (un_pcb != NULL)
+    t_pcb *un_pcb = buscar_y_remover_pcb_por_pid(pid); //TODO esta funcion funciona?
+    if (un_pcb)
     {
-                                  
         t_buffer *a_enviar = new_buffer();
         add_int_to_buffer(a_enviar, un_pcb->pid);
-        log_info(kernel_logger, "AGREGO AL BUFFER EL PID A ELIMINAR: %d", un_pcb->pid);
         t_paquete *un_paquete = crear_paquete(FINALIZAR_ESTRUCTURAS_KM, a_enviar);
-
+        //TODO habria que proteger "socket_memoria" con un mutex?
+        socket_memoria = crear_conexion(kernel_logger, "Memoria Server", IP_MEMORIA, PUERTO_MEMORIA);
         enviar_paquete(un_paquete, socket_memoria);
         atender_kernel_memoria();
         eliminar_paquete(un_paquete);
@@ -143,14 +206,14 @@ void finalizar_proceso(int pid)
         log_info(kernel_logger, "Se aviso a Memoria para que libere las estructuras del proceso");
         sem_wait(&sem_estructura_liberada);
 
-        agregar_pcb_lista(un_pcb, lista_exit, mutex_lista_exit);
+        agregar_pcb_lista(un_pcb, lista_exit, &mutex_lista_exit);
 
         log_info(kernel_logger, "Fin de Proceso: ## Finaliza el proceso %d", un_pcb->pid);
 
         // Verificamos si hay procesos en SUSP_READY
         pthread_mutex_lock(&mutex_lista_susp_ready);
 
-        bool hay_espacio_disponible = true;
+        bool hay_espacio_disponible = true; //TODO: esto es un mock deberiamos cambiarlo cuando la memoria este completa
 
         while (!list_is_empty(lista_susp_ready) && hay_espacio_disponible)
         {
@@ -175,8 +238,9 @@ void finalizar_proceso(int pid)
             if (flag_pedido_de_memoria)
             {
                 // Si la memoria respondió correctamente, removemos el PCB de la lista NEW
-                list_remove_element(lista_susp_ready, pcb_a_reactivar);
-                agregar_pcb_lista(pcb_a_reactivar, lista_ready, mutex_lista_ready);
+                
+                remover_pcb_lista(pcb_a_reactivar, lista_susp_ready, &mutex_lista_susp_ready);
+                agregar_pcb_lista(pcb_a_reactivar, lista_ready, &mutex_lista_ready);
                 cambiar_estado(pcb_a_reactivar, READY_PROCCES);
             }
             else

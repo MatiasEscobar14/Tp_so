@@ -18,7 +18,6 @@ void atender_kernel_memoria()
         {
             pthread_mutex_lock(&mutex_flag_pedido_memoria);
             flag_pedido_de_memoria = true;
-            log_info(kernel_logger, "entramos a la respuesta correcta, flag: %d", flag_pedido_de_memoria);
             pthread_mutex_unlock(&mutex_flag_pedido_memoria);
         }
         else

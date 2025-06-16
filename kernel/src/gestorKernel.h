@@ -9,7 +9,7 @@ int miliseg;
 
 
 #include <utils/utils.h>
-#include<pthread.h>
+#include <pthread.h>
 #include <semaphore.h>
 
 
@@ -48,7 +48,7 @@ typedef enum{
 }estado_pcb;
 
 typedef struct {
-    uint32_t pid;
+    int pid;
     uint32_t pc;
     char* nombre_archivo;
     uint32_t tamanio_proceso;
@@ -65,6 +65,7 @@ extern bool flag_pedido_de_memoria;
 
 
 //=======LISTAS======//
+
 
 extern t_list* lista_new;
 extern t_list* lista_ready;
@@ -123,12 +124,22 @@ typedef struct {                //?
 typedef struct {
     char* nombre;
     int socket_fd;  
-    t_pcb* en_ejecucion;
-    //t_list* procesos_en_espera;
-    t_queue* cola_espera;
+    t_pcb* pcb_ejecutando;
+    //t_queue* cola_espera;
     bool libre;
+    pthread_mutex_t mutex;
 } t_modulo_io;
 
+typedef struct {
+    t_queue* cola_espera;
+    char* nombre;                  
+    pthread_mutex_t mutex;
+} t_io_espera_por_nombre;
+
+//Valen prueba
+
+extern t_list* lista_io_esperas;
+extern pthread_mutex_t mutex_lista_io_esperas;
 
 
 #endif

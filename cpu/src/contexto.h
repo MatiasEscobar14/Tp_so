@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <commons/collections/list.h>
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
+#include <utils/utils.h>
+#include <utils/protocolo.h>
 
 typedef enum
 {

@@ -26,6 +26,6 @@ void iniciar_logger_cpu(char* nombre){
 void initialize_semaphores(){
     sem_init(&sem_rta_instruccion,0,0);
     
-    log_info(kernel_logger, "Sempaphores inicializados.");
+    log_info(cpu_logger, "Sempaphores inicializados.");
 
 }

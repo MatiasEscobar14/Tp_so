@@ -1,4 +1,4 @@
-#include </home/utnso/tp-2025-1c-Linux-Learners/cpu/src/tlb.h>
+/*#include "tlb.h"
 
 static t_tlb TLB;
 
@@ -49,4 +49,4 @@ int tlb_search(uint32_t pid, uint32_t pagina, t_log *logger)
     }
 
     return entry->frame;
-}
+}*/

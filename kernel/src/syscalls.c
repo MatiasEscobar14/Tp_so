@@ -3,12 +3,17 @@
 #include "planificadorLargoPlazo.h"
 #include "kernel_memoria.h"
 #include "kernel_cpu.h"
+<<<<<<< HEAD
+=======
+#include "kernel_IO.h"
+>>>>>>> pruebaValen
 void crear_proceso_sys(char *nombre_archivo, int tam_proceso)
 {
 	t_pcb *un_pcb = NULL;
 	log_info(kernel_logger, "El PATH del proceso es: [%s] y el tamaño del mismo es: [%d] \n", nombre_archivo, tam_proceso);
 	un_pcb = crear_pcb(nombre_archivo, tam_proceso);
-	agregar_pcb_lista(un_pcb, lista_new, mutex_lista_new);
+    log_info(kernel_logger, "Se creo la pcb: %d", un_pcb->pid);
+	agregar_pcb_lista(un_pcb, lista_new, &mutex_lista_new);
 	planificadorLargoPlazo();
 }
 
@@ -28,48 +33,79 @@ void dump_memory_sys(int pid)
 	log_info(kernel_logger, "Se aviso a Memoria para que haga dump del proceso");
 }
 
-void syscall_io(t_syscall_io *param)
-{
-	log_info(kernel_logger, "entre al syscall_io");
-	log_info(kernel_logger, "pid: %d, nombre_io: %s, miliseg: %d", param->pid, param->nombre_io, param->miliseg);
+void syscall_io(t_syscall_io *param){
+	log_info(kernel_logger, "Entre a syscal_io");
 
-	t_pcb *pcb = buscar_pcb_por_pid(param->pid);
-	log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: IO '%s' por %d ms", param->pid, param->nombre_io, param->miliseg);
-	log_info(kernel_logger, "PCB encontrada: %d ", pcb->pid);
-	
-	t_modulo_io *modulo_io = buscar_modulo_io_por_nombre(param->nombre_io);
-	log_info(kernel_logger, "Modulo IO encontrado: %s ", modulo_io->nombre);
+    // 1. Buscar TODAS las instancias con ese nombre
+    t_list* modulos_con_nombre = buscar_modulos_io_por_nombre(param->nombre_io);
+    if (list_is_empty(modulos_con_nombre)) {
+        log_error(kernel_logger, "Dispositivo IO '%s' no encontrado.", param->nombre_io);
 
-	if (!modulo_io)
-	{
-		log_error(kernel_logger, "Dispositivo IO '%s' no encontrado.", param->nombre_io);
-		cambiar_estado(pcb, EXIT_PROCCES);
-		agregar_pcb_lista(pcb, lista_exit, mutex_lista_exit);
-		free(param->nombre_io);
-		free(param);
-		pthread_exit(NULL);
-		// TODO deberiamos finalizar proceso o simplemente cambiar el estado a EXIT?
-		return;
-	}
-	log_info(kernel_logger, "Dispositivo IO encontrado: '%s' (socket: %d)", modulo_io->nombre, modulo_io->socket_fd);
+        t_pcb* pcb = buscar_pcb_por_pid(param->pid);
+        if (pcb) {
+            remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
+            cambiar_estado(pcb, EXIT_PROCCES);
+            agregar_pcb_lista(pcb, lista_exit, &mutex_lista_exit);
+        }
 
-	log_info(kernel_logger, "Antes de cambiar estado a BLOCKED");
-	cambiar_estado(pcb, BLOCKED_PROCCES);
-	agregar_pcb_lista(pcb, lista_blocked, mutex_lista_blocked);
+        list_destroy(modulos_con_nombre);
+        free(param->nombre_io);
+        free(param);
+        return;
+    }
 
-	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
-	queue_push(modulo_io->cola_espera, pcb);
-	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
+    // 2. Cambiar proceso a BLOCKED
+    t_pcb* pcb = buscar_pcb_por_pid(param->pid);
+    if (!pcb) {
+        log_error(kernel_logger, "PCB con PID %d no encontrado", param->pid);
+        list_destroy(modulos_con_nombre);
+        free(param->nombre_io);
+        free(param);
+        return;
+    }
 
-	if (modulo_io->libre)
-	{
-		log_info(kernel_logger, "Entre al if para enviar_pcb a modulo io");
-		t_pcb *pcb_a_ejecutar = queue_pop(modulo_io->cola_espera);
-		modulo_io->libre = false;
-		enviar_pcb_a_modulo_io(modulo_io, pcb_a_ejecutar, param->miliseg);
-	}
+    remover_pcb_lista(pcb, lista_execute, &mutex_lista_execute);
+    cambiar_estado(pcb, BLOCKED_PROCCES);
+    agregar_pcb_lista(pcb, lista_blocked, &mutex_lista_blocked);
 
-	//log_info(kernel_logger, "Fin de IO: ## (<%d>) finalizó IO y pasa a READY", param->pid);
-	free(param->nombre_io);
-	free(param);
+    // 3. Obtener la cola de espera por nombre
+    t_io_espera_por_nombre* espera_nombre = buscar_o_crear_cola_io(param->nombre_io);
+
+    pthread_mutex_lock(&espera_nombre->mutex);
+
+    // 4. Encolar el proceso en la cola común
+    t_io_esperando* espera = malloc(sizeof(t_io_esperando));
+    espera->pcb = pcb;
+    espera->milisegundos = param->miliseg;
+    queue_push(espera_nombre->cola_espera, espera);
+
+    // 5. Ver si hay alguna instancia libre
+    bool asignado = false;
+    for (int i = 0; i < list_size(modulos_con_nombre); i++) {
+        t_modulo_io* modulo = list_get(modulos_con_nombre, i);
+
+        pthread_mutex_lock(&modulo->mutex);
+        if (modulo->libre && !queue_is_empty(espera_nombre->cola_espera)) {
+            t_io_esperando* trabajo = queue_pop(espera_nombre->cola_espera);
+            modulo->libre = false;
+            modulo->pcb_ejecutando = trabajo->pcb;
+            enviar_pcb_a_modulo_io(modulo, trabajo->pcb, trabajo->milisegundos);
+            free(trabajo);
+            asignado = true;
+            pthread_mutex_unlock(&modulo->mutex);
+            break;
+        }
+        pthread_mutex_unlock(&modulo->mutex);
+    }
+
+    pthread_mutex_unlock(&espera_nombre->mutex);
+    list_destroy(modulos_con_nombre);
+
+    log_info(kernel_logger, "Proceso PID %d enviado a IO: %s por %d milisegundos",  
+             param->pid, param->nombre_io, param->miliseg); 
+
+    free(param->nombre_io);
+    free(param);
 }
+
+

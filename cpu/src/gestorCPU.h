@@ -19,12 +19,11 @@
 #include <readline/readline.h>
 #include <semaphore.h>
 
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/utils.h>
-#include </home/utnso/tp-2025-1c-Linux-Learners/utils/src/utils/protocolo.h>
-#include "inicializar_estructuras.h"
+#include <utils/utils.h>
+//#include "inicializar_estructuras.h"
 #include "contexto.h"
-#include "utils_pcb.h"
-#include "instrucciones.h"
+//#include "utils_pcb.h"
+//#include "instrucciones.h"
 
 
 

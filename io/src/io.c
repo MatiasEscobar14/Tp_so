@@ -9,9 +9,6 @@ int main(int argc, char *argv[])
     // }
 
     char *nombre_dispositivo = argv[1];
-
-    log_info("Dispositivo configurado: %s", nombre_dispositivo);
-
     char *mensaje_presentacion = string_from_format(nombre_dispositivo);
 
     //===========================================CONEXION IO (CLIENTE) CON KERNEL (SERVER)========================================================//
@@ -33,8 +30,6 @@ int main(int argc, char *argv[])
     while (1)
     {
         int cod_op = recibir_operacion(socket_cliente);
-        t_paquete *paquete_recibido = recibir_paquete(socket_cliente);
-
         switch (cod_op)
         {
         case MENSAJE:
@@ -42,24 +37,36 @@ int main(int argc, char *argv[])
             break;
 
         case REALIZAR_IO:
+<<<<<<< HEAD
         {
             t_buffer *buffer_io = paquete_recibido->buffer;
             int pid = extraer_int_buffer(buffer_io);
             int tiempo_ms = extraer_int_buffer(buffer_io);
             log_info(logger, "ingrese a realizar io y recibi el pid %d y el tiempo_ms %d ", pid, tiempo_ms);
+=======
+            t_buffer* un_buffer = recv_buffer(socket_cliente);
+            int pid = extraer_int_buffer(un_buffer);
+            int tiempo_ms = extraer_int_buffer(un_buffer);
+>>>>>>> pruebaValen
             log_info(logger, "Inicio de IO: ## PID: <%d> - Inicio de IO - Tiempo: <%d>.", pid, tiempo_ms);
 
             usleep(tiempo_ms * 1000);
 
+<<<<<<< HEAD
             log_info(logger, "Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
 
             // Informar al Kernel que finalizó la IO
+=======
+            log_info(logger,"Finalizacion de IO: ## PID: <%d> - Fin de IO.", pid);
+            // TODO informar a kernal que finalizo el IO
+>>>>>>> pruebaValen
             t_buffer *buffer_respuesta = new_buffer();
             add_int_to_buffer(buffer_respuesta, pid);
             t_paquete *paquete_respuesta = crear_paquete(FIN_IO, buffer_respuesta);
             enviar_paquete(paquete_respuesta, socket_cliente);
             log_info(logger,"envie el paquete a fin de io");
             eliminar_paquete(paquete_respuesta);
+            free(un_buffer);
             break;
         }
 

@@ -1,79 +1,125 @@
 #include "memoria-cpu.h"
 
-void procesar_conexion_memoria(void *void_args)
-{
-	t_procesar_conexion_args *args = (t_procesar_conexion_args *)void_args;
-	t_log *logger_memoria = args->log;
-	int cliente_socket = args->fd;
-	free(args);
+void esperar_cpu(){
+    log_info(logger_memoria, "ESPERANDO CPU's");
 
-	op_code cop;
-	while (cliente_socket != -1)
-	{
-		if (recv(cliente_socket, &cop, sizeof(op_code), 0) != sizeof(op_code))
-		{
-			log_debug(logger_memoria, "Cliente desconectado.\n");
-			return;
-		}
+    while (1)
+    {
+        int fd_conexion = accept(socket_memoria, NULL, NULL);
+        // TODO: Validacion de error?
+        log_info(logger_memoria, "## Cpu conectada - FD: <%d>", fd_conexion);
 
-		switch (cop){
-            case PAQUETE:
-                break;
-            case HANDSHAKE: 
-                break;
-		    case MENSAJE:
-			    recibir_mensaje(logger_memoria, cliente_socket);
-			    break;
-
-            case PEDIDO_INSTRUCCION: 
-			    printf("entre al case pedido de instruccion");
-			
-			    //recibir_pedido_instruccion(&pid, &pc, cliente_socket); //(2)
-                t_buffer* un_buffer = recv_buffer(cliente_socket);
-                int pid = extraer_int_buffer(un_buffer);
-                int pc = extraer_int_buffer(un_buffer);
-
-			    printf("paso bien el pedido de instruccion");
-			    // log_debug(logger_memoria, "Se recibio un pedido de instruccion para el PID %d y PC %d", pid, pc);
-			    t_proceso_memoria* proceso_memoria = obtener_proceso_pid(pid); //(3)
-			    if (proceso_memoria == NULL)
-			    {
-				    log_error(logger_memoria, "No se encontro el proceso con PID %d", pid);
-				    break;
-			    }
-
-				t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc); //(3)
-				if (instruccion != NULL)
-				{
-					//enviar_instruccion(cliente_socket, instruccion); //(4)
-				    // log_debug(logger_memoria, "Se envia la instruccion a CPU de PC %d para el PID %d y es: %s - %s - %s", pc, pid, instruccion_to_string(instruccion->nombre), instruccion->parametro1, instruccion->parametro2);
-				}
-				else
-				{
-					log_error(logger_memoria, "No se encontro la instruccion con PC %d para el PID %d", pc, pid);
-				}
-				break;
-
-			case INICIALIZAR_PROCESO: 
-			    proceso_memoria = recibir_proceso_memoria(cliente_socket); //(5)
-			    proceso_memoria = iniciar_proceso_path(proceso_memoria); //(6)
-			    break;
-                /*
-            case FINALIZAR_PROCESO:
-			    uint32_t pid_a_finalizar;
-			    recibir_finalizar_proceso(&pid_a_finalizar, cliente_socket);
-			    proceso_memoria = obtener_proceso_pid(pid_a_finalizar);
-			    if (proceso_memoria == NULL)
-			    {
-				    log_error(logger_memoria, "No se encontro el proceso con PID %d", pid_a_finalizar);
-				    break;
-			    }
-			    else
-			    {
-				    liberar_estructura_proceso_memoria(proceso_memoria);
-				    break;
-			    }*/
+        pthread_t thread;
+        if (pthread_create(&thread, NULL, (void *)attender_memoria_cpu, (void *)(intptr_t) (fd_conexion)))
+        {
+            log_error(logger_memoria, "Error al crear hilo para Kernel");
+            close(fd_conexion); // Cierra el socket si no se pudo crear el hilo.
         }
+        else
+        {
+            pthread_detach(thread);
+        }
+    }
+}
+
+void attender_memoria_cpu(int cliente_socket)
+{
+    t_buffer *un_buffer;
+    log_info(logger_memoria, "Esperando mensaje de CPU - FD: <%d>", cliente_socket);
+    
+    int cod_op = recibir_operacion(cliente_socket);
+    
+    switch (cod_op)
+    {
+        case HANDSHAKE:
+            log_debug(logger_memoria, "Handshake recibido de CPU - FD: <%d>", cliente_socket);
+            // Enviar respuesta de handshake si es necesario
+            break;
+            
+        case PEDIDO_INSTRUCCION:
+            log_debug(logger_memoria, "Pedido de instrucción recibido de CPU - FD: <%d>", cliente_socket);
+            
+            un_buffer = recv_buffer(cliente_socket);
+            int pid = extraer_int_buffer(un_buffer);
+            int pc = extraer_int_buffer(un_buffer);
+            
+            log_debug(logger_memoria, "Pedido de instrucción - PID: %d, PC: %d", pid, pc);
+            
+            t_proceso_memoria* proceso_memoria = obtener_proceso_pid(pid);
+            if (proceso_memoria == NULL)
+            {
+                log_error(logger_memoria, "No se encontró el proceso con PID %d", pid);
+                // Enviar error a CPU
+            }
+            else
+            {
+                t_instruccion *instruccion = obtener_instruccion_del_proceso_pc(proceso_memoria, pc);
+                if (instruccion != NULL)
+                {
+                    enviar_instruccion(cliente_socket, instruccion);
+                    log_debug(logger_memoria, "Instrucción enviada a CPU - PID: %d, PC: %d", pid, pc);
+                }
+                else
+                {
+                    log_error(logger_memoria, "No se encontró la instrucción con PC %d para el PID %d", pc, pid);
+                    // Enviar error a CPU
+                }
+            }
+            
+            free(un_buffer->stream);
+            free(un_buffer);
+            break;
+            
+        case INICIALIZAR_PROCESO:
+            log_debug(logger_memoria, "Inicializar proceso recibido de CPU - FD: <%d>", cliente_socket);
+            
+            un_buffer = recv_buffer(cliente_socket);
+            //proceso_memoria = recibir_proceso_memoria_desde_buffer(un_buffer); // Asumiendo que tienes esta función
+            //proceso_memoria = iniciar_proceso_path(proceso_memoria);
+            
+            if (proceso_memoria != NULL)
+            {
+                log_info(logger_memoria, "Proceso inicializado exitosamente - PID: %d", proceso_memoria->pid);
+                // Enviar confirmación a CPU si es necesario
+            }
+            else
+            {
+                log_error(logger_memoria, "Error al inicializar proceso");
+                // Enviar error a CPU
+            }
+            
+            free(un_buffer->stream);
+            free(un_buffer);
+            break;
+            
+        /*case FINALIZAR_PROCESO:
+            log_debug(logger_memoria, "Finalizar proceso recibido de CPU - FD: <%d>", cliente_socket);
+            
+            un_buffer = recv_buffer(cliente_socket);
+            uint32_t pid_a_finalizar = extraer_int_buffer(un_buffer);
+            
+            t_proceso_memoria* proceso_a_finalizar = obtener_proceso_pid(pid_a_finalizar);
+            if (proceso_a_finalizar == NULL)
+            {
+                log_error(logger_memoria, "No se encontró el proceso con PID %d", pid_a_finalizar);
+            }
+            else
+            {
+                liberar_estructura_proceso_memoria(proceso_a_finalizar);
+                log_info(logger_memoria, "Proceso finalizado exitosamente - PID: %d", pid_a_finalizar);
+            }
+            
+            free(un_buffer->stream);
+            free(un_buffer);
+            break;*/
+            
+        case MENSAJE:
+            recibir_mensaje(logger_memoria, cliente_socket);
+            break;
+            
+        default:
+            log_warning(logger_memoria, "Operación no reconocida recibida de CPU - FD: <%d>, OP: %d", cliente_socket, cod_op);
+            break;
     }
 }
 
@@ -363,7 +409,7 @@ void recibir_finalizar_proceso(int *pid, int socket)
 {
     return element == proceso_memoria;
 }
-/*
+
 void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
 {
     // Liberar elementos de la tabla de páginas
@@ -383,7 +429,7 @@ void liberar_estructura_proceso_memoria(t_proceso_memoria *proceso_memoria)
     free(proceso_memoria->path);
     free(proceso_memoria);
 }
-*/
+
 void liberar_instruccion(t_instruccion *instruccion)
 {
     free(instruccion->parametro1);
@@ -392,4 +438,4 @@ void liberar_instruccion(t_instruccion *instruccion)
     free(instruccion->parametro4);
     free(instruccion->parametro5);
     free(instruccion);
-}
+}*/

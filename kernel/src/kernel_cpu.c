@@ -7,8 +7,7 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 	char* nombre_archivo;
 	int tamanio_proceso;
 	//t_pcb* un_pcb = NULL;
-	free(socket_cliente); // Liberar el puntero pasado al hilo
-	t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
+	
 	t_buffer *un_buffer;
     while (control_key) {
 		//int cod_op = recibir_operacion(socket_cpu_dispatch);
@@ -22,28 +21,28 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 
 		switch (cop) {
 			case HANDSHAKE:
+			t_modulo_cpu *nuevo_modulo = malloc(sizeof(t_modulo_cpu));
+
 			un_buffer = recv_buffer(socket);
 			if (!un_buffer) {
 					log_error(kernel_logger, "Error al recibir buffer del HANDSHAKE.");
 					break;
 				}
 			int identificador = extraer_int_buffer(un_buffer);
+	
 			nuevo_modulo->identificador = identificador;
 			nuevo_modulo->socket_fd_dispatch = socket;
-
+			nuevo_modulo->libre = true;
+			nuevo_modulo->proceso_en_ejecucion = NULL;
 
 			log_info(kernel_logger, "HandShake recibido de CPU: %d con socket: %d", nuevo_modulo->identificador, nuevo_modulo->socket_fd_dispatch);
 			pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
 			list_add(lista_modulos_cpu_conectadas, nuevo_modulo);
 			pthread_mutex_unlock(&mutex_lista_modulos_cpu_conectadas);
+			sem_post(&sem_cpu_disponible);
 			log_info(kernel_logger, "CPU %d registrada con socket %d", identificador, socket);
-
-			t_buffer* buffer_handshake = new_buffer();
-			add_int_to_buffer(buffer_handshake, 1);
-			t_paquete* paquete_handshake = crear_paquete(MENSAJE, buffer_handshake);
-			enviar_paquete(paquete_handshake, nuevo_modulo->socket_fd_dispatch);
-			
 			imprimir_modulos_cpu();
+			
 			free(un_buffer);
 				break;
 		    case MENSAJE:
@@ -53,8 +52,8 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			    //
 			    break;
 			case INIT_PROC:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
-				pid = extraer_int_buffer(un_buffer);
+				un_buffer = recv_buffer(socket);
+		
 				nombre_archivo = extraer_string_buffer(un_buffer);
 				tamanio_proceso = extraer_int_buffer(un_buffer);
 
@@ -62,17 +61,20 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 			    crear_proceso_sys(nombre_archivo, tamanio_proceso);
 				//aviso_finalizacion_syscall?
 				//free(nombre_archivo);
+				t_buffer* rta = new_buffer();
+				t_paquete* rta_paquete = crear_paquete(MENSAJE, rta);
+				enviar_paquete(rta_paquete, socket);
+
+
 				free(un_buffer);
 			
 			    break;
 			case EXIT:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
-				pid = extraer_int_buffer(un_buffer);
 				log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: EXIT", pid);
 				finalizar_proceso(pid);
 				break;
 			case DUMP_MEMORY:
-				un_buffer = recv_buffer(socket_cpu_dispatch);
+				un_buffer = recv_buffer(socket);
 				pid = extraer_int_buffer(un_buffer);
 				log_info(kernel_logger, "Syscall recibida: ## (%d) - Solicitó syscall: DUMP_MEMORY", pid);
 				bloquear_proceso_syscall(pid);
@@ -86,15 +88,12 @@ void atender_kernel_cpu_dispatch(int *socket_cliente) {
 					int pid = extraer_int_buffer(un_buffer);
 					int tiempo_ms = extraer_int_buffer(un_buffer);
 					free(un_buffer);
-					t_syscall_io* parametros = malloc(sizeof(t_syscall_io));//FALTA EL FREE OJO
+					t_syscall_io* parametros = malloc(sizeof(t_syscall_io));
 					parametros->nombre_io = nombre_io;
 					parametros->pid = pid;
 					parametros->miliseg = tiempo_ms;
 					log_info(kernel_logger, "Mandando a dormir al [PID: %d] por %d milisegundos", parametros->pid, parametros->miliseg);
-					pthread_t hilo_io;
-					pthread_create(&hilo_io, NULL, (void*)syscall_io, (void*)parametros);
-					pthread_join(hilo_io, NULL);
-					free(parametros);
+					syscall_io(parametros);
 				break;
 		    default:
 			    log_warning(kernel_logger,"OPERACION DESCONOCIDA - KERNEL - CPU DISPATCH");
@@ -199,26 +198,21 @@ char* recibir_string(int socket) {
 }
 
 t_modulo_io* buscar_modulo_io_por_nombre(char* nombre_io) {
-	log_info(kernel_logger, "Entré a buscar el modulo_io_por_nombre con nombre: %s", nombre_io);
 	t_modulo_io* modulo_buscado = NULL;
-
 	bool encontrado = false;
 
 	pthread_mutex_lock(&mutex_lista_modulos_io_conectadas);
 	for (int i = 0; i < list_size(lista_modulos_io_conectadas); i++) {
 		t_modulo_io *modulo = list_get(lista_modulos_io_conectadas, i);
-		if (strcmp(modulo->nombre, nombre_io) == 0) {
+		if (modulo && strcmp(modulo->nombre, nombre_io) == 0) {
 			modulo_buscado = modulo;
 			encontrado = true;
 			break;
 		}
 	}
 	pthread_mutex_unlock(&mutex_lista_modulos_io_conectadas);
-
-	if (encontrado) {
-		log_info(kernel_logger,"Modulo IO encontrado: %s", modulo_buscado->nombre);
-	} else {
-		log_error(kernel_logger, "No se encontró el módulo IO con nombre '%s'", nombre_io);
+	if (!encontrado) {
+		log_error(kernel_logger, "No se encontró el módulo IO con nombre %s", nombre_io);
 	}
 
 	return modulo_buscado;
