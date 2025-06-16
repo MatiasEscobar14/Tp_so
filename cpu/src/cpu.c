@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     log_info(cpu_logger, "Logger e config iniciados");
 
     conectar_con_kernel(identificador);
-    conectar_con_memoria();
+    socket_memoria = crear_conexion(cpu_logger, "Server Memoria", IP_MEMORIA, PUERTO_MEMORIA);
     
     /*log_info(cpu_logger, "===================================================");
     t_buffer* buffer = new_buffer();
@@ -34,24 +34,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void conectar_con_memoria(){
-    socket_memoria = crear_conexion(cpu_logger, "Server Memoria", IP_MEMORIA, PUERTO_MEMORIA);
-    while (1)
-    {
-        int cod_op = recibir_operacion(socket_memoria);
-        switch (cod_op)
-        {
-        case  MENSAJE:
-            log_info(cpu_logger,"llegue al mensaje");
-            break;
-        
-        default:
-            break;
-        }
-    }
-    
-
-}
 
 void conectar_con_kernel(int identificador)
 {

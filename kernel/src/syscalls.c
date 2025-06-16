@@ -3,10 +3,7 @@
 #include "planificadorLargoPlazo.h"
 #include "kernel_memoria.h"
 #include "kernel_cpu.h"
-<<<<<<< HEAD
-=======
 #include "kernel_IO.h"
->>>>>>> pruebaValen
 void crear_proceso_sys(char *nombre_archivo, int tam_proceso)
 {
 	t_pcb *un_pcb = NULL;
@@ -80,7 +77,7 @@ void syscall_io(t_syscall_io *param){
     queue_push(espera_nombre->cola_espera, espera);
 
     // 5. Ver si hay alguna instancia libre
-    bool asignado = false;
+    
     for (int i = 0; i < list_size(modulos_con_nombre); i++) {
         t_modulo_io* modulo = list_get(modulos_con_nombre, i);
 
@@ -91,7 +88,6 @@ void syscall_io(t_syscall_io *param){
             modulo->pcb_ejecutando = trabajo->pcb;
             enviar_pcb_a_modulo_io(modulo, trabajo->pcb, trabajo->milisegundos);
             free(trabajo);
-            asignado = true;
             pthread_mutex_unlock(&modulo->mutex);
             break;
         }

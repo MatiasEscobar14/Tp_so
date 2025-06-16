@@ -154,19 +154,9 @@ bool cpu_esta_libre(void *cpu_void)
 
 t_modulo_cpu* enviar_pcb_a_cpu(t_pcb *un_pcb)
 {
-
-    if (un_pcb == NULL)
-    {
-        log_error(kernel_logger, "PCB es NULL, no se puede enviar a CPU");
-        return;
-    }
     pthread_mutex_lock(&mutex_lista_modulos_cpu_conectadas);
 
     t_modulo_cpu* un_cpu = list_find(lista_modulos_cpu_conectadas, cpu_esta_libre);
-
-
-    printf("ID: %d, Estado: %d\n", un_cpu->identificador, un_cpu->libre);
-
 
     if (un_cpu)
     {

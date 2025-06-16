@@ -6,7 +6,9 @@ void planificadorCortoPlazo()
 {
      while (1)
     {   
-      //  sem_wait(&sem_cpu_disponible);
+        log_info(kernel_logger, "Esperando a que se conecte una CPU...");
+        sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
+        log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.");  
         pthread_mutex_lock(&mutex_lista_ready);
         bool lista_vacia = list_is_empty(lista_ready);
         pthread_mutex_unlock(&mutex_lista_ready);
@@ -47,9 +49,7 @@ void atender_FIFO() {
     pthread_mutex_unlock(&mutex_lista_ready);
 
     if (un_pcb != NULL) {
-        log_info(kernel_logger, "Esperando a que se conecte una CPU...", un_pcb->pid);
-        sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
-        log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.", un_pcb->pid);  
+        
         cambiar_estado(un_pcb, EXEC_PROCCES);
         remover_pcb_lista(un_pcb, lista_ready, &mutex_lista_ready);
         agregar_pcb_lista(un_pcb, lista_execute, &mutex_lista_execute);

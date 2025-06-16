@@ -7,7 +7,6 @@ t_list *lista_ready;
 sem_t sem_rpta_estructura_inicializada;
 sem_t semaforo_largo_plazo;
 sem_t sem_estructura_liberada;
-sem_t sem_cpu_disponible;
 
 
 pthread_mutex_t mutex_lista_new = PTHREAD_MUTEX_INITIALIZER;
