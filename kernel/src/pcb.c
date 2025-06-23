@@ -14,6 +14,8 @@ t_pcb *crear_pcb(char *ruta, int tam_proceso)
     nueva_pcb->tamanio_proceso = tam_proceso;
     nueva_pcb->estado = NEW_PROCCES;
     nueva_pcb->tiempo_inicio_estado = time(NULL);
+    nueva_pcb->tiempo_estimacion = ESTIMACION_INICIAL;
+    nueva_pcb->tiempo_exec_ultima_actualizacion = 0;
 
     // Inicializar métricas, son 7 estados y 7 tiempos
 
@@ -39,6 +41,7 @@ void cambiar_estado(t_pcb *un_pcb, estado_pcb proximo_estado)
     time_t ahora = time(NULL);
     double tiempo_en_estado = difftime(ahora, un_pcb->tiempo_inicio_estado);
     un_pcb->metricas_tiempo[un_pcb->estado] += tiempo_en_estado;
+
     log_info(kernel_logger, "## (%d) Pasa del estado %s al estado %s", un_pcb->pid, estado_a_string(un_pcb->estado), estado_a_string(proximo_estado));
     un_pcb->estado = proximo_estado;
     un_pcb->tiempo_inicio_estado = ahora;

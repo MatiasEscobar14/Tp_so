@@ -13,7 +13,8 @@ char* PUERTO_CPU_DISPATCH;
 char* PUERTO_CPU_INTERRUPT;
 t_algoritmo ALGORITMO_CORTO_PLAZO;
 t_algoritmo ALGORITMO_INGRESO_A_READY;
-char* ESTIMACION_INICIAL;
+double ESTIMACION_INICIAL;
+double ALPHA;
 
 int socket_io;
 int socket_cpu_dispatch;

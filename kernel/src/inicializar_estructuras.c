@@ -32,7 +32,8 @@ void iniciar_config_kernel(char* ruta){
 	PUERTO_CPU_INTERRUPT = config_get_string_value(kernel_config, "PUERTO_CPU_INTERRUPT");
 	char* algoritmo_corto_plazo = config_get_string_value(kernel_config, "ALGORITMO_CORTO_PLAZO");
 	char* algoritmo_ingreso_a_ready = config_get_string_value(kernel_config, "ALGORITMO_INGRESO_A_READY");
-	ESTIMACION_INICIAL = config_get_string_value(kernel_config,"ESTIMACION_INICIAL" );
+	ESTIMACION_INICIAL = atof(config_get_string_value(kernel_config,"ESTIMACION_INICIAL" ));
+	ALPHA = atof(config_get_string_value(kernel_config,"ALFA" ));
 
 	if(strcmp(algoritmo_corto_plazo, "FIFO") == 0){
 		ALGORITMO_CORTO_PLAZO = FIFO;

@@ -8,9 +8,7 @@ void crear_proceso_inicial(int tamanio_proceso, char* ruta){
 		pcb = crear_pcb(ruta, tamanio_proceso);
 		pthread_mutex_lock(&mutex_lista_new);
 		list_add(lista_new, pcb);
-		log_info(kernel_logger,"El PID es %d", pcb->pid);
 		pthread_mutex_unlock(&mutex_lista_new);
-		log_info(kernel_logger, "Creación de Proceso: ## (%d:0) Se crea el proceso - Estado: NEW", pcb->pid);
 		//sem_post(&sem_cpu_disponible); 
 		iniciar_plp();	//	PLANIFICADOR A LARGO PLAZO
 	}else{
@@ -32,6 +30,7 @@ int main(int argc, char* argv[]) {
 
 	crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
 	pthread_join(thread_conexiones, NULL);
+
 
 	return 0;
 

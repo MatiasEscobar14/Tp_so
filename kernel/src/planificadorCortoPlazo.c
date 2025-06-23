@@ -62,5 +62,14 @@ void atender_FIFO() {
 }
 
 
+double calcular_estimacion(t_pcb* un_pcb){
+    double tiempo_total_actual = un_pcb->metricas_tiempo[EXEC_PROCCES];
+    double tiempo_rafaga_anterior = tiempo_total_actual - un_pcb->tiempo_exec_ultima_actualizacion;
+    double estimacion_anterior = un_pcb->tiempo_estimacion;
+    
+    return (tiempo_rafaga_anterior * ALPHA) + estimacion_anterior * (1 - ALPHA);
+}
+
+
 
 

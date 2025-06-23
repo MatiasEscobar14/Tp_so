@@ -34,7 +34,8 @@ extern char* PUERTO_CPU_DISPATCH;
 extern char* PUERTO_CPU_INTERRUPT;
 extern t_algoritmo ALGORITMO_CORTO_PLAZO;
 extern t_algoritmo ALGORITMO_INGRESO_A_READY;
-extern char* ESTIMACION_INICIAL;
+extern double ESTIMACION_INICIAL;
+extern double ALPHA;
 
 //=======PCB========//
 typedef enum{
@@ -56,6 +57,8 @@ typedef struct {
     double metricas_tiempo[CANT_ESTADOS];    
     estado_pcb estado;
     time_t tiempo_inicio_estado;
+    double tiempo_estimacion;
+    //double tiempo_exec_ultima_actualizacion;
 }t_pcb;
 
 
