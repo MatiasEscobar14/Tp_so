@@ -58,7 +58,7 @@ typedef struct {
     estado_pcb estado;
     time_t tiempo_inicio_estado;
     double tiempo_estimacion;
-    //double tiempo_exec_ultima_actualizacion;
+    //double lo_que_realemente_ejecuto;
 }t_pcb;
 
 

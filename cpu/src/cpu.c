@@ -29,8 +29,6 @@ int main(int argc, char *argv[])
     log_info(cpu_logger, "===================================================");*/
 
 
-   
-
     return 0;
 }
 

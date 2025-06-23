@@ -15,7 +15,7 @@ t_pcb *crear_pcb(char *ruta, int tam_proceso)
     nueva_pcb->estado = NEW_PROCCES;
     nueva_pcb->tiempo_inicio_estado = time(NULL);
     nueva_pcb->tiempo_estimacion = ESTIMACION_INICIAL;
-    nueva_pcb->tiempo_exec_ultima_actualizacion = 0;
+    nueva_pcb->tiempo_exec_ultima_actualizacion = 0.0;
 
     // Inicializar métricas, son 7 estados y 7 tiempos
 

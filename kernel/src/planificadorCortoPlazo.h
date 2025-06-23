@@ -12,5 +12,6 @@ void atender_FIFO();
 void planificadorCortoPlazo();
 
 double calcular_estimacion(t_pcb* un_pcb);
+void actualizar_estimacion_sjf(t_pcb* pcb);
 
 #endif

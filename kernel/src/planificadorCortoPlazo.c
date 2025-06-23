@@ -63,13 +63,21 @@ void atender_FIFO() {
 
 
 double calcular_estimacion(t_pcb* un_pcb){
-    double tiempo_total_actual = un_pcb->metricas_tiempo[EXEC_PROCCES];
+    double tiempo_total_actual = un_pcb->metricas_tiempo[EXEC_PROCESS];
     double tiempo_rafaga_anterior = tiempo_total_actual - un_pcb->tiempo_exec_ultima_actualizacion;
     double estimacion_anterior = un_pcb->tiempo_estimacion;
     
     return (tiempo_rafaga_anterior * ALPHA) + estimacion_anterior * (1 - ALPHA);
 }
 
-
+void actualizar_estimacion_sjf(t_pcb* pcb) {
+    if (ALGORITMO_CORTO_PLAZO == SJF) { 
+        double nueva_estimacion = calcular_estimacion(pcb);
+        pcb->tiempo_estimacion = nueva_estimacion;
+        pcb->tiempo_exec_ultima_actualizacion = pcb->metricas_tiempo[EXEC_PROCESS];
+        
+        log_info("PCB %d - Nueva estimación: %lf", pcb->pid, nueva_estimacion);
+    }
+}
 
 
