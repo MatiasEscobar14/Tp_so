@@ -160,7 +160,7 @@ void planificadorLargoPlazoPMCP()
             /* Esperamos hasta que la estructura sea creada */
             sem_wait(&sem_rpta_estructura_inicializada);
             //pthread_mutex_lock(&mutex_flag_pedido_memoria);
-            log_info(kernel_logger, "Flag pedido de memoria antes de IF: %d", flag_pedido_de_memoria);
+            
             if (flag_pedido_de_memoria)
             {
                 /* Si la memoria respondió correctamente, removemos el PCB de la lista NEW */

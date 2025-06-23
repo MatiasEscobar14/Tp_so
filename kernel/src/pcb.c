@@ -312,3 +312,22 @@ void remover_pcb_lista(t_pcb *pcb, t_list *lista, pthread_mutex_t *mutex)
 
     pthread_mutex_unlock(mutex);
 }
+
+
+
+t_pcb* encontrar_proceso_menor_estimacion() {
+    if (list_is_empty(lista_ready)) {
+        return NULL;
+    }
+    
+    t_pcb* proceso_menor = list_get(lista_ready, 0);
+    
+    for (int i = 1; i < list_size(lista_ready); i++) {
+        t_pcb* proceso_actual = list_get(lista_ready, i);
+        if (proceso_actual->tiempo_estimacion < proceso_menor->tiempo_estimacion) {
+            proceso_menor = proceso_actual;
+        }
+    }
+    
+    return proceso_menor;
+}

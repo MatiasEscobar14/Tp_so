@@ -6,9 +6,6 @@ void planificadorCortoPlazo()
 {
      while (1)
     {   
-        log_info(kernel_logger, "Esperando a que se conecte una CPU...");
-        sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
-        log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.");  
         pthread_mutex_lock(&mutex_lista_ready);
         bool lista_vacia = list_is_empty(lista_ready);
         pthread_mutex_unlock(&mutex_lista_ready);
@@ -38,8 +35,13 @@ void planificadorCortoPlazo()
 }
 
 void atender_FIFO() {
+
+    log_info(kernel_logger, "Esperando a que se conecte una CPU...");
+    sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
+    log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.");  
+
     log_info(kernel_logger, "Comienzo a ejecutar FIFO (planificador corto plazo)");
-    // Intentar obtener un proceso de la lista READY
+    
     pthread_mutex_lock(&mutex_lista_ready);
     t_pcb* un_pcb = NULL;
 
@@ -55,15 +57,47 @@ void atender_FIFO() {
         agregar_pcb_lista(un_pcb, lista_execute, &mutex_lista_execute);
     
         t_modulo_cpu* modulo_cpu = enviar_pcb_a_cpu(un_pcb); 
-
-        //atender_kernel_cpu_dispatch(&(modulo_cpu->socket_fd_dispatch));  // Espera PID + motivo de finalizacion/interrupcion
+        
+        atender_kernel_cpu_dispatch(&(modulo_cpu->socket_fd_dispatch));  // Espera PID + motivo de finalizacion/interrupcion
         //falta agregar como protocolo los motivos de finalizacion/interrupcion
     }
 }
 
+void atender_SJF() {
+
+    log_info(kernel_logger, "Esperando a que se conecte una CPU...");
+    sem_wait(&sem_cpu_disponible); // Espera a que haya una CPU disponible
+    log_info(kernel_logger, "CPU conectada, enviando pcb a CPU.");  
+
+    log_info(kernel_logger, "Comienzo a ejecutar SJF sin desalojo (planificador corto plazo)");
+    
+    pthread_mutex_lock(&mutex_lista_ready);
+    t_pcb* pcb_elegido = NULL;
+    
+    if (!list_is_empty(lista_ready)) {
+        // Buscar el proceso con menor estimación de ráfaga
+        pcb_elegido = encontrar_proceso_menor_estimacion();
+    }
+    
+    pthread_mutex_unlock(&mutex_lista_ready);
+    
+    if (pcb_elegido != NULL) {
+        log_info(kernel_logger, "PCB %d seleccionado con estimación: %lf", 
+                 pcb_elegido->pid, pcb_elegido->tiempo_estimacion);
+        
+        cambiar_estado(pcb_elegido, EXEC_PROCCES);
+        remover_pcb_lista(pcb_elegido, lista_ready, &mutex_lista_ready);
+        agregar_pcb_lista(pcb_elegido, lista_execute, &mutex_lista_execute);
+        
+        t_modulo_cpu* modulo_cpu = enviar_pcb_a_cpu(pcb_elegido);
+        atender_kernel_cpu_dispatch(&(modulo_cpu->socket_fd_dispatch));
+    }
+}
+
+
 
 double calcular_estimacion(t_pcb* un_pcb){
-    double tiempo_total_actual = un_pcb->metricas_tiempo[EXEC_PROCESS];
+    double tiempo_total_actual = un_pcb->metricas_tiempo[EXEC_PROCCES];
     double tiempo_rafaga_anterior = tiempo_total_actual - un_pcb->tiempo_exec_ultima_actualizacion;
     double estimacion_anterior = un_pcb->tiempo_estimacion;
     
@@ -74,9 +108,9 @@ void actualizar_estimacion_sjf(t_pcb* pcb) {
     if (ALGORITMO_CORTO_PLAZO == SJF) { 
         double nueva_estimacion = calcular_estimacion(pcb);
         pcb->tiempo_estimacion = nueva_estimacion;
-        pcb->tiempo_exec_ultima_actualizacion = pcb->metricas_tiempo[EXEC_PROCESS];
+        pcb->tiempo_exec_ultima_actualizacion = pcb->metricas_tiempo[EXEC_PROCCES];
         
-        log_info("PCB %d - Nueva estimación: %lf", pcb->pid, nueva_estimacion);
+        log_info(kernel_logger,"PCB %d - Nueva estimación: %lf", pcb->pid, nueva_estimacion);
     }
 }
 
