@@ -17,7 +17,8 @@ t_pcb* buscar_en_lista(t_list *lista, pthread_mutex_t *mutex, const char *nombre
 t_pcb *buscar_y_remover_en_lista(t_list *lista, pthread_mutex_t *mutex, char *nombre_lista, int pid);
 t_pcb* buscar_pcb_por_socket(int socket_cpu);
 
-t_modulo_cpu* enviar_pcb_a_cpu(t_pcb *un_pcb);
+void enviar_pcb_a_cpu(t_modulo_cpu* un_cpu, t_pcb* un_pcb);
+t_modulo_cpu* cpu_libre();
 void bloquear_proceso_syscall(int pid);
 void enviar_pcb_a_modulo_io(t_modulo_io* modulo, t_pcb* pcb, int tiempo_ms);
 t_pcb* encontrar_proceso_menor_estimacion();
