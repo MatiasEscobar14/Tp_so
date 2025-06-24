@@ -137,3 +137,7 @@ void actualizar_estimacion_sjf(t_pcb *pcb)
         log_info(kernel_logger, "PCB %d - Nueva estimación: %lf", pcb->pid, nueva_estimacion);
     }
 }
+
+void atender_SRT(){
+
+}

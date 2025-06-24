@@ -29,9 +29,8 @@ int main(int argc, char* argv[]) {
     pthread_create(&thread_conexiones, NULL, crear_conexiones, NULL);
 
 	crear_proceso_inicial(tamanio_proceso, archivo_pseudocodigo);
-	pthread_join(thread_conexiones, NULL);
 
-
+	
 	return 0;
 
 }

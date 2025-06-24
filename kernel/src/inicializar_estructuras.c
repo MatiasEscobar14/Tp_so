@@ -12,7 +12,6 @@
 
 void iniciar_logger_kernel(){
 	kernel_logger = log_create("kernel.log","Kernel", 1, LOG_LEVEL_INFO);
-	log_info(kernel_logger, "Logger de Kernel iniciado.");
 }
 
 void iniciar_config_kernel(char* ruta){
@@ -59,7 +58,7 @@ void iniciar_config_kernel(char* ruta){
 		log_error(kernel_logger,"[Algoritmo de ingreso a ready no válido]");
 		exit(EXIT_FAILURE);
 	}
-	log_info(kernel_logger, "Config de Kernel iniciado.");
+	
 	}
 
 	
@@ -75,7 +74,7 @@ void iniciar_lista(){
 	lista_modulos_io_conectadas = list_create();
 	lista_modulos_cpu_conectadas = list_create();
 	lista_io_esperas = list_create();
-	log_info(kernel_logger, "Listas inicializadas.");
+	
 }
 
 void iniciar_kernel(char* ruta_config){
@@ -96,7 +95,6 @@ void initialize_mutex(){
 	pthread_mutex_init(&mutex_lista_modulos_cpu_conectadas,NULL );
 	pthread_mutex_init(&mutex_lista_modulos_io_conectadas,NULL);
 	pthread_mutex_init(&mutex_lista_io_esperas, NULL);
-	log_info(kernel_logger, "Mutex inicializados.");
 
 }
 void initialize_semaphores(){
@@ -106,6 +104,6 @@ void initialize_semaphores(){
 		sem_init(&sem_estructura_liberada,0,0);
 		sem_init(&sem_rpta_dump_memory,0,0);
 		sem_init(&sem_cpu_disponible,0,0);
-		log_info(kernel_logger, "Sempaphores inicializados.");
+
 
 }
