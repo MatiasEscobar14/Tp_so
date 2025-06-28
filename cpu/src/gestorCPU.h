@@ -35,6 +35,8 @@ extern char* PUERTO_MEMORIA;
 extern char* IP_KERNEL;
 extern char* PUERTO_KERNEL_DISPATCH;
 extern char* PUERTO_KERNEL_INTERRUPT;
+extern int ENTRADAS_TLB;
+extern char* REEMPLAZO_TLB;
 
 extern int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memoria;
 

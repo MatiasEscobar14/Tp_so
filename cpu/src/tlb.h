@@ -13,19 +13,27 @@
 typedef enum {
     FIFO_TLB,
     LRU_TLB
-} t_tlb_algoritmo;
+} algoritmo_tlb;
 
 typedef struct {
-    t_list *entradas;
-    uint32_t monto_entradas;
-    t_tlb_algoritmo algoritmo;
+    entrada_tlb *entradas;
+    int monto_entradas;//valor que dice el config
+    int monto_actual; //las que se usan 
+    algoritmo_tlb algoritmo;
 } t_tlb;
 
 typedef struct {
-    uint32_t pid;
-    uint32_t pagina;
-    uint32_t frame;
-    long long last_use;
-} t_tlb_fila;
+    int pid;
+    int pagina;
+    int frame;
+    int tiempo_lru;
+} entrada_tlb;
+
+void inizializar_tlb();
+int buscar_en_tlb(int pid, int pagina);
+void reemplazo_algoritmo_FIFO(int pid, int pagina, int frame);
+void reemplazo_algoritmo_LRU(int pid, int pagina, int frame);
+void actualizar_tlb(int pid, int pagina, int frame);
+
 
 #endif*/

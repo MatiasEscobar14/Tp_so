@@ -9,6 +9,8 @@ char* PUERTO_MEMORIA;
 char* IP_KERNEL;
 char* PUERTO_KERNEL_DISPATCH;
 char* PUERTO_KERNEL_INTERRUPT;
+int ENTRADAS_TLB;
+char* REEMPLAZO_TLB;
 
 int cliente_de_kernel_interrupt,cliente_de_kernel_dispatch, socket_memoria;
 

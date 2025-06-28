@@ -12,6 +12,8 @@ void iniciar_config_cpu(char* ruta){
     IP_KERNEL = config_get_string_value(cpu_config, "IP_KERNEL");
     PUERTO_KERNEL_DISPATCH = config_get_string_value(cpu_config, "PUERTO_KERNEL_DISPATCH");
     PUERTO_KERNEL_INTERRUPT = config_get_string_value(cpu_config, "PUERTO_KERNEL_INTERRUPT");
+    ENTRADAS_TLB = config_get_string_value(cpu_config, "ENTRADAS_TLB");;
+    REEMPLAZO_TLB = config_get_string_value(cpu_config, "REEMPLAZO_TLB");;
 }
 
 void iniciar_logger_cpu(char* nombre){

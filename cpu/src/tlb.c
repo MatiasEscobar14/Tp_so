@@ -1,52 +1,101 @@
 /*#include "tlb.h"
 
-static t_tlb TLB;
+t_tlb tlb;
 
-void tlb_init(int monto_entradas, char *tlb_algoritmo)
+void inizializar_tlb()
 {
-    TLB.entradas = list_create();
-    TLB.monto_entradas = monto_entradas;
-    if (!strcmp("FIFO", tlb_algoritmo))
+    tlb = (t_tlb *)malloc(sizeof(t_tlb));
+    tlb->entradas = (entrada_tlb *)malloc(sizeof(entrada_tlb) * ENTRADAS_TLB);
+    tlb->monto_entradas = ENTRADAS_TLB;
+    tlb->monto_actual = 0
+
+    if (strcmp(REEMPLAZO_TLB, "FIFO") == 0)
     {
-        TLB.algoritmo = FIFO_TLB;
+        tlb->algoritmo = FIFO_TLB;
     }
     else
     {
-        TLB.algoritmo = LRU_TLB;
+        tlb->algoritmo = LRU_TLB;
+    }
+    
+    return tlb;
+}
+
+int buscar_en_tlb(int pid, int pagina) {
+
+    time_t tiempo_actual = time(NULL); // calcula cual es el tiempo que hace que fue usado por ultima vez
+
+    for (int i = 0; i < tlb->monto_actual; i++)
+    {
+        if (tlb->entradas[i].pid == pid && tlb->entradas[i].pagina == pagina)
+        {
+            tlb->entradas[i].tiempo_lru = (int) tiempo_actual;
+            return tlb->entradas[i].frame; // TLB-HIT
+        }
+    }
+    return -1; // TLB-MISS
+
+}
+
+// Reemplazo por FIFO
+void reemplazo_algoritmo_FIFO(int pid, int pagina, int frame)
+{
+    for (int i = 1; i < tlb->monto_actual; i++)
+    {
+        tlb->entradas[i - 1] = tlb->entradas[i];
+    }
+
+    tlb->entradas[tlb->monto_actual - 1].pid = pid;
+    tlb->entradas[tlb->monto_actual - 1].pagina = pagina;
+    tlb->entradas[tlb->monto_actual - 1].frame = frame;
+}
+
+// Reemplazo por LRU
+void reemplazo_algoritmo_LRU(int pid, int pagina, int frame)
+{
+    int lruIndice = 0;
+    time_t tiempo_actual = time(NULL);
+    for (int i = 1; i < tlb->monto_actual; i++)
+    {
+        if (tlb->entradas[i].tiempo_lru < tlb->entradas[lruIndice].tiempo_lru)
+        {
+            lruIndice = i;
+        }
+    }
+
+    tlb->entradas[lruIndice].pid = pid;
+    tlb->entradas[lruIndice].pagina = pagina;
+    tlb->entradas[lruIndice].frame = frame;
+    tlb->entradas[lruIndice].tiempo_lru = tiempo_actual;
+}
+
+void actualizar_tlb(int pid, int pagina, int frame)
+{
+    time_t tiempo_actual = time(NULL);
+    if (tlb->monto_actual < tlb->monto_entradas)
+    {
+        tlb->entradas[tlb->monto_actual].pid = pid;
+        tlb->entradas[tlb->monto_actual].pagina = pagina;
+        tlb->entradas[tlb->monto_actual].frame = frame;
+        if (tlb->algoritmo == LRU)
+        {
+            tlb->entradas[tlb->monto_actual].tiempo_lru = (int) tiempo_actual;
+        }
+        tlb->monto_actual++;
+    }
+    else
+    {
+        if (tlb->algoritmo == FIFO)
+        {
+            reemplazo_algoritmo_FIFO(pid, pagina, frame);
+        }
+        else
+        {
+            reemplazo_algoritmo_LRU(pid, pagina, frame);
+        }
     }
 }
 
 
-int tlb_search(uint32_t pid, uint32_t pagina, t_log *logger)
-{
 
-    if (0 == TLB.monto_entradas)
-    {
-        // creo que no hay que loggear nada, ya que esto es equivalente a no tener tlb
-        //log_info(logger, "PID: %d - TLB MISS - Pagina: %d", pid, page);
-        return -1;
-    }
-
-    bool find_entry(void *elem)
-    {
-        t_tlb_fila *temp = (t_tlb_row *)elem;
-        return pid == temp->pid && page == temp->page;
-    }
-
-    t_tlb_fila *entrada = (t_tlb_row *)list_find(TLB.entries, find_entry);
-
-    if (!entrada)
-    {
-        log_info(logger, "PID: %d - TLB MISS - Pagina: %d", pid, pagina);
-        return -1;
-    }
-
-    log_info(logger, "PID: %d - TLB HIT - Pagina: %d", pid, pagina);
-
-    if (TLB.algorithm == LRU_TLB)
-    {
-        entry->last_use =  current_timestamp();
-    }
-
-    return entry->frame;
 }*/
