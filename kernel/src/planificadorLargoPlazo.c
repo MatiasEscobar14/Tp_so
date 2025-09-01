@@ -96,7 +96,7 @@ void planificadorLargoPlazoFifo()
             
 
             sem_wait(&sem_rpta_estructura_inicializada);
-            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            pthread_mutex_lock(&mutex_flag_pedido_memoria);
             
             if (flag_pedido_de_memoria)
             {
@@ -159,7 +159,7 @@ void planificadorLargoPlazoPMCP()
             
             /* Esperamos hasta que la estructura sea creada */
             sem_wait(&sem_rpta_estructura_inicializada);
-            //pthread_mutex_lock(&mutex_flag_pedido_memoria);
+            pthread_mutex_lock(&mutex_flag_pedido_memoria);
             
             if (flag_pedido_de_memoria)
             {

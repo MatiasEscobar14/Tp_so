@@ -8,6 +8,6 @@
 
 extern t_list* lista_procesos;
 
-extern pthread_mutex_t mutex_lista_procesos;
+//extern pthread_mutex_t mutex_lista_procesos;
 
 #endif

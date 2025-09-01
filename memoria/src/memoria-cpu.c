@@ -91,7 +91,7 @@ void attender_memoria_cpu(int cliente_socket)
             free(un_buffer->stream);
             free(un_buffer);
             break;
-            
+            */
         /*case FINALIZAR_PROCESO:
             log_debug(logger_memoria, "Finalizar proceso recibido de CPU - FD: <%d>", cliente_socket);
             
@@ -272,8 +272,7 @@ t_proceso_memoria *iniciar_proceso_path(t_proceso_memoria *proceso_nuevo)
     return proceso_nuevo;
 }
 
-char *leer_archivo(char *path)
-{
+char *leer_archivo(char *path){
     char instrucciones[100];
     strcpy(instrucciones, path);
     FILE *archivo = fopen(instrucciones, "r");
